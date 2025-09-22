@@ -14,6 +14,7 @@ import Store from "../pages/user/Store";
 import Cart from "../pages/user/Cart";
 import About from "../pages/user/About";
 import ProductDetail from "../pages/user/ProductDetail";
+import Checkout from "../pages/user/Checkout";
 
 export default function AppRoutes() {
 
@@ -65,6 +66,9 @@ export default function AppRoutes() {
                     </PrivateRoute>
                 }>
                     <Route index element={<Cart />} />
+                </Route>
+                <Route path="/checkout" element={<UserLayout />}>
+                    <Route index element={<Checkout />} />
                 </Route>
                 {/*   <Route path="/productdetail" element={
                     <PrivateRoute allowedRoles={['customer']}>
