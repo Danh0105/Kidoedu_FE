@@ -74,36 +74,22 @@ export default function ModalLG({ onProductAdded }) {
             }
 
 
-            // Tạo DTO gửi backend
             const dto = {
                 product_name: nameproduct?.trim() || "",
-
-                // SKU unique, tránh trùng
                 sku: `SKU-${Date.now()}`,
-
                 short_description: stripHtml(shortDesc) || null,
                 long_description: longDesc || null,
-
-                // ép kiểu số, fallback = 0
-                status: status ? Number(status) : 0,
-
-                // price có thể đang là string -> ép sang number
+                status: status ? Number(status) : 4,
                 price: Number(price) || 0,
-
-                // stock_quantity tối thiểu = 1
                 stock_quantity: Number(count) || 1,
-
-                // ép sang number (nếu null thì backend bỏ qua được vì DTO có @IsOptional)
                 category_id: categoryId ? Number(categoryId) : null,
-
-                // chuẩn hóa mảng images
                 images: uploadedUrls.map((url) => ({
                     image_url: url,
                 })),
             };
 
             console.log("DTO gửi đến backend:", dto);
-            const res = await axios.post("http://localhost:3000/products", dto);
+            const res = await axios.post("http://163.223.211.23/products", dto);
             if (onProductAdded) {
                 console.log("Sản phẩm mới:", res.data.data);
                 onProductAdded(res.data.data);

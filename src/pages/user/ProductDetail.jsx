@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Slider from "react-slick";
 import InnerImageZoom from "react-inner-image-zoom";
-
-
-
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "react-inner-image-zoom/lib/styles.min.css";
-import Product from "../../components/user/category/Product";
 import { useParams } from "react-router-dom";
-import { get } from "sortablejs";
 import axios from "axios";
 
 export default function ProductDetail() {

@@ -7,9 +7,10 @@
     "@ckeditor/ckeditor5-build-classic": "^44.3.0",
     "@ckeditor/ckeditor5-react": "^11.0.0",
     "@fortawesome/fontawesome-free": "^7.0.0",
+    "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-brands-svg-icons": "^7.0.0",
     "@fortawesome/free-solid-svg-icons": "^7.0.0",
-    "@fortawesome/react-fontawesome": "^0.2.3",
+    "@fortawesome/react-fontawesome": "^0.2.6",
     "admin-lte": "^4.0.0-rc4",
     "apexcharts": "^5.3.3",
     "axios": "^1.10.0",
@@ -38,11 +39,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
-      "start": "react-scripts start",
-  "build": "react-scripts build",
-  "test": "react-scripts test",
-  "eject": "react-scripts eject"
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [

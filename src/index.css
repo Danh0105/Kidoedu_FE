@@ -12,11 +12,12 @@ code {
     monospace;
 }
 .arrow-icon {
+    transform: rotate(-45deg);
   display: inline-block;
   transition: transform 0.3s ease;
 }
 
 .arrow-btn:hover .arrow-icon{
-  transform: rotate(45deg);
+  transform: rotate(0deg);
   /* Xoay 90 độ để thành mũi tên ngang */
 }

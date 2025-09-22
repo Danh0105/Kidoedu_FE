@@ -8,7 +8,7 @@ export default function ProductManagement() {
 
     const fetchProducts = async (page = 1, limit = 10) => {
         try {
-            const res = await axios.get("http://localhost:3000/products", {
+            const res = await axios.get("http://163.223.211.23/products", {
                 params: { page, limit }
             });
 
@@ -26,7 +26,7 @@ export default function ProductManagement() {
         if (!window.confirm("Bạn có chắc muốn xóa sản phẩm này?")) return;
 
         try {
-            await axios.delete(`http://localhost:3000/products/${id}`);
+            await axios.delete(`http://163.223.211.23/products/${id}`);
 
             // ✅ Xóa khỏi state mà không cần reload
             setProducts((prev) => prev.filter((p) => p.product_id !== id));

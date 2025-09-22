@@ -1,53 +1,70 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import "../../assets/user/sign-in.css";
 import "../../components/user/css/Login.css";
 import { Expo, gsap, Quad } from 'gsap';
 import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
 import { TweenMax } from 'gsap/gsap-core';
+import { jwtDecode } from 'jwt-decode';
+import { useCart } from '../../hooks/CartContext';
 
 export default function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
-    const BASENAME = '/KiduEdu';
+    const BASENAME = '';
     const containerRef = useRef(null);
-
+    const { setCartCount } = useCart();
     useEffect(() => {
-        const token = localStorage.getItem('Authorization');
-        const role = localStorage.getItem('role');
-        if (token && role) {
-            const path = role === 'admin' ? '/admin/dashboard' : role === 'customer' ? '/dashboard' : '/';
-            window.location.href = `${BASENAME}${path}`;
+        setCartCount(0);
+        const token = localStorage.getItem('Authorization') || null;
+        if (typeof token === 'string' && token.trim() !== '') {
+            try {
+
+                const decoded = jwtDecode(token);
+                const role = decoded?.role;
+
+                const path =
+                    role === 'admin' ? '/admin/dashboard' :
+                        role === 'customer' ? '/' :
+                            '/';
+
+                navigate(`${BASENAME}${path}`);
+            } catch (err) {
+                console.error('Invalid token', err);
+                navigate('/login');
+            }
         }
     }, [navigate]);
-
     const login = async (event) => {
         event.preventDefault();
         try {
-
-
             const res = await fetch('http://163.223.211.23/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
                 credentials: 'include',
             });
-
-
             const data = await res.json();
             if (res.ok) {
                 localStorage.setItem('Authorization', data.access_token);
-                localStorage.setItem('role', data.role);
+                const decoded = jwtDecode(data.access_token);
                 alert('Đăng nhập thành công!');
-                const path = data.role === 'admin' ? '/admin/dashboard' : data.role === 'customer' ? '/dashboard' : '/';
+                const path =
+                    decoded.role === 'admin'
+                        ? '/admin/dashboard'
+                        : decoded.role === 'customer'
+                            ? '/'
+                            : '/';
                 window.location.href = `${BASENAME}${path}`;
+            } else if (res.status === 401) {
+                alert("Sai tài khoản hoặc mật khẩu");
             } else {
-                alert(data.error || "Sai tài khoản hoặc mật khẩu");
+                alert(data.error || "Đã xảy ra lỗi, vui lòng thử lại");
             }
+
         } catch (error) {
             alert('Không kết nối được máy chủ');
-            console.error(error);
         }
     };
 
@@ -457,7 +474,7 @@ export default function Login() {
 
                 <div className="form-floating mb-3">
                     <input
-                        type="text"
+                        type="email"
                         className="form-control"
                         id="email"
                         placeholder=""
@@ -465,7 +482,7 @@ export default function Login() {
                         onChange={e => setUsername(e.target.value)}
                         required
                     />
-                    <label htmlFor="floatingInput">Username</label>
+                    <label htmlFor="floatingInput">Email</label>
                 </div>
 
                 <div className="form-floating mb-3">
@@ -482,8 +499,7 @@ export default function Login() {
                 </div>
 
                 <div className="form-check text-start my-3">
-                    <input className="form-check-input" type="checkbox" value="remember-me" id="checkDefault" />
-                    <label className="form-check-label" htmlFor="checkDefault">Remember me</label>
+                    <NavLink to="/register">Chưa có tài khoản</NavLink>
                 </div>
 
                 <button className="btn btn-primary w-100 py-2" type="submit">Sign in</button>

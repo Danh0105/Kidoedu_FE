@@ -14,8 +14,8 @@ export default function Store() {
                 params: { page, limit }
             });
 
-            setProducts(res.data.data); // ✅ mảng sản phẩm
-            setMeta(res.data.meta);     // ✅ thông tin phân trang
+            setProducts(res.data.data);
+            setMeta(res.data.meta);
         } catch (err) {
             console.error("Lỗi khi lấy sản phẩm:", err);
         }
@@ -32,39 +32,53 @@ export default function Store() {
     };
 
 
-
+    const [selectedId, setSelectedProductId] = useState(null);
     useEffect(() => {
         fetchProducts();
         fetchCategory();
     }, []);
+    const getRandomColor = () => {
+        const letters = "0123456789ABCDEF";
+        let color = "#";
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    };
     return (
-        <div className='container-xxl'>
+        <div className='container' style={{ maxWidth: "95%" }}>
             <Slick1 />
-            <div class="d-flex">
-                <div>
+            <div class="d-flex bg-white p-2">
+                <div style={{ width: "330px" }}>
                     <div className='p-2 border border-2 rounded'>
                         {categories.length > 0 ? (
-                            categories.map((c) => (
-                                <div >
-                                    <Category
-                                        label={c.category_name}
-                                    />
+                            categories.map((c) => {
+                                const textColor = getRandomColor();
+                                return (
 
-                                    <div className="d-flex flex-column ms-3">
-                                        {c.children.map((child) => (
-                                            <CheckboxProduct
-                                                id={child.category_id}
-                                                name={child.category_name}
-                                            />
-                                        ))}
+                                    <div >
+                                        <Category
+                                            label={c.category_name}
+                                            color={textColor}
+                                        />
+
+                                        <div className="d-flex flex-column ms-3">
+                                            {c.children.map((child) => (
+                                                <CheckboxProduct
+                                                    id={child.category_id}
+                                                    name={child.category_name}
+                                                    color={textColor}
+                                                    selectedId={selectedId}
+                                                    onChange={(id) => setSelectedProductId(child.category_id)}
+                                                />
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            ))) : (
+                                )
+                            }
+                            )) : (
                             <tr><td colSpan="9" className="text-center">Không có danh mục</td></tr>
                         )}
-
-
-
                     </div>
                 </div>
                 <div className="p-2 flex-fill">
@@ -87,10 +101,10 @@ export default function Store() {
                     </div>
                     <div className="container text-center overflow-auto" style={{ maxHeight: "710px" }}>
 
-                        <div className="row row-cols-4">
+                        <div className="row row-cols-4" >
                             {products.length > 0 ? (
                                 products.map((p) => (
-                                    <div className="col mt-2">
+                                    <div className="col mt-1">
                                         <Product
                                             name={p.product_name.length > 20
                                                 ? p.product_name.substring(0, 20) + "..."

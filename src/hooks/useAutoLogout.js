@@ -4,7 +4,7 @@ const AUTO_LOGOUT_DELAY = 10 * 60 * 1000; // 10 phút
 
 export default function useAutoLogout() {
   const timerId = useRef(null);
-  const BASENAME = '/KiduEdu';
+  const BASENAME = '';
 
   const resetTimer = useCallback(() => {
     if (timerId.current) {

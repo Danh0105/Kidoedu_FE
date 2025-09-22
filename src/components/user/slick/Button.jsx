@@ -1,6 +1,4 @@
 import React, { Component } from 'react'
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import '../../../index.css'
 export default class Button extends Component {
     render() {
@@ -9,12 +7,16 @@ export default class Button extends Component {
                 <div class="d-flex justify-content-between">
                     <div>
                         <div>{this.props.name}</div>
-                        <div>{this.props.detail}</div>
+                        <div className='d-flex justify-content-between gap-3'>
+                            <div>{this.props.detail}</div>
+                            <div>Sản phẩm</div>
+                        </div>
                     </div>
                     <div
                         style={{ width: "50px", height: "50px", cursor: "pointer" }}
                         className='arrow-icon rounded-circle bg-white d-flex align-items-center justify-content-center'>
-                        <FontAwesomeIcon icon={faArrowUp} className=" text-dark arrow-icon" style={{ padding: "10px" }} />
+                        <i class="bi bi-arrow-down text-dark arrow-icon fs-4"></i>
+
                     </div>
                 </div>
             </button>

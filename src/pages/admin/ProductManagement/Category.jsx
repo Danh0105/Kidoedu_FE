@@ -7,7 +7,7 @@ export default function Category({ onChange }) {
   const [categoryName, setCategoryName] = useState("");
   const [parentId, setParentId] = useState(null);
   useEffect(() => {
-    axios.get("http://localhost:3000/categories").then((res) => {
+    axios.get("http://163.223.211.23/categories").then((res) => {
       const roots = res.data.filter((cat) => cat.parent === null);
       setCategories(roots);
     });
@@ -23,9 +23,9 @@ export default function Category({ onChange }) {
     }
 
     try {
-      await axios.delete(`http://localhost:3000/categories/${id}`);
+      await axios.delete(`http://163.223.211.23/categories/${id}`);
 
-      const res = await axios.get("http://localhost:3000/categories");
+      const res = await axios.get("http://163.223.211.23/categories");
       const roots = res.data.filter((cat) => cat.parent === null);
       setCategories(roots);
     } catch (error) {
@@ -47,7 +47,7 @@ export default function Category({ onChange }) {
         category_name: categoryName,
         parent_category_id: parentId || null,
       };
-      const res = await axios.post("http://localhost:3000/categories", dto);
+      const res = await axios.post("http://163.223.211.23/categories", dto);
       const newCat = res.data;
       if (newCat.parent) {
         setCategories((prev) =>
