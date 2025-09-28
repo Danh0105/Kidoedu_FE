@@ -15,6 +15,11 @@ import Cart from "../pages/user/Cart";
 import About from "../pages/user/About";
 import ProductDetail from "../pages/user/ProductDetail";
 import Checkout from "../pages/user/Checkout";
+<<<<<<< HEAD
+=======
+import Order from "../pages/user/Order";
+import Invoice from "../pages/user/Invoice";
+>>>>>>> recover-ebbd72c7c
 
 export default function AppRoutes() {
 
@@ -60,16 +65,35 @@ export default function AppRoutes() {
                 <Route path="/store" element={<UserLayout />}>
                     <Route index element={<Store />} />
                 </Route>
+<<<<<<< HEAD
                 <Route path="/cart" element={
+=======
+                {/*    <Route path="/cart" element={
+>>>>>>> recover-ebbd72c7c
                     <PrivateRoute allowedRoles={['customer']}>
                         <UserLayout />
                     </PrivateRoute>
                 }>
                     <Route index element={<Cart />} />
+<<<<<<< HEAD
+=======
+                </Route> */}
+                <Route path="/cart" element={<UserLayout />}>
+                    <Route index element={<Cart />} />
+>>>>>>> recover-ebbd72c7c
                 </Route>
                 <Route path="/checkout" element={<UserLayout />}>
                     <Route index element={<Checkout />} />
                 </Route>
+<<<<<<< HEAD
+=======
+                <Route path="/order" element={<UserLayout />}>
+                    <Route index element={<Order />} />
+                </Route>
+                <Route path="/invoice" element={<UserLayout />}>
+                    <Route index element={<Invoice />} />
+                </Route>
+>>>>>>> recover-ebbd72c7c
                 {/*   <Route path="/productdetail" element={
                     <PrivateRoute allowedRoles={['customer']}>
                         <UserLayout />

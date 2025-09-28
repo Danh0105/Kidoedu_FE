@@ -162,3 +162,17 @@ input[type=number] {
   text-overflow: ellipsis;
 }
 
+<<<<<<< HEAD
+=======
+.custom-border-top {
+  border-top: 5px solid transparent; /* Chỉ có viền trên */
+  border-image: repeating-linear-gradient(
+    120deg,
+    #e74c3c 0px,   /* đỏ */
+    #e74c3c 20px,
+    #3498db 20px,  /* xanh */
+    #3498db 60px
+  ) 8;
+  border-image-slice: 2;
+}
+>>>>>>> recover-ebbd72c7c

@@ -6,6 +6,7 @@ import "slick-carousel/slick/slick-theme.css";
 import "react-inner-image-zoom/lib/styles.min.css";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import ModalCart from "../../components/user/ModalCart";
 
 export default function ProductDetail() {
     const [nav1, setNav1] = useState(null);
@@ -46,6 +47,22 @@ export default function ProductDetail() {
         fetchProduct();
     }, []);
 
+    const [showModal, setShowModal] = useState(false);
+
+    const formatCurrency = (value) =>
+        new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+
+    const handleAddToCart = async (id) => {
+        try {
+            const res = await axios.get(`http://163.223.211.23:3000/products/${id}`);
+            const data = res.data.data;
+            setProduct(data);
+            setImages(data.images?.map((img) => img.image_url) || []);
+            setShowModal(true); // mở modal khi có dữ liệu
+        } catch (err) {
+            console.error("Lỗi khi lấy sản phẩm:", err);
+        }
+    };
 
     return (
         <div className="container py-4" >
@@ -150,7 +167,19 @@ export default function ProductDetail() {
                                 +
                             </button>
                         </div>
-                        <button className="btn btn-primary me-2">Thêm vào giỏ hàng</button>
+                        <button
+                            onClick={() => handleAddToCart(id)}
+                            className="btn btn-danger"
+                            style={{ fontSize: "15px" }}
+                        >
+                            Thêm vào giỏ
+                        </button>
+                        <ModalCart
+                            show={showModal}
+                            onClose={() => setShowModal(false)}
+                            product={product}
+                            images={images}
+                        />
                         <button className="btn btn-outline-danger">Mua ngay</button>
                     </div>
 
