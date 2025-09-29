@@ -6,7 +6,6 @@ import { Expo, gsap, Quad } from 'gsap';
 import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
 import { TweenMax } from 'gsap/gsap-core';
 import { jwtDecode } from 'jwt-decode';
-import { useCart } from '../../hooks/CartContext';
 
 export default function Login() {
     const [username, setUsername] = useState('');
@@ -14,9 +13,8 @@ export default function Login() {
     const navigate = useNavigate();
     const BASENAME = '';
     const containerRef = useRef(null);
-    const { setCartCount } = useCart();
+
     useEffect(() => {
-        setCartCount(0);
         const token = localStorage.getItem('Authorization') || null;
         if (typeof token === 'string' && token.trim() !== '') {
             try {

@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-import React, { createContext, useContext, useState } from "react";
-
-const CartContext = createContext();
-
-export const CartProvider = ({ children }) => {
-  const [cartCount, setCartCount] = useState(0);
-
-  return (
-    <CartContext.Provider value={{ cartCount, setCartCount }}>
-=======
 // CartContext.js
 import { createContext, useState } from "react";
 
@@ -50,13 +39,7 @@ export const CartProvider = ({ children }) => {
     <CartContext.Provider value={{
       CartCT, order, addToCartContext, checkout, cartCount, setCartCount, selectedProducts, setSelectedProducts, removeFromCartContext
     }}>
->>>>>>> recover-ebbd72c7c
       {children}
     </CartContext.Provider>
   );
 };
-<<<<<<< HEAD
-
-export const useCart = () => useContext(CartContext);
-=======
->>>>>>> recover-ebbd72c7c

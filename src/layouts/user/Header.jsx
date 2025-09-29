@@ -1,114 +1,47 @@
-<<<<<<< HEAD
-import React, { useState, useEffect } from 'react';
-=======
 import React, { useState, useEffect, useContext } from 'react';
->>>>>>> recover-ebbd72c7c
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import logo from "../../assets/user/Logo.png";
 import '../../assets/user/header.css';
 import Menu from '../../components/user/Menu';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-<<<<<<< HEAD
-import { useCart } from '../../hooks/CartContext';
-=======
 import Cookies from 'js-cookie';
 import { CartContext } from '../../hooks/CartContext';
->>>>>>> recover-ebbd72c7c
 export default function Header() {
     const navigate = useNavigate();
     const [scrolled, setScrolled] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('Authorization'));
-<<<<<<< HEAD
-    const { cartCount, setCartCount } = useCart();
-    const { profile, setProfile } = useState();
-=======
     const { CartCT, addToCartContext, cartCount, setCartCount } = useContext(CartContext);
 
->>>>>>> recover-ebbd72c7c
     const fetchCountCart = async () => {
         try {
             const token = localStorage.getItem("Authorization");
             if (!token || typeof token !== "string" || token.trim() === "") {
-<<<<<<< HEAD
-                setCartCount(0);
-                return;
-            }
-
-=======
                 const guestCart = JSON.parse(Cookies.get('guest_cart') || '[]');
                 guestCart.forEach(item => addToCartContext(item));
 
                 return;
             }
->>>>>>> recover-ebbd72c7c
             let decoded;
             try {
                 decoded = jwtDecode(token);
             } catch (err) {
                 console.error("Token không hợp lệ:", err);
-<<<<<<< HEAD
-                setCartCount(0);
-=======
->>>>>>> recover-ebbd72c7c
                 return;
             }
 
             const resCart = await axios.get(`http://163.223.211.23/cart/${decoded.sub}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-<<<<<<< HEAD
-
-=======
->>>>>>> recover-ebbd72c7c
             const cart = resCart.data;
             setCartCount(cart.items.length || 0);
         } catch (err) {
             console.error("Lỗi khi lấy giỏ hàng:", err);
-<<<<<<< HEAD
-            setCartCount(0);
-        }
-    };
-    const fetchProfile = async () => {
-        try {
-            const token = localStorage.getItem("Authorization");
-            if (!token || typeof token !== "string" || token.trim() === "") {
-                setCartCount(0);
-                return;
-            }
-
-            let decoded;
-            try {
-                decoded = jwtDecode(token);
-            } catch (err) {
-                console.error("Token không hợp lệ:", err);
-                setCartCount(0);
-                return;
-            }
-
-            const resCart = await axios.get(`http://163.223.211.23/cart/${decoded.sub}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            const cart = resCart.data;
-            setCartCount(cart.items.length || 0);
-        } catch (err) {
-            console.error("Lỗi khi lấy giỏ hàng:", err);
-            setCartCount(0);
-        }
-    };
-    const login = () => {
-        navigate("/login");
-    };
-
-    const logout = () => {
-=======
         }
     };
 
     const logout = () => {
         setCartCount(CartCT.length)
->>>>>>> recover-ebbd72c7c
         localStorage.removeItem('Authorization');
         localStorage.removeItem('role');
         setIsLoggedIn(false);
@@ -118,10 +51,6 @@ export default function Header() {
 
     useEffect(() => {
         fetchCountCart();
-<<<<<<< HEAD
-=======
-
->>>>>>> recover-ebbd72c7c
         const handleScroll = () => {
             setScrolled(window.scrollY > 80);
         };
@@ -138,13 +67,9 @@ export default function Header() {
             window.removeEventListener("storage", handleStorage);
         };
     }, []);
-<<<<<<< HEAD
-
-=======
     useEffect(() => {
         console.log("guestCart", CartCT);
     }, [CartCT]);
->>>>>>> recover-ebbd72c7c
     return (
         <>
 
@@ -182,11 +107,7 @@ export default function Header() {
                                         backgroundColor: "white",
                                     }}
                                 >
-<<<<<<< HEAD
-                                    {cartCount}
-=======
                                     {cartCount || CartCT.length}
->>>>>>> recover-ebbd72c7c
                                 </span>
                             </div>
                         </NavLink>

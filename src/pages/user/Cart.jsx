@@ -322,13 +322,8 @@ export default function Cart() {
                             Chọn nhập mã
                         </a>
                     </div>
-<<<<<<< HEAD
-                </div>
-                <div className="d-flex justify-content-between">
-=======
                 </div> */}
                 <div className="d-flex justify-content-between ">
->>>>>>> recover-ebbd72c7c
                     <div className='d-flex align-items-center'>
                         <div className='me-2'>
                             <input
@@ -350,15 +345,9 @@ export default function Cart() {
                             Tổng cộng ({totalQuantity} sản phẩm): ₫{totalPrice.toLocaleString()}
                         </div>
                         <div>
-<<<<<<< HEAD
-    <button className='btn btn-danger' style={{ fontSize: "20px" }}>
-        Mua Hàng
-    </button>
-=======
                             <NavLink onClick={() => setSelectedProducts(products.filter(p => p.selected))} to='/checkout' className='btn btn-danger' style={{ fontSize: "20px" }}>
                                 Mua Hàng
                             </NavLink>
->>>>>>> recover-ebbd72c7c
                         </div >
                     </div >
                 </div >
