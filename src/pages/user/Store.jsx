@@ -10,7 +10,7 @@ export default function Store() {
     const [categories, setCategories] = useState([]);
     const fetchProducts = async (page = 1, limit = 10) => {
         try {
-            const res = await axios.get("http://163.223.211.23:3000/products", {
+            const res = await axios.get("https://api.kidoedu.edu.vn:8028/products", {
                 params: { page, limit }
             });
 
@@ -22,7 +22,7 @@ export default function Store() {
     };
     const fetchCategory = async () => {
         try {
-            const res = await axios.get("http://163.223.211.23:3000/categories");
+            const res = await axios.get("https://api.kidoedu.edu.vn:8028/categories");
             const roots = res.data.filter((cat) => cat.parent === null);
             setCategories(roots);
 

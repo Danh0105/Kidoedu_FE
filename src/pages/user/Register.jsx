@@ -13,7 +13,7 @@ export default function Register() {
 
     const login = async () => {
         try {
-            const res = await fetch('http://163.223.211.23:3000/auth/register', {
+            const res = await fetch('https://api.kidoedu.edu.vn:8028/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password, email, role }),

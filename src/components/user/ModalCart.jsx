@@ -58,7 +58,7 @@ export default function ModalCart({ show, onClose, product, images }) {
         const payload = { productId, quantity };
 
         const res = await axios.post(
-          `http://163.223.211.23:3000/cart/${userId}/items`,
+          `https://api.kidoedu.edu.vn:8028/cart/${userId}/items`,
           payload,
           {
             headers: {

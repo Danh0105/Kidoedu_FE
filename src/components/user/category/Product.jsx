@@ -14,7 +14,7 @@ export default function Product(props) {
 
     const handleAddToCart = async (id) => {
         try {
-            const res = await axios.get(`http://163.223.211.23:3000/products/${id}`);
+            const res = await axios.get(`https://api.kidoedu.edu.vn:8028/products/${id}`);
             const data = res.data.data;
             setProduct(data);
             setImages(data.images?.map((img) => img.image_url) || []);
