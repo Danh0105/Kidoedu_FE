@@ -173,3 +173,10 @@ input[type=number] {
   ) 8;
   border-image-slice: 2;
 }
+.card-img-top {
+  height: 200px;        /* Chiều cao khung ảnh */
+  width: 100%;          /* Full chiều ngang card */
+  object-fit: contain;  /* Giữ đúng tỉ lệ, không bị méo */
+  background-color: #fff; /* thêm nền trắng cho cân đối */
+  padding: 5px;         /* tạo khoảng trống viền */
+}

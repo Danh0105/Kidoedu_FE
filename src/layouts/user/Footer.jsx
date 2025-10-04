@@ -28,10 +28,10 @@ export default function Footer() {
                             <p style={{ fontWeight: 600, marginBottom: "0px" }}>Thông tin liên hệ</p>
                         </div>
                         <div style={{ color: "#444444" }}>
-                            <p className="text-wrap"><FontAwesomeIcon icon={faLocationDot} /> Địa Chỉ : 231/1 Nguyễn Phúc Chu - Phường 15 - Quận Tân Bình - TP. Hồ Chí Minh.</p>
-                            <p className="text-wrap"><FontAwesomeIcon icon={faPhone} /> ĐIện thoại :  0707 868 600 - 0789 636 979</p>
-                            <p className="text-wrap"><FontAwesomeIcon icon={faEnvelope} /> Mail : hcns@ichiskill.edu.vn</p>
-                            <p className="text-wrap"><FontAwesomeIcon icon={faGlobe} /> Website : www.ichiskilll.com</p>
+                            <p className="text-wrap"><FontAwesomeIcon icon={faLocationDot} /> Địa Chỉ : Số 1 Đường Cộng Hòa 3 - Phường Phú Thọ Hòa - TP. Hồ Chí Minh.</p>
+                            <p className="text-wrap"><FontAwesomeIcon icon={faPhone} /> ĐIện thoại :  0789 636 979</p>
+                            <p className="text-wrap"><FontAwesomeIcon icon={faEnvelope} /> Mail : lytran@ichiskill.edu.vn</p>
+                            <p className="text-wrap"><FontAwesomeIcon icon={faGlobe} /> Website : www.kidoedu.edu.vn</p>
                         </div>
 
                     </div>

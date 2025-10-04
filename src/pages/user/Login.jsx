@@ -8,7 +8,7 @@ import { TweenMax } from 'gsap/gsap-core';
 import { jwtDecode } from 'jwt-decode';
 
 export default function Login() {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
     const BASENAME = '';
@@ -21,7 +21,6 @@ export default function Login() {
 
                 const decoded = jwtDecode(token);
                 const role = decoded?.role;
-
                 const path =
                     role === 'admin' ? '/admin/dashboard' :
                         role === 'customer' ? '/' :
@@ -37,10 +36,11 @@ export default function Login() {
     const login = async (event) => {
         event.preventDefault();
         try {
-            const res = await fetch('http://163.223.211.23/auth/login', {
+            console.log('Logging in with', { email, password });
+            const res = await fetch('https://kidoedu.vn/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ email, password }),
                 credentials: 'include',
             });
             const data = await res.json();
@@ -476,8 +476,8 @@ export default function Login() {
                         className="form-control"
                         id="email"
                         placeholder=""
-                        value={username}
-                        onChange={e => setUsername(e.target.value)}
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
                         required
                     />
                     <label htmlFor="floatingInput">Email</label>

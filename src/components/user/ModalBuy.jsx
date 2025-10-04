@@ -1,38 +1,19 @@
-import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
-import React, { useEffect, useState, useContext } from 'react'
 import InnerImageZoom from 'react-inner-image-zoom';
 import Slider from 'react-slick';
 import { CartContext } from "../../hooks/CartContext";
-import Cookies from 'js-cookie';
-export default function ModalCart({ show, onClose, product, images }) {
-  const { setCartCount, addToCartContext } = useContext(CartContext);
+import { NavLink } from 'react-router-dom';
+import { useContext, useState } from 'react';
+export default function ModalBuy({ show, onClose, product, images, p }) {
+  const { setSelectedProducts } = useContext(CartContext);
   const [nav1, setNav1] = useState(null);
   const [nav2, setNav2] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const increase = () => setQuantity((prev) => prev + 1);
   const decrease = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-
-  const fetchCountCart = async () => {
-    const token = localStorage.getItem('Authorization') || null;
-    if (typeof token === 'string' && token.trim() !== '') {
-      const decoded = jwtDecode(token);
-      const resCart = await axios.get(`https://kidoedu.vn/cart/${decoded.sub}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const cart = resCart.data;
-
-      setCartCount(cart.items.length || 0);
-    }
-  }
-  useEffect(() => {
-
-    if (!show) {
-      setQuantity(1);
-      setNav1(null);
-      setNav2(null);
-    }
-  }, [show]);
+  const transformedProduct = {
+    data: p,
+    quantity: quantity,
+  };
 
   if (!show) return null;
 
@@ -48,46 +29,7 @@ export default function ModalCart({ show, onClose, product, images }) {
     fade: true,
     dots: false,
   };
-  const addToCart = async (productId, quantity) => {
-    try {
-      const token = localStorage.getItem('Authorization') || null;
 
-      if (typeof token === 'string' && token.trim() !== '') {
-        const decoded = jwtDecode(token);
-        const userId = decoded.sub;
-        const payload = { productId, quantity };
-
-        const res = await axios.post(
-          `https://kidoedu.vn/cart/${userId}/items`,
-          payload,
-          {
-            headers: {
-              Authorization: token,
-            },
-          }
-        );
-
-        alert('Đã thêm sản phẩm!');
-        fetchCountCart();
-      } else {
-        const currentCart = JSON.parse(Cookies.get('guest_cart') || '[]');
-        const existingIndex = currentCart.findIndex(item => item.productId === productId);
-        fetchCountCart();
-
-        if (existingIndex !== -1) {
-          currentCart[existingIndex].quantity += quantity;
-        } else {
-          currentCart.push({ productId, quantity });
-        }
-        Cookies.set('guest_cart', JSON.stringify(currentCart), { expires: 7 });
-        currentCart.forEach(item => addToCartContext(item));
-        alert('Đã lưu sản phẩm vào giỏ hàng!');
-      }
-    } catch (error) {
-      console.error('Lỗi thêm vào giỏ hàng:', error);
-      alert('Không thể thêm vào giỏ hàng!');
-    }
-  };
 
   return (
     <div
@@ -166,9 +108,7 @@ export default function ModalCart({ show, onClose, product, images }) {
                 <h4 className="text-danger">
                   {Number(product?.price).toLocaleString("vi-VN")} ₫
                 </h4>
-                <div className="overflow-auto" style={{ height: "240px" }}>
-                  <p className='text-start'>{product?.short_description}</p>
-                </div>
+                <p className='text-start'>{product?.short_description}</p>
                 <div className=" position-absolute bottom-0 start-50 translate-middle-x w-100">
                   <div className="d-flex gap-2">
                     <div className="d-flex align-items-center">
@@ -198,7 +138,9 @@ export default function ModalCart({ show, onClose, product, images }) {
                         +
                       </button>
                     </div>
-                    <button className="btn btn-danger me-2" onClick={() => addToCart(product?.product_id, quantity)}>Thêm vào giỏ hàng</button>
+                    <NavLink onClick={() => setSelectedProducts([transformedProduct])} to='/checkout' className='btn btn-primary' >
+                      Mua ngay
+                    </NavLink>
                   </div>
                   <div className="d-flex gap-2 mt-2">
                     <span>SKU: {product?.sku}</span>

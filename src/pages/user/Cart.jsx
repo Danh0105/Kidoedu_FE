@@ -21,7 +21,7 @@ export default function Cart() {
                 }
 
                 const productRequests = guestCart.map((item) =>
-                    axios.get(`https://api.kidoedu.edu.vn:8028/products/${item.productId}`)
+                    axios.get(`https://kidoedu.vn/products/${item.productId}`)
                 );
 
                 const responses = await Promise.all(productRequests);
@@ -42,7 +42,7 @@ export default function Cart() {
             }
 
             const resCart = await axios.get(
-                `http://163.223.211.23/cart/${decoded.sub}`,
+                `https://kidoedu.vn/cart/${decoded.sub}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -50,7 +50,7 @@ export default function Cart() {
             const productIds = cart.items.map((item) => item.product.product_id);
 
             const productRequests = productIds.map((id) =>
-                axios.get(`https://api.kidoedu.edu.vn:8028/products/${id}`)
+                axios.get(`https://kidoedu.vn/products/${id}`)
             );
             const responses = await Promise.all(productRequests);
             const productsData = responses.map((res) => res.data);
@@ -115,7 +115,7 @@ export default function Cart() {
 
         try {
             await axios.put(
-                `https://api.kidoedu.edu.vn:8028/cart/${decoded.sub}/items/${productId}`,
+                `https://kidoedu.vn/cart/${decoded.sub}/items/${productId}`,
                 { quantity: newQty },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -172,7 +172,7 @@ export default function Cart() {
             }
 
             await axios.delete(
-                `https://api.kidoedu.edu.vn:8028/cart/${userId}/items/${product_id}`,
+                `https://kidoedu.vn/cart/${userId}/items/${product_id}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 

@@ -1,24 +1,26 @@
-import React, { Component } from 'react';
+// RadioCategoryItem.jsx
+import React from "react";
 
-export default class RadioProduct extends Component {
-    render() {
-        const { color, id, name, selectedId, onChange } = this.props;
-
-        return (
-            <div className="form-check" style={{ fontSize: "18px", color }}>
-                <input
-                    className="form-check-input"
-                    type="radio"
-                    name="productRadio"
-                    value={id}
-                    id={`radio-${id}`}
-                    checked={selectedId === id}
-                    onChange={() => onChange(id)}
-                />
-                <label className="form-check-label fw-medium" htmlFor={`radio-${id}`}>
-                    {name}
-                </label>
-            </div>
-        );
-    }
+export default function RadioCategoryItem({ id, name, selectedId, onChange }) {
+    const checked = selectedId === id;
+    return (
+        <button
+            type="button"
+            className={`list-group-item list-group-item-action d-flex align-items-center
+                  ${checked ? "active" : ""}`}
+            onClick={() => onChange(checked ? null : id)}
+            aria-pressed={checked}
+            style={{ fontSize: 16 }}
+        >
+            <input
+                className="form-check-input me-2"
+                type="radio"
+                checked={checked}
+                readOnly
+                tabIndex={-1}
+            />
+            <span className="flex-grow-1 text-start">{name}</span>
+            {checked && <span className="ms-2" aria-hidden>✔</span>}
+        </button>
+    );
 }

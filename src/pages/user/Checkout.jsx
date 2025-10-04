@@ -4,13 +4,20 @@ import { useNavigate } from "react-router-dom";
 import { CartContext } from '../../hooks/CartContext';
 import ModalInfo from '../../components/user/ModalInfo';
 import Cookies from 'js-cookie';
+import ModalPayment from '../../components/user/ModalPayment';
 
 export default function Checkout() {
   const [products, setProducts] = useState([]);
   const [shippingInfo, setShippingInfo] = useState(null);
   const navigate = useNavigate();
   const { selectedProducts } = useContext(CartContext);
-
+  const [showModalPayment, setShowModalPayment] = useState(false);
+  const [method, setMethod] = useState("cod");
+  const [opt, setOpt] = useState({
+    id: "cod",
+    label: "Thanh toán khi nhận hàng (COD)",
+    icon: "https://cdn-icons-png.flaticon.com/512/1041/1041872.png",
+  });
   useEffect(() => {
     if (selectedProducts) {
       setProducts(selectedProducts);
@@ -28,16 +35,14 @@ export default function Checkout() {
       }
     }
   }, [selectedProducts]);
-
   const totalPrice = products.reduce(
     (sum, p) => sum + p.data.price * p.quantity,
     0
   );
-  const shippingFee = 38000;
-  const finalTotal = totalPrice + shippingFee;
+  const shippingFee = 0;
+  const finalTotal = totalPrice;
   const handleSubmit = (e) => {
     const saved = Cookies.get("shippingInfo");
-
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -45,10 +50,12 @@ export default function Checkout() {
         parsed.items = selectedProducts.map((p) => ({
           product_id: p.data.product_id,
           quantity: p.quantity,
-          price_per_unit: p.data.price,
+          price_per_unit: Number(p.data.price),
         }));
         const url = parsed.API;
         delete parsed.API;
+        console.log(parsed)
+
         axios.post(url, parsed).then((res) => {
           navigate("/invoice", { state: { order: res.data.order, items: products } });
         });
@@ -56,6 +63,71 @@ export default function Checkout() {
         console.error("Không thể parse shippingInfo từ cookie:", err);
       }
 
+    }
+  };
+  const selectedMethod = async () => {
+    setShowModalPayment(true);
+  };
+  const handleMomoPayment = async () => {
+    try {
+      const orderId = `ORD-${Date.now()}`;
+      const saved = Cookies.get("shippingInfo");
+
+      if (!saved) return alert("Không tìm thấy thông tin giao hàng.");
+
+      const shipping = JSON.parse(saved);
+
+      // Lưu đơn hàng tạm thời
+      localStorage.setItem("pendingOrder", JSON.stringify({
+        orderId,
+        products,
+        shippingInfo: shipping,
+        method: "momo",
+      }));
+      const response = await axios.post("https://kidoedu.vn/momo/create-payment", {
+        amount: finalTotal,
+        orderId: orderId,
+        items: products.map((p) => ({
+          id: p.data.product_id,
+          name: p.data.product_name,
+          qty: p.quantity,
+          price: p.data.price,
+        })),
+      });
+
+      const data = response.data;
+
+      if (data.payUrl) {
+        window.location.href = data.payUrl;
+      } else {
+        alert("Không thể tạo thanh toán MoMo.");
+      }
+    } catch (error) {
+      console.error("Lỗi thanh toán MoMo:", error);
+      alert("Đã xảy ra lỗi khi kết nối MoMo.");
+    }
+  };
+
+  const handleConfirm = (selectedMethod) => {
+    setMethod(selectedMethod);
+    if (selectedMethod === "cod") {
+      setOpt({
+        id: "cod",
+        label: "Thanh toán khi nhận hàng (COD)",
+        icon: "https://cdn-icons-png.flaticon.com/512/1041/1041872.png",
+      });
+    } else if (selectedMethod === "momo") {
+      setOpt({
+        id: "momo",
+        label: "Thanh toán qua MoMo",
+        icon: "https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png",
+      });
+    } else if (selectedMethod === "vnpay") {
+      setOpt({
+        id: "vnpay",
+        label: "Thanh toán qua VNPay",
+        icon: "https://stcd02206177151.cloud.edgevnpay.vn/assets/images/logo-icon/logo-primary.svg",
+      });
     }
   };
   return (
@@ -110,7 +182,14 @@ export default function Checkout() {
               </div>
             </div>
           ) : (
-            <div>Chưa có địa chỉ nhận hàng</div>
+            <div className='d-flex flex-wrap align-items-center justify-content-between'>
+              <div>Chưa có địa chỉ nhận hàng</div>
+              <a className="link-primary text-decoration-none" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                Thay đổi
+              </a>
+              <ModalInfo onUpdate={(newData) => setShippingInfo(newData)} />
+            </div>
+
           )}
         </div>
       </div>
@@ -190,15 +269,15 @@ export default function Checkout() {
               <div className="d-flex justify-content-between align-items-start">
                 <div>
                   <span className="fw-bold me-2">Phương thức vận chuyển:</span>
-                  <span className="text-dark">Nhanh</span>
-                  <a href="#" className="ms-2 text-primary text-decoration-none">Thay Đổi</a>
-                  <p className="text-muted small mb-0">Đảm bảo nhận hàng từ 4 Tháng 10 - 8 Tháng 10</p>
+                  <span className="text-dark">Chưa phát triển</span>
+
+                  {/*  <p className="text-muted small mb-0">Đảm bảo nhận hàng từ 4 Tháng 10 - 8 Tháng 10</p>
                   <p className="text-muted small mb-0">
                     Nhận Voucher trị giá 15.000₫ nếu đơn hàng được giao đến bạn sau ngày 8 Tháng 10 2025.
-                  </p>
+                  </p> */}
                 </div>
-                <div className="fw-bold">{shippingFee.toLocaleString()}₫</div>
-              </div>
+                {/*                 <div className="fw-bold">{shippingFee.toLocaleString()}₫</div>
+ */}              </div>
             </div>
 
             <div className="p-3 border-bottom">
@@ -220,9 +299,31 @@ export default function Checkout() {
         <div className="bg-white">
           <div className="d-flex justify-content-between align-items-center p-3 border-bottom">
             <h6 className="mb-0 fw-bold">Phương thức thanh toán</h6>
-            <div>
-              <span className="me-3">Thanh toán khi nhận hàng</span>
-              <a href="#" className="text-primary fw-bold text-decoration-none">THAY ĐỔI</a>
+            <div className="d-flex justify-content-between align-items-center">
+              <div className="col-14 d-flex justify-content-between align-items-center" key={opt.id}>
+                <div className="d-flex align-items-center">
+                  <img
+                    src={opt.icon}
+                    alt={opt.label}
+                    width={36}
+                    height={36}
+                    className="me-3"
+                  />
+                  <span className="fw-semibold">{opt.label}</span>
+                </div>
+                <a
+                  href="#"
+                  onClick={selectedMethod}
+                  className="text-primary fw-bold text-decoration-none ms-2"
+                >
+                  THAY ĐỔI
+                </a>
+              </div>
+              <ModalPayment
+                show={showModalPayment}
+                onClose={() => setShowModalPayment(false)}
+                onConfirm={handleConfirm}
+              />
             </div>
           </div>
 
@@ -246,7 +347,7 @@ export default function Checkout() {
               Nhấn <strong>"Đặt hàng"</strong> đồng nghĩa với việc bạn đồng ý tuân theo{" "}
               <a href="#" className="text-primary">Điều khoản</a>
             </small>
-            <button className="btn btn-danger px-4" onClick={handleSubmit}>Đặt hàng</button>
+            <button className="btn btn-danger px-4" onClick={method === "momo" ? handleMomoPayment : handleSubmit}>Đặt hàng</button>
           </div>
         </div>
       </div>

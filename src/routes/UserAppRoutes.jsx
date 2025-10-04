@@ -17,7 +17,8 @@ import ProductDetail from "../pages/user/ProductDetail";
 import Checkout from "../pages/user/Checkout";
 import Order from "../pages/user/Order";
 import Invoice from "../pages/user/Invoice";
-
+import ChatBox from "../components/user/ChatBox";
+import SearchProducts from "../pages/user/Search";
 export default function AppRoutes() {
 
     return (
@@ -78,8 +79,14 @@ export default function AppRoutes() {
                 <Route path="/order" element={<UserLayout />}>
                     <Route index element={<Order />} />
                 </Route>
+                <Route path="/search" element={<UserLayout />}>
+                    <Route index element={<SearchProducts />} />
+                </Route>
                 <Route path="/invoice" element={<UserLayout />}>
                     <Route index element={<Invoice />} />
+                </Route>
+                <Route path="/chatbot" element={<UserLayout />}>
+                    <Route index element={<ChatBox />} />
                 </Route>
                 {/*   <Route path="/productdetail" element={
                     <PrivateRoute allowedRoles={['customer']}>

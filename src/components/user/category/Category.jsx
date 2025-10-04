@@ -1,15 +1,12 @@
-import React, { Component } from 'react';
+// CategoryTitle.jsx
+import React from "react";
 
-class CheckboxItem extends Component {
-    render() {
-        return (
-            <div>
-                <label className="form-check-label font-family lh-lg fw-bold" style={{ fontSize: "20px", color: this.props.color }} >
-                    {this.props.label}
-                </label>
-            </div>
-        );
-    }
+export default function CategoryTitle({ label }) {
+    return (
+        <div className="py-1">
+            <span className="fw-bold lh-lg" style={{ fontSize: 18 }}>
+                {label}
+            </span>
+        </div>
+    );
 }
-
-export default CheckboxItem;

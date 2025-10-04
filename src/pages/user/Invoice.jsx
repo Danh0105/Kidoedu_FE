@@ -105,7 +105,7 @@ export default function Invoice() {
               {/* Total */}
               <div className="text-end mb-3">
                 <p><strong>Tạm tính:</strong> {Number(order.subtotal).toLocaleString()} ₫</p>
-                <p><strong>Phí vận chuyển:</strong> 38,000 ₫</p>
+                <p><strong>Phí vận chuyển:</strong> 0 ₫</p>
                 <h5 className="fw-bold text-danger">
                   Tổng cộng: {Number(order.total_amount).toLocaleString()} ₫
                 </h5>

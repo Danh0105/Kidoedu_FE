@@ -89,7 +89,7 @@ export default function ModalLG({ onProductAdded }) {
             };
 
             console.log("DTO gửi đến backend:", dto);
-            const res = await axios.post("http://163.223.211.23/products", dto);
+            const res = await axios.post("https://kidoedu.vn/products", dto);
             if (onProductAdded) {
                 console.log("Sản phẩm mới:", res.data.data);
                 onProductAdded(res.data.data);

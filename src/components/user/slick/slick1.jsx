@@ -52,7 +52,7 @@ export default function Slick1() {
 
     const fetchCategory = async () => {
         try {
-            const res = await axios.get("https://api.kidoedu.edu.vn:8028/categories");
+            const res = await axios.get("https://kidoedu.vn/categories");
             const roots = res.data.filter((cat) => cat.parent === null);
             const rootsWithCount = roots.map((cat) => ({
                 ...cat,

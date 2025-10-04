@@ -117,7 +117,7 @@ export default function ModalInfo({ onUpdate }) {
       let payload = {};
 
       if (activeTab === "personal") {
-        url = "http://163.223.211.23/users/register-individual";
+        url = "https://kidoedu.vn/users/register-individual";
         payload = {
           username: form.email_personal.split("@")[0],
           email: form.email_personal,
@@ -135,7 +135,7 @@ export default function ModalInfo({ onUpdate }) {
           API: url,
         };
       } else if (activeTab === "business") {
-        url = "http://163.223.211.23/users/register-business";
+        url = "https://kidoedu.vn/users/register-business";
         payload = {
           username: form.email_business.split("@")[0],
           email: form.email_business,

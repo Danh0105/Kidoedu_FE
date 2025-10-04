@@ -30,7 +30,7 @@ export default function Header() {
                 return;
             }
 
-            const resCart = await axios.get(`http://163.223.211.23/cart/${decoded.sub}`, {
+            const resCart = await axios.get(`https://kidoedu.vn/cart/${decoded.sub}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const cart = resCart.data;
@@ -90,9 +90,9 @@ export default function Header() {
                         </nav>
                     </div>
                     <div className="navbar-nav d-flex flex-row gap-3">
-                        <div className="navbar-nav d-flex flex-row">
+                        {/*       <div className="navbar-nav d-flex flex-row">
                             <i className="bi bi-search fs-3 link-danger"></i>
-                        </div>
+                        </div> */}
                         <NavLink to="/cart" className="d-inline-block">
                             <div className="position-relative d-inline-block">
                                 <div className='navbar-nav'>
