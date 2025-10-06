@@ -233,10 +233,10 @@ export default function Store({
                     {err && <div className="alert alert-danger">Lỗi: {err}</div>}
 
                     {/* Product List */}
-                    <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
+                    <div className="d-flex flex-wrap" style={{ width: "1120px", gap: "10px" }}>
                         {items.length ? (
                             items.map((prod) => (
-                                <div className="col" key={prod.product_id}>
+                                <div className="col" key={prod.product_id} style={{ flex: "0 0 10%" }}>
                                     <Product prod={prod} />
                                 </div>
                             ))
@@ -248,6 +248,8 @@ export default function Store({
                             </div>
                         )}
                     </div>
+
+
 
                     {/* Pagination */}
                     {meta?.last_page > 1 && (

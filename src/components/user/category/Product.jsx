@@ -75,7 +75,7 @@ export default function Product({ prod }) {
             <div className="row p-0 d-flex justify-content-center mt-5">
                 <h5 className="card-title" style={{ fontSize: "15px", fontWeight: 700 }}>
                     <Link to={`/productdetail/${id}`} className="nav-link p-0">
-                        {trimText(name, 30)}
+                        {trimText(name, 25)}
                     </Link>
                 </h5>
 
