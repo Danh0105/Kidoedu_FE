@@ -180,3 +180,14 @@ input[type=number] {
   background-color: #fff; /* thêm nền trắng cho cân đối */
   padding: 5px;         /* tạo khoảng trống viền */
 }
+/* Khi ứng dụng đang tải */
+body.app-loading {
+  background-color: #e30505 !important; /* màu xám nhạt */
+  transition: background-color 0.3s ease;
+}
+
+/* Khi ứng dụng đã tải xong */
+body.app-loaded {
+  background-color: #f1f1f1 !important; /* trắng lại */
+  transition: background-color 0.3s ease;
+}

@@ -62,7 +62,7 @@ export default function Product({ prod }) {
     const handleBuy = () => fetchProductAndOpen(id, "buy");
 
     return (
-        <div className="card nav-link" style={{ height: "404.1px", width: "268px" }}>
+        <div className="card nav-link p-2" style={{ height: "404.1px", width: "268px" }}>
             <Link to={`/productdetail/${id}`} className="nav-link p-0">
                 <img
                     src={firstImage}
@@ -72,7 +72,7 @@ export default function Product({ prod }) {
                 />
             </Link>
 
-            <div className="row p-0 d-flex justify-content-center mt-5">
+            <div className="row p-0 d-flex justify-content-center mt-4">
                 <h5 className="card-title" style={{ fontSize: "15px", fontWeight: 700 }}>
                     <Link to={`/productdetail/${id}`} className="nav-link p-0">
                         {trimText(name, 25)}

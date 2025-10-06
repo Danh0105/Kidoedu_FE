@@ -19,6 +19,9 @@ import Order from "../pages/user/Order";
 import Invoice from "../pages/user/Invoice";
 import ChatBox from "../components/user/ChatBox";
 import SearchProducts from "../pages/user/Search";
+import Quotation from "../pages/user/Quotation";
+import NewProducts from "../pages/user/NewProducts";
+import FeaturedProducts from "../pages/user/FeaturedProducts";
 export default function AppRoutes() {
 
     return (
@@ -37,6 +40,15 @@ export default function AppRoutes() {
                 </Route>
                 <Route path="/about" element={<UserLayout />}>
                     <Route index element={<About />} />
+                </Route>
+                <Route path="/quotation" element={<UserLayout />}>
+                    <Route index element={<Quotation />} />
+                </Route>
+                <Route path="/newproduct" element={<UserLayout />}>
+                    <Route index element={<NewProducts />} />
+                </Route>
+                <Route path="/featuredproducts" element={<UserLayout />}>
+                    <Route index element={<FeaturedProducts />} />
                 </Route>
                 {/* Private routes */}
                 <Route path="/dashboard" element={
