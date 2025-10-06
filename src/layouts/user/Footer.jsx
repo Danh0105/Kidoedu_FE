@@ -72,7 +72,7 @@ export default function Footer() {
             </div>
             <div className="bg-light">
                 <div className="d-flex justify-content-center align-items-center" style={{ color: "#444a43", height: "50px", backgroundColor: "#444a43" }}>
-                    <div className="mb-0 text-light">Copyright © 2025 KiduEdu, All Rights Reserved.</div>
+                    <div className="mb-0 text-light">Copyright © 2025 KidoEdu, All Rights Reserved.</div>
                     <a
                         href="https://zalo.me/0326968216"
                         target="_blank"
