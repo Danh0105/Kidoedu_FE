@@ -42,7 +42,6 @@ export default function Home({ apiBase = "https://kidoedu.vn" }) {
 
 
             const data = res.data ?? {};
-            console.log(data.items)
             setItems(data.items ?? []);
         } catch (e) {
             console.error("Error fetching products by category:", e);
@@ -155,7 +154,76 @@ export default function Home({ apiBase = "https://kidoedu.vn" }) {
             )}
         </div>
     );
+    const ProductSection = ({ title, products, badge, showAll, toggleShow }) => {
+        const visibleProducts = showAll ? products : products.slice(0, 4);
 
+        return (
+            <section className="my-5">
+                <div className="text-center mb-4">
+                    <h2 className="fw-bold" style={{ fontSize: "2rem" }}>
+                        {title}
+                    </h2>
+                    <div style={{
+                        height: "3px",
+                        width: "80px",
+                        backgroundColor: "hsl(0,75%,60%)",
+                        margin: "10px auto",
+                        borderRadius: "3px"
+                    }}></div>
+                </div>
+                <div className="row justify-content-center">
+                    {visibleProducts.length > 0 ? (
+                        visibleProducts.map((p) => <ProductCard key={p.product_id} p={p} badge={badge} />)
+                    ) : (
+                        <p className="text-center text-muted">Đang cập nhật sản phẩm...</p>
+                    )}
+                </div>
+
+                {/* Nút Xem thêm / Thu gọn */}
+                {products.length > 4 && (
+                    <div className="text-center mt-3">
+                        <button
+                            onClick={toggleShow}
+                            className="btn btn-outline-danger rounded-pill px-4"
+                        >
+                            {showAll ? "Thu gọn" : "Xem thêm"}
+                        </button>
+                    </div>
+                )}
+            </section>
+        );
+    };
+    const ProductCard = ({ p, badge }) => (
+        <div key={p.product_id} className="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex justify-content-center">
+            <div className="card shadow-sm border-0 rounded-4 overflow-hidden hover-shadow" style={{ maxWidth: 300 }}>
+                <div style={{ position: "relative" }}>
+                    {badge && (
+                        <span
+                            className={`badge position-absolute top-0 start-0 m-2 px-3 py-2 ${badge === "Mới" ? "bg-success" : "bg-warning text-dark"}`}
+                            style={{ borderRadius: "8px" }}
+                        >
+                            {badge}
+                        </span>
+                    )}
+                    <a href={`/product/${p.product_id}`}>
+                        <img
+                            src={p.images?.[0]?.image_url || ROBOT}
+                            alt={p.product_name}
+                            className="img-fluid"
+                            style={{ height: "220px", width: "100%", objectFit: "cover" }}
+                        />
+                    </a>
+                </div>
+                <div className="card-body text-center">
+                    <h6 className="fw-semibold text-truncate mb-2" title={p.product_name}>{p.product_name}</h6>
+                    <p className="text-danger fw-bold mb-3">{Number(p.price).toLocaleString()} ₫</p>
+                    <a href={`/product/${p.product_id}`} className="btn btn-outline-primary btn-sm rounded-pill px-3">
+                        Xem chi tiết
+                    </a>
+                </div>
+            </div>
+        </div>
+    );
     return (
         <div style={{ backgroundColor: "#fff" }}>
             <div className="container py-4">
@@ -177,58 +245,32 @@ export default function Home({ apiBase = "https://kidoedu.vn" }) {
                     </p>
                 </div>
 
-                {/* Sản phẩm mới */}
-                <section className="my-5">
-                    <h2 className="fw-bold text-center mb-3">🆕 Sản phẩm mới</h2>
-                    <div className="row justify-content-center">
-                        {(showAllNew ? newProducts : newProducts.slice(0, 4)).map((p) => (
-                            <div className="col-lg-3 col-md-4 col-sm-6" key={p.product_id}>
-                                <ProductHome prod={p} />
-                            </div>
-                        ))}
-                    </div>
-                    {newProducts.length > 4 && (
-                        <div className="text-center mt-3">
-                            <button
-                                onClick={() => setShowAllNew(!showAllNew)}
-                                className="btn btn-outline-danger rounded-pill px-4"
-                            >
-                                {showAllNew ? "Thu gọn" : "Xem thêm"}
-                            </button>
-                        </div>
-                    )}
-                </section>
+                <ProductSection
+                    title="🆕 Sản phẩm mới"
+                    products={newProducts}
+                    badge="Mới"
+                    showAll={showAllNew}
+                    toggleShow={() => setShowAllNew(!showAllNew)}
+                />
 
                 {/* Sản phẩm nổi bật */}
-                <section className="my-5">
-                    <h2 className="fw-bold text-center mb-3">⭐ Sản phẩm nổi bật</h2>
-                    <div className="row justify-content-center">
-                        {(showAllFeatured ? featuredProducts : featuredProducts.slice(0, 4)).map((p) => (
-                            <div className="col-lg-3 col-md-4 col-sm-6" key={p.product_id}>
-                                <ProductHome prod={p} />
-                            </div>
-                        ))}
-                    </div>
-                    {featuredProducts.length > 4 && (
-                        <div className="text-center mt-3">
-                            <button
-                                onClick={() => setShowAllFeatured(!showAllFeatured)}
-                                className="btn btn-outline-danger rounded-pill px-4"
-                            >
-                                {showAllFeatured ? "Thu gọn" : "Xem thêm"}
-                            </button>
-                        </div>
-                    )}
-                </section>
+                <ProductSection
+                    title="⭐ Sản phẩm nổi bật"
+                    products={featuredProducts}
+                    badge="Nổi bật"
+                    showAll={showAllFeatured}
+                    toggleShow={() => setShowAllFeatured(!showAllFeatured)}
+                />
 
                 {/* Khóa học */}
                 <section className="my-5">
                     <div className="text-center mb-4">
                         <h2 className="fw-bold" style={{ fontSize: "2rem" }}>📘 Khóa học nổi bật</h2>
-                        <div className="mx-auto" style={{
+                        <div style={{
                             height: "3px",
                             width: "80px",
                             backgroundColor: "hsl(0,75%,60%)",
+                            margin: "10px auto",
                             borderRadius: "3px"
                         }}></div>
                     </div>

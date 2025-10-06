@@ -73,34 +73,41 @@ export default function Footer() {
             <div className="bg-light">
                 <div className="d-flex justify-content-center align-items-center" style={{ color: "#444a43", height: "50px", backgroundColor: "#444a43" }}>
                     <div className="mb-0 text-light">Copyright © 2025 KiduEdu, All Rights Reserved.</div>
-                    <div
-                        style={{
-                            position: 'fixed',
-                            bottom: '160px',
-                            right: '20px',
-                            display: 'flex',
-                            borderRadius: '50%',
-                            backgroundColor: '#0000',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            color: 'white',
-                            cursor: 'pointer',
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
-                            zIndex: 9999
-                        }}
-                        className="pulse-animation"   // 👈 thêm class
+                    <a
+                        href="https://zalo.me/0326968216"
+                        target="_blank"
+                        rel="noopener noreferrer"
                     >
-                        <img
-                            src={Zalo}
+                        <div
                             style={{
-                                width: '60px',
-                                height: '60px',
+                                position: 'fixed',
+                                bottom: '160px',
+                                right: '20px',
+                                display: 'flex',
                                 borderRadius: '50%',
+                                backgroundColor: '#0000',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                color: 'white',
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+                                zIndex: 9999
                             }}
-                            alt="Logo zalo"
-                        />
-                    </div>
+                            className="pulse-animation"   // 👈 thêm class
+                        >
 
+                            <img
+                                src={Zalo}
+                                style={{
+                                    width: '60px',
+                                    height: '60px',
+                                    borderRadius: '50%',
+                                }}
+                                alt="Logo zalo"
+                            />
+
+                        </div>
+                    </a>
                     <div
                         style={{
                             position: 'fixed',

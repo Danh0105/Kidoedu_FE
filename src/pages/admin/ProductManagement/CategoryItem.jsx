@@ -2,7 +2,7 @@ import React from "react";
 
 function CategoryItem({ category, onDelete, onSelect }) {
   return (
-    <div className="form-check text-start mt-2 p-0">
+    <div className="form-check text-start mt-2 p-0 " >
       <label
         className="form-check-label fw-bold"
         htmlFor={`cat-${category.category_id}`}

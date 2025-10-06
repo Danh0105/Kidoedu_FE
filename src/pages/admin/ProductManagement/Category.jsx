@@ -72,7 +72,7 @@ export default function Category({ onChange }) {
 
 
   return (
-    <div>
+    <div className="scrollspy-example" style={{ height: "400px" }}>
       <div className="d-flex flex-column justify-content-start p-2 border-2 border gap-2">
         {categories.map((cat) => (
           <CategoryItem
