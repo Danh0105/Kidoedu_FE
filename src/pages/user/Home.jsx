@@ -294,8 +294,9 @@ export default function Home({ apiBase = "https://kidoedu.vn" }) {
 
     return (
         <div style={{ backgroundColor: "#fff" }}>
+            <Carousel />
             <div className="container py-4">
-                <Carousel />
+
 
                 <div className="d-flex" style={{ height: 505 }}>
                     <CategorySidebar />

@@ -150,7 +150,24 @@ export default function Footer() {
                         </div>
                     )}
                 </div>
+                <a href="tel:0789 636 979" class="hotline-bubble" aria-label="Gọi ngay">
+                    <i class="bi bi-telephone-fill"></i>
+                    <span class="hotline-tip">Gọi 0789 636 979</span>
+                </a>
 
+
+            </div>
+            <div class="hotline-banner">
+                <div class="hotline-icon">
+                    <i class="bi bi-phone"></i>
+                </div>
+
+                <div class="hotline-text">
+                    <div>Hotline - Zalo</div>
+                    <strong class="shine">0789 636 979</strong>
+                </div>
+
+                <a class="zalo-badge" href="https://zalo.me/0789 636 979" target="_blank" aria-label="Chat Zalo"></a>
             </div>
         </footer>
 

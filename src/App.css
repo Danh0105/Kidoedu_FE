@@ -191,3 +191,121 @@ body.app-loaded {
   background-color: #f1f1f1 !important; /* trắng lại */
   transition: background-color 0.3s ease;
 }
+.hotline-bubble{
+  position:fixed;bottom:25px;right:25px;
+  background:linear-gradient(45deg,#ff0000,#ff9100);
+  color:#fff;border-radius:50%;
+  width:56px;height:56px;display:flex;align-items:center;justify-content:center;
+  font-size:26px;box-shadow:0 4px 10px rgba(0,0,0,.4);
+  z-index:9999;transition:transform .25s ease, filter .25s ease;
+  animation:pulse 1.8s infinite, ring 2.3s ease-in-out .4s infinite;
+}
+.hotline-bubble:hover{ transform:scale(1.12); filter:brightness(1.05); }
+
+.hotline-tip{
+  position:absolute;right:70px;white-space:nowrap;
+  background:#222;color:#fff;padding:6px 10px;border-radius:8px;
+  font-size:13px;font-weight:600;opacity:0;pointer-events:none;transform:translateY(6px);
+  transition:all .25s ease;box-shadow:0 4px 10px rgba(0,0,0,.25);
+}
+.hotline-bubble:hover .hotline-tip{ opacity:1; transform:translateY(0); }
+@media (max-width: 575.98px){
+  .hotline-tip{ display:none; } /* gọn trên mobile */
+}
+/* ---- Base (như trước) ---- */
+.hotline-banner{
+  position:fixed;bottom:20px;left:20px;
+  background:linear-gradient(90deg,#e60000,#ff4b2b);
+  color:#fff;border-radius:12px 50px 50px 12px;
+  display:flex;align-items:center;gap:12px;
+  padding:10px 20px;box-shadow:0 4px 10px rgba(0,0,0,.3);
+  font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  z-index:9999;transition:transform .3s ease;
+  will-change:transform,box-shadow,filter;
+  animation: slideIn .6s ease-out, floatY 4s ease-in-out 1s infinite;
+}
+.hotline-banner:hover{ transform:scale(1.05); }
+
+.hotline-icon{
+  background:#fff;color:#ff0000;border-radius:50%;
+  padding:8px;font-size:22px;display:flex;align-items:center;justify-content:center;
+  animation:ring 2.2s ease-in-out infinite;
+  box-shadow:0 0 0 0 rgba(255,255,255,.55);
+}
+
+/* Text */
+.hotline-text div{ font-size:14px;font-weight:500;line-height:1.1; }
+.hotline-text strong{ font-size:16px;color:#ffeb3b;font-weight:800;letter-spacing:.5px; }
+
+/* ---- Zalo badge tròn + nhịp tim ---- */
+.zalo-badge{
+  width:34px;height:34px;border-radius:50%;
+  background:#fff url('https://i.imgur.com/2q9m2qP.png') center/20px 20px no-repeat; /* thay bằng icon Zalo của bạn */
+  margin-left:8px;box-shadow:0 5px 12px rgba(0,0,0,.35);
+  position:relative;flex:0 0 auto;
+  animation:pulse 1.8s infinite;
+}
+.zalo-badge::after{
+  content:"";position:absolute;inset:0;border-radius:50%;
+  box-shadow:0 0 0 0 rgba(255,255,255,.25);
+  animation:pulseRing 1.8s infinite;
+}
+
+/* ---- Hiệu ứng “shine” lấp lánh trên số ---- */
+.shine{
+  position:relative;display:inline-block;overflow:hidden;
+}
+.shine::after{
+  content:"";position:absolute;top:0;left:-120%;
+  width:120%;height:100%;
+  background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.35) 50%,transparent 100%);
+  transform:skewX(-20deg);
+  animation:shineSweep 3.5s ease-in-out .8s infinite;
+}
+
+/* ---- Keyframes ---- */
+@keyframes slideIn{
+  from{ transform:translateX(-20px); opacity:0; }
+  to{ transform:translateX(0); opacity:1; }
+}
+@keyframes floatY{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-4px); }
+}
+/* Rung nhẹ icon điện thoại */
+@keyframes ring{
+  0%,100%{ transform:rotate(0); }
+  10%{ transform:rotate(-15deg); }
+  20%{ transform:rotate(12deg); }
+  30%{ transform:rotate(-10deg); }
+  40%{ transform:rotate(8deg); }
+  50%{ transform:rotate(-6deg); }
+  60%{ transform:rotate(4deg); }
+  70%{ transform:rotate(-2deg); }
+  80%{ transform:rotate(1deg); }
+  90%{ transform:rotate(-1deg); }
+}
+/* Nhịp tim cho badge Zalo */
+@keyframes pulse{
+  0%{ transform:scale(1); }
+  50%{ transform:scale(1.08); }
+  100%{ transform:scale(1); }
+}
+@keyframes pulseRing{
+  0%{ box-shadow:0 0 0 0 rgba(255,255,255,.35); }
+  70%{ box-shadow:0 0 0 14px rgba(255,255,255,0); }
+  100%{ box-shadow:0 0 0 0 rgba(255,255,255,0); }
+}
+/* Vệt sáng chạy qua số hotline */
+@keyframes shineSweep{
+  0%{ left:-120%; }
+  55%{ left:120%; }
+  100%{ left:120%; }
+}
+
+/* Accessiblity: tắt animation nếu người dùng chọn reduce-motion */
+@media (prefers-reduced-motion: reduce){
+  .hotline-banner,.hotline-icon,.zalo-badge,.zalo-badge::after,.shine::after{
+    animation:none !important;
+  }
+}

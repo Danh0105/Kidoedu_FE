@@ -5,9 +5,9 @@ export default function Carousel() {
     return (
         <div
             id="carouselExampleDark"
-            className="container carousel carousel-dark slide position-relative mb-2"
+            className=" carousel carousel-dark slide position-relative mb-2"
         >
-            <div className="carousel-inner" style={{ borderRadius: "40px" }}>
+            <div className="carousel-inner" style={{ borderRadius: "30px" }}>
                 <div className="carousel-item active" data-bs-interval="10000">
                     <img src={C1} className="d-block w-100" alt="..." style={{ maxWidth: "100%", maxHeight: "700px", margin: "0 auto" }} />
                 </div>

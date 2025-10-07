@@ -11,7 +11,7 @@ function App() {
   return (
 
     <React.StrictMode>
-      <MobileBlocker />
+      {/*  <MobileBlocker /> */}
       {useAutoLogout()}
       <CartProvider>
         <UserAppRoutes />
