@@ -1,56 +1,31 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
-
-const makeClass = (isActive) =>
-    `nav-link-menu px-2${isActive ? " active" : ""}`;
+import React from 'react'
+import { NavLink } from 'react-router-dom'
 
 export default function Menu() {
     return (
-        <div className="dropdown position-relative">
-            {/* Nút icon (ở giữa) */}
-            <button
-                className="btn btn-light rounded-circle shadow-sm menu-icon"
-                type="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-                aria-label="Menu"
-            >
-                <i className="bi bi-list fs-4"></i>
-            </button>
+        <>
+            <li className="nav-item">
+                <NavLink to="/" className={({ isActive }) => `nav-link-menu ${isActive ? "active" : "nav-link-menu px-2 "}`}>Trang chủ</NavLink>
+            </li>
+            <li className="nav-item">
+                <NavLink className={({ isActive }) => `nav-link-menu ${isActive ? "active" : "nav-link-menu px-2 "}`} to="/store"> Cửa hàng</NavLink>
+            </li>
+            <li className="nav-item">
+                <NavLink className={({ isActive }) => `nav-link-menu ${isActive ? "active" : "nav-link-menu px-2 "}`} to="/quotation">Báo giá</NavLink>
+            </li>
+            <li className="nav-item">
+                <NavLink className={({ isActive }) => `nav-link-menu ${isActive ? "active" : "nav-link-menu px-2 "}`} to="/newproduct">Sản phẩm mới</NavLink>
+            </li>
+            <li className="nav-item">
+                <NavLink className={({ isActive }) => `nav-link-menu ${isActive ? "active" : "nav-link-menu px-2 "}`} to="/featuredproducts">Sản phẩm nổi bật</NavLink>
+            </li>
+            <li className="nav-item">
+                <NavLink className={({ isActive }) => `nav-link-menu ${isActive ? "active" : "nav-link-menu px-2 "}`} to="/lesson">Khóa học</NavLink>
+            </li>
+            <li className="nav-item">
+                <NavLink className={({ isActive }) => `nav-link-menu ${isActive ? "active" : " nav-link-menu px-2 "}`} to="/about">About </NavLink>
+            </li>
+        </>
 
-            {/* Dropdown căn giữa bên dưới icon */}
-            <ul className="dropdown-menu dropdown-menu-center shadow">
-                <li>
-                    <NavLink to="/" className="dropdown-item">
-                        Trang chủ
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink to="/store" className="dropdown-item">
-                        Cửa hàng
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink to="/quotation" className="dropdown-item">
-                        Báo giá
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink to="/newproduct" className="dropdown-item">
-                        Sản phẩm mới
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink to="/featuredproducts" className="dropdown-item">
-                        Sản phẩm nổi bật
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink to="/about" className="dropdown-item">
-                        About
-                    </NavLink>
-                </li>
-            </ul>
-        </div>
-    );
+    )
 }

@@ -8,6 +8,7 @@ import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie';
 import { CartContext } from '../../hooks/CartContext';
 import '../../components/user/css/Header.css'
+import MenuCompact from '../../components/user/MenuCompact';
 export default function Header() {
     const navigate = useNavigate();
     const [scrolled, setScrolled] = useState(false);
@@ -97,7 +98,18 @@ export default function Header() {
                                 aria-label="Eleventh navbar example"
                             >
                                 <div className="container-fluid px-0 d-flex justify-content-center">
-                                    <Menu />
+
+                                    {/* Mobile / Tablet: chỉ hiện icon dropdown */}
+                                    <div className="d-lg-none">
+                                        <MenuCompact />
+                                    </div>
+
+                                    {/* Desktop: menu bình thường */}
+                                    <div className="collapse navbar-collapse show d-none d-lg-block" id="navbarsExample09">
+                                        <ul className="navbar-nav me-auto mb-2 mb-lg-0 p-2 header-menu-scroll">
+                                            <Menu />
+                                        </ul>
+                                    </div>
                                 </div>
                             </nav>
                         </nav>
