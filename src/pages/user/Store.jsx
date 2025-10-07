@@ -1,5 +1,6 @@
 // Store.jsx
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useDebounce, buildPager, toVND, useSafeBuildUrl } from "../../hooks/useUiUtils";
 import axios from "axios";
 
 
@@ -237,7 +238,7 @@ export default function Store({
                         {items.length ? (
                             items.map((prod) => (
                                 <div className="col" key={prod.product_id} style={{ flex: "0 0 10%" }}>
-                                    <Product prod={prod} />
+                                    <Product prod={prod} status={prod?.status} />
                                 </div>
                             ))
                         ) : (
@@ -301,35 +302,4 @@ export default function Store({
             </div>
         </div>
     );
-}
-
-/* ------------------ helpers ------------------ */
-
-function useDebounce(value, delay = 400) {
-    const [debounced, setDebounced] = useState(value);
-    useEffect(() => {
-        const t = setTimeout(() => setDebounced(value), delay);
-        return () => clearTimeout(t);
-    }, [value, delay]);
-    return debounced;
-}
-
-function buildPager(totalPages, current, windowSize = 2) {
-    if (!totalPages) return [];
-    const out = [];
-    const add = (num, label = String(num), currentFlag = false) =>
-        out.push({ key: `${label}-${num}`, num, label, current: currentFlag });
-    const start = Math.max(1, current - windowSize);
-    const end = Math.min(totalPages, current + windowSize);
-
-    if (start > 1) {
-        add(1, "1", current === 1);
-        if (start > 2) out.push({ key: "ellipsis-start", ellipsis: true });
-    }
-    for (let i = start; i <= end; i++) add(i, String(i), i === current);
-    if (end < totalPages) {
-        if (end < totalPages - 1) out.push({ key: "ellipsis-end", ellipsis: true });
-        add(totalPages, String(totalPages), current === totalPages);
-    }
-    return out;
 }
