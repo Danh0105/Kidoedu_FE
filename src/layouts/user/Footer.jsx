@@ -134,7 +134,7 @@ export default function Footer() {
                         <div onClick={scrollToTop} style={{
                             position: 'fixed',
                             bottom: '20px',
-                            right: '28px',
+                            right: '90px',
                             width: '44px',
                             height: '44px',
                             borderRadius: '50%',

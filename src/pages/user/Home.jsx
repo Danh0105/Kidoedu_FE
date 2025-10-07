@@ -298,10 +298,11 @@ export default function Home({ apiBase = "https://kidoedu.vn" }) {
             <div className="container py-4">
 
 
-                <div className="d-flex" style={{ height: 505 }}>
+                <div className="d-none d-md-flex" style={{ height: 505 }} aria-hidden="true">
                     <CategorySidebar />
                     <ProductGrid />
                 </div>
+
 
                 {/* Hero Section */}
                 <div className="text-center my-5">

@@ -309,3 +309,61 @@ body.app-loaded {
     animation:none !important;
   }
 }
+/* ===== ModalCart chỉ responsive, không đổi cấu trúc ===== */
+
+@media (max-width: 991.98px){ /* md- */
+  .modal-cart .modal-dialog{
+    margin: .75rem; /* sát viền mobile vừa phải */
+  }
+}
+
+@media (max-width: 575.98px){ /* xs */
+  /* Override inline size bằng !important để ưu tiên hơn */
+  .modal-cart .product-slider-main{
+    max-width: 100% !important;
+  }
+  .modal-cart .product-main-item,
+  .modal-cart .main-img{
+    max-height: 240px !important;
+  }
+  .modal-cart .thumb-img{
+    height: 72px !important;
+  }
+  .modal-cart .product-desc{
+    max-height: 160px !important; /* bớt cao để vừa nút */
+  }
+  /* Thanh hành động cố định bên dưới khối phải khi mobile (tránh bị che) */
+  .modal-cart .action-bar{
+    position: static !important;
+    transform: none !important;
+    width: 100% !important;
+    margin-top: .75rem;
+  }
+  /* Nút & input số lượng dễ bấm hơn */
+  .modal-cart .action-bar .btn,
+  .modal-cart .action-bar .form-control{
+    height: 40px;
+  }
+}
+/* ===== Checkout responsive helpers ===== */
+.checkout-page .object-cover { object-fit: cover; }
+.checkout-page .prod-title { max-width: 100%; }
+
+/* Giảm chật chội phần bảng trên màn nhỏ */
+@media (max-width: 767.98px){ /* < md */
+  .checkout-page .prod-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;        /* 2 dòng rồi … */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .checkout-page img[alt="Sản phẩm"]{
+    width: 72px !important;
+    height: 72px !important;
+  }
+}
+
+/* Nút đặt hàng full-width ở xs, auto ở >=sm */
+@media (min-width: 576px){
+  .checkout-page .w-sm-auto { width: auto !important; }
+}
