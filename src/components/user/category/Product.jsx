@@ -68,8 +68,7 @@ export default function Product({ prod }) {
     return (
         <div
             className="card nav-link p-2 position-relative shadow-sm"
-            style={{ height: 404.1, width: 268, overflow: "visible" }}
-            onMouseEnter={() => setHovered(true)}
+            style={{ width: 268, overflow: "hidden" }}
             onMouseLeave={() => setHovered(false)}
         >
             {/* Ribbon góc trái */}
@@ -101,8 +100,33 @@ export default function Product({ prod }) {
                     onError={(e) => {
                         e.currentTarget.src = PLACEHOLDER_IMG;
                     }}
+                    onMouseEnter={() => setHovered(true)}
                 />
             </Link>
+            <div
+                onMouseEnter={() => setHovered(true)}
+
+                className="d-flex gap-2 justify-content-center"
+                style={{
+                    position: "absolute",
+                    left: 8,
+                    right: 8,
+                    bottom: hovered ? 220 : -48,       // 👈 hiệu ứng trượt lên/xuống
+                    background: "rgba(255,255,255,.92)",
+                    backdropFilter: "blur(4px)",
+                    borderRadius: 12,
+                    padding: 8,
+                    boxShadow: "0 6px 18px rgba(0,0,0,.12)",
+                    transition: "bottom .25s ease",
+                    zIndex: 2,
+                }}
+            >
+                <button className="btn btn-sm btn-outline-secondary">Xem nhanh</button>
+                <button className="btn btn-sm btn-outline-secondary">So sánh</button>
+                <button className="btn btn-sm btn-outline-danger">
+                    <i className="bi bi-heart"></i>
+                </button>
+            </div>
             <div className="row p-0 d-flex justify-content-center mt-4">
                 <h5 className="card-title" style={{ fontSize: 15, fontWeight: 700 }}>
                     <Link to={`/productdetail/${id}`} className="nav-link p-0">
@@ -118,7 +142,21 @@ export default function Product({ prod }) {
                     </Link>
                 </div>
 
-                <p className="card-text text-danger mb-3">{formatCurrency(price)}</p>
+                <p className="card-text text-danger mb-2">{formatCurrency(price)}</p>
+
+                {/* PROMO STRIP */}
+                <div className="rounded-3 px-2 py-1 mb-3 d-flex gap-2 align-items-center"
+                    style={{ background: "rgba(13,110,253,.08)" }}>
+                    <span className="badge bg-success-subtle text-success border border-success">
+                        Freeship
+                    </span>
+                    <span className="badge bg-warning-subtle text-warning border border-warning">
+                        Trả góp 0%
+                    </span>
+                    <span className="badge bg-info-subtle text-info border border-info">
+                        Đổi trả 7N
+                    </span>
+                </div>
 
                 <div className="d-flex justify-content-between gap-2">
                     <button
@@ -135,8 +173,6 @@ export default function Product({ prod }) {
                     >
                         Mua ngay
                     </button>
-                </div>
-                <div>
                     <div
                         style={{
                             position: "absolute",
@@ -156,6 +192,8 @@ export default function Product({ prod }) {
                         }}
                     />
                 </div>
+
+
 
                 {/* Modals */}
                 <ModalCart

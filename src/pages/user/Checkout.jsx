@@ -185,8 +185,8 @@ export default function Checkout() {
             </div>
 
             <div className="text-end">
-              <span className="badge bg-light text-danger border border-danger me-2">Mặc định</span>
-              <a
+              {/*               <span className="badge bg-light text-danger border border-danger me-2">Mặc định</span>
+ */}              <a
                 href="#"
                 className="text-primary text-decoration-none"
                 data-bs-toggle="modal"

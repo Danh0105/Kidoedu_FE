@@ -4,6 +4,7 @@ import { CartContext } from "../../hooks/CartContext";
 import { NavLink } from 'react-router-dom';
 import { useContext, useState } from 'react';
 export default function ModalBuy({ show, onClose, product, images, p }) {
+  console.log(product);
   const { setSelectedProducts } = useContext(CartContext);
   const [nav1, setNav1] = useState(null);
   const [nav2, setNav2] = useState(null);
@@ -11,7 +12,7 @@ export default function ModalBuy({ show, onClose, product, images, p }) {
   const increase = () => setQuantity((prev) => prev + 1);
   const decrease = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
   const transformedProduct = {
-    data: p,
+    data: product,
     quantity: quantity,
   };
 

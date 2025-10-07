@@ -2,14 +2,15 @@
 import React, { useMemo, useState, useContext } from "react";
 import { NavLink } from "react-router-dom";
 import { CartContext } from "../../hooks/CartContext";
-
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+import Cookies from 'js-cookie';
 const fmtVND = (n) =>
   Number(n || 0).toLocaleString("vi-VN", { style: "currency", currency: "VND" });
 
-export function ProductInfoPanel({ product, images = [], onAddToCart, defaultQty = 1 }) {
-  const { addItem } = useContext(CartContext);
-  const [qty, setQty] = useState(defaultQty);
-
+export function ProductInfoPanel({ product, images = [] }) {
+  const { addToCartContext, setCartCount } = useContext(CartContext);
+  const [quantity, setQuantity] = useState(1);
   const name = product?.product_name ?? product?.data?.product_name ?? "Sản phẩm";
   const price = useMemo(
     () => Number(product?.price ?? product?.data?.price ?? 0),
@@ -30,19 +31,6 @@ export function ProductInfoPanel({ product, images = [], onAddToCart, defaultQty
     .filter(Boolean)
     .slice(0, 6); // hiển thị tối đa 6 gạch đầu dòng
 
-  const handleAdd = async () => {
-    const item = {
-      data: {
-        product_id: product?.product_id ?? product?.data?.product_id,
-        product_name: name,
-        price,
-        images: images.map((url) => ({ image_url: url })),
-      },
-      quantity: qty,
-    };
-    await addItem?.(item);
-    onAddToCart?.(item);
-  };
   // utils/badges.js (hoặc đặt ngay trong file)
   const pickBadgesFromStatus = (rawStatus) => {
     const s = Number(rawStatus ?? 0);
@@ -54,6 +42,58 @@ export function ProductInfoPanel({ product, images = [], onAddToCart, defaultQty
   const status = product?.status ?? product?.data?.status;
   // tạo danh sách badge
   const tags = pickBadgesFromStatus(status);
+  const addToCart = async (productId, quantity) => {
+    try {
+      const token = localStorage.getItem('Authorization') || null;
+
+      if (typeof token === 'string' && token.trim() !== '') {
+        const decoded = jwtDecode(token);
+        const userId = decoded.sub;
+        const payload = { productId, quantity };
+
+        const res = await axios.post(
+          `https://kidoedu.vn/cart/${userId}/items`,
+          payload,
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+
+        alert('Đã thêm sản phẩm!');
+        fetchCountCart();
+      } else {
+        const currentCart = JSON.parse(Cookies.get('guest_cart') || '[]');
+        const existingIndex = currentCart.findIndex(item => item.productId === productId);
+        fetchCountCart();
+
+        if (existingIndex !== -1) {
+          currentCart[existingIndex].quantity += quantity;
+        } else {
+          currentCart.push({ productId, quantity });
+        }
+        Cookies.set('guest_cart', JSON.stringify(currentCart), { expires: 7 });
+        currentCart.forEach(item => addToCartContext(item));
+        alert('Đã lưu sản phẩm vào giỏ hàng!');
+      }
+    } catch (error) {
+      console.error('Lỗi thêm vào giỏ hàng:', error);
+      alert('Không thể thêm vào giỏ hàng!');
+    }
+  };
+  const fetchCountCart = async () => {
+    const token = localStorage.getItem('Authorization') || null;
+    if (typeof token === 'string' && token.trim() !== '') {
+      const decoded = jwtDecode(token);
+      const resCart = await axios.get(`https://kidoedu.vn/cart/${decoded.sub}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const cart = resCart.data;
+
+      setCartCount(cart.items.length || 0);
+    }
+  }
   return (
     <div className="bg-white p-4 rounded-4 shadow-sm position-relative overflow-hidden">
 
@@ -119,25 +159,25 @@ export function ProductInfoPanel({ product, images = [], onAddToCart, defaultQty
             <button
               className="btn btn-outline-secondary"
               type="button"
-              onClick={() => setQty((n) => Math.max(1, (Number(n) || 1) - 1))}
+              onClick={() => setQuantity((n) => Math.max(1, (Number(n) || 1) - 1))}
             >
               <i className="bi bi-dash-lg"></i>
             </button>
             <input
               className="form-control text-center"
               type="number"
-              value={qty}
+              value={quantity}
               min={1}
               max={999}
               onChange={(e) => {
                 const v = Number(e.target.value);
-                setQty(Number.isFinite(v) && v > 0 ? Math.min(v, 999) : 1);
+                setQuantity(Number.isFinite(v) && v > 0 ? Math.min(v, 999) : 1);
               }}
             />
             <button
               className="btn btn-outline-secondary"
               type="button"
-              onClick={() => setQty((n) => Math.min(999, (Number(n) || 1) + 1))}
+              onClick={() => setQuantity((n) => Math.min(999, (Number(n) || 1) + 1))}
             >
               <i className="bi bi-plus-lg"></i>
             </button>
@@ -145,7 +185,7 @@ export function ProductInfoPanel({ product, images = [], onAddToCart, defaultQty
         </div>
 
         <div className="d-flex flex-wrap gap-2 ms-auto">
-          <button className="btn btn-danger px-4 d-flex align-items-center gap-2" onClick={handleAdd}>
+          <button className="btn btn-danger px-4 d-flex align-items-center gap-2" onClick={() => addToCart(product?.product_id, quantity)}>
             <i className="bi bi-bag-plus"></i>
             Thêm vào giỏ hàng
           </button>
@@ -163,7 +203,7 @@ export function ProductInfoPanel({ product, images = [], onAddToCart, defaultQty
                     price,
                     images: images.map((url) => ({ image_url: url })),
                   },
-                  quantity: qty,
+                  quantity: quantity,
                 },
               ],
             }}
@@ -197,9 +237,8 @@ export function ProductInfoPanel({ product, images = [], onAddToCart, defaultQty
           style={{ zIndex: 1030 }}
         >
           <div className="fw-bold text-danger">{fmtVND(price)}</div>
-          <button className="btn btn-outline-danger flex-fill" onClick={handleAdd}>
-            Thêm giỏ
-          </button>
+          <button className="btn btn-danger me-2" onClick={() => addToCart(product?.product_id, quantity)}>Thêm vào giỏ hàng</button>
+
           <NavLink className="btn btn-primary flex-fill" to="/checkout" state={{ directBuy: true }}>
             Mua ngay
           </NavLink>

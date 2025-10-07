@@ -74,21 +74,21 @@ export default function ProductDetail() {
             <div className="row g-4">
                 {/* Cột ảnh sản phẩm */}
                 <div className="col-md-6">
-                    <div className="product-slider bg-white p-3 rounded-4 shadow-sm position-relative">
+                    <div className="product-slider bg-white p-3 rounded-4 shadow-sm position-relative" >
                         {/* Slider chính (có zoom) */}
                         <Slider
                             {...mainSettings}
                             asNavFor={nav2}
                             ref={(slider1) => setNav1(slider1)}
-                            style={{ maxWidth: "420px", margin: "0 auto" }}
+                            style={{ width: "204px", height: "311px", margin: "0 auto" }}
                         >
                             {images.map((src, idx) => (
-                                <div key={idx} style={{ maxHeight: "360px" }}>
+                                <div key={idx} >
                                     <InnerImageZoom
                                         src={src}
                                         zoomSrc={src}
                                         zoomType="hover"
-                                        zoomScale={1.5}
+                                        zoomScale={1}
                                         alt={`Ảnh ${idx + 1}`}
                                         className="img-fluid"
                                         style={{ maxHeight: "360px", objectFit: "contain" }}
@@ -148,26 +148,7 @@ export default function ProductDetail() {
 
             {/* Tab mô tả */}
             <div className="row mt-4">
-                <ul
-                    className="nav nav-pills mb-2 bg-body-tertiary pt-3 pb-3 rounded-3"
-                    id="pills-tab"
-                    role="tablist"
-                >
-                    <li className="nav-item" role="presentation">
-                        <button
-                            className="nav-link active"
-                            id="pills-home-tab"
-                            data-bs-toggle="pill"
-                            data-bs-target="#pills-home"
-                            type="button"
-                            role="tab"
-                            aria-controls="pills-home"
-                            aria-selected="true"
-                        >
-                            Mô tả
-                        </button>
-                    </li>
-                </ul>
+
 
                 <div className="tab-content" id="pills-tabContent">
                     <div
@@ -186,15 +167,7 @@ export default function ProductDetail() {
             </div>
 
             {/* Modal xem nhanh giỏ */}
-            {showModalCart && cartPreview && (
-                <ModalCart
-                    show={showModalCart}
-                    onClose={() => setShowModalCart(false)}
-                    product={cartPreview?.data}
-                    images={cartPreview?.data?.images?.map((x) => x.image_url) ?? []}
-                    quantity={cartPreview?.quantity}
-                />
-            )}
+
 
             {/* Sản phẩm liên quan (đặt sau) */}
             <h2 className="mt-4 mb-2" style={{ fontWeight: "var(--h2-bold-font-weight,bold)" }}>

@@ -110,7 +110,7 @@ export default function NewProducts({ apiBase = "https://kidoedu.vn" }) {
                   </p>
                   <button
                     onClick={() =>
-                      window.open(`/productdetail/${p.product_id}`, "_blank")
+                      window.open(`/productdetail/${p.product_id}`)
                     }
                     className="btn btn-outline-primary btn-sm rounded-pill px-3"
                   >
