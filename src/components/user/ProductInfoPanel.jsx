@@ -9,8 +9,10 @@ const fmtVND = (n) =>
   Number(n || 0).toLocaleString("vi-VN", { style: "currency", currency: "VND" });
 
 export function ProductInfoPanel({ product, images = [] }) {
-  const { addToCartContext, setCartCount } = useContext(CartContext);
+
+  const { addToCartContext, setCartCount, setSelectedProducts } = useContext(CartContext);
   const [quantity, setQuantity] = useState(1);
+
   const name = product?.product_name ?? product?.data?.product_name ?? "Sản phẩm";
   const price = useMemo(
     () => Number(product?.price ?? product?.data?.price ?? 0),
@@ -94,6 +96,14 @@ export function ProductInfoPanel({ product, images = [] }) {
       setCartCount(cart.items.length || 0);
     }
   }
+  const handleSubmit = (product) => {
+    setSelectedProducts([
+      {
+        data: product,
+        quantity: quantity || 1, // ✅ Dùng giá trị trong ô input
+      },
+    ]);
+  };
   return (
     <div className="bg-white p-4 rounded-4 shadow-sm position-relative overflow-hidden">
 
@@ -191,22 +201,9 @@ export function ProductInfoPanel({ product, images = [] }) {
           </button>
 
           <NavLink
-            className="btn btn-primary px-4 d-flex align-items-center gap-2"
             to="/checkout"
-            state={{
-              directBuy: true,
-              items: [
-                {
-                  data: {
-                    product_id: product?.product_id ?? product?.data?.product_id,
-                    product_name: name,
-                    price,
-                    images: images.map((url) => ({ image_url: url })),
-                  },
-                  quantity: quantity,
-                },
-              ],
-            }}
+            className="btn btn-primary px-4 d-flex align-items-center gap-2"
+            onClick={() => handleSubmit(product)}
           >
             <i className="bi bi-lightning-charge-fill"></i>
             Mua ngay
