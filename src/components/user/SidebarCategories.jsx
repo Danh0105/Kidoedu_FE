@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-
+import { Cpu } from 'lucide-react';
 import CategoryTitle from "../../components/user/category/Category";
 import RadioCategoryItem from "../../components/user/category/CheckboxProduct";
 export default function SidebarCategories({
@@ -90,6 +90,10 @@ export default function SidebarCategories({
                     aria-controls={panelId}
                     onClick={() => toggle(cat.category_id)}
                   >
+                    <Cpu
+                      size={18}
+                      className={`me-2 ${selectedCatId === cat.category_id ? "text-danger" : "text-primary"}`}
+                    />
                     <CategoryTitle label={cat.category_name} />
                     {children.length > 0 && (
                       <span className="badge text-bg-light ms-2">{children.length}</span>
@@ -105,6 +109,7 @@ export default function SidebarCategories({
                   {children.length ? (
                     <div className="list-group list-group-flush">
                       {children.map((child) => (
+
                         <RadioCategoryItem
                           key={child.category_id}
                           id={child.category_id}

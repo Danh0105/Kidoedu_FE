@@ -45,27 +45,27 @@ export default function About() {
             <div className='container'>
                 <div className="d-flex justify-content-center">
                     <div className="p-2 bd-highlight intro" style={{ width: "570px" }}>
-                        <h2 classNameName='mb-4 pt-2'>GIỚI THIỆU VỀ GENTECH </h2>
-                        <div className="des-about">ICHI SKILL có tên đầy đủ là: CÔNG TY CỔ PHẦN GIÁO DỤC KHOA HỌC CÔNG NGHỆ&nbsp; ICHI SKILL được thành lập vào ngày 28/12/2020. Mã số thuế: 0316660845
+                        <h2 classNameName='mb-4 pt-2'>GIỚI THIỆU VỀ Kidoedu </h2>
+                        <div className="des-about">Kidoedu có tên đầy đủ là: CÔNG TY CỔ PHẦN GIÁO DỤC KHOA HỌC CÔNG NGHỆ&nbsp; Kidoedu được thành lập vào ngày 28/12/2020. Mã số thuế: 0316660845
                             Công ty chuyên về lĩnh vực giáo dục kỹ năng sống - Công dân số - STEM cho học sinh  từ cấp học mầm non, tiểu học, THCS và THPT.
-                            ICHI SKILL đang bước những bước đầu tiên thật vững chắc với đội ngũ chuyên gia nhiều kinh nghiệm, tự tin mang lại chương trình giáo dục tiên tiến cho thế hệ trẻ về hành trang kỹ năng sống, đầy đủ để xây dựng ước mơ cho cuộc đời mình.</div>
+                            Kidoedu đang bước những bước đầu tiên thật vững chắc với đội ngũ chuyên gia nhiều kinh nghiệm, tự tin mang lại chương trình giáo dục tiên tiến cho thế hệ trẻ về hành trang kỹ năng sống, đầy đủ để xây dựng ước mơ cho cuộc đời mình.</div>
                         <a>XEM THÊM</a>
                     </div>
                     <div className="p-2 bd-highlight">
-                        <img src={intro} style={{ width: "550px", height: "auto" }} alt="Logo công ty Gentech" />
+                        <img src={intro} style={{ width: "550px", height: "auto" }} alt="Logo công ty Kidoedu" />
                     </div>
                 </div>
             </div>
             <div className='bg-warning'>
                 <div className='container'>
                     <div className='d-flex justify-content-center'>
-                        <h2>Vì sao chọn GENTECH</h2>
+                        <h2>Vì sao chọn Kidoedu</h2>
                     </div>
                     <div className='d-flex justify-content-center'>
                         <div className='p-2 bd-highlight intro'>
                             <div className='d-flex justify-content-center' style={{ width: "570px" }}>
                                 <div className='p-2 bd-highlight intro'>
-                                    <img src={gv} style={{ width: "50px", height: "auto" }} alt="Logo công ty Gentech" />
+                                    <img src={gv} style={{ width: "50px", height: "auto" }} alt="Logo công ty Kidoedu" />
                                 </div>
                                 <div className='p-2 bd-highlight intro'>
                                     <div >
@@ -78,12 +78,12 @@ export default function About() {
                         <div className='p-2 bd-highlight intro'>
                             <div className='d-flex justify-content-center' style={{ width: "570px" }}>
                                 <div className='p-2 bd-highlight intro'>
-                                    <img src={cup} style={{ width: "50px", height: "auto" }} alt="Logo công ty Gentech" />
+                                    <img src={cup} style={{ width: "50px", height: "auto" }} alt="Logo công ty Kidoedu" />
                                 </div>
                                 <div className='p-2 bd-highlight intro'>
                                     <div>
                                         <h2>Phương pháp giảng dạy chuẩn</h2>
-                                        <div >Ichi Skill chú trọng phương pháp học tập tương tác để giúp các em học sinh thực hành, phát huy tối đa tiềm năng của bản thân.</div>
+                                        <div >Kidoedu chú trọng phương pháp học tập tương tác để giúp các em học sinh thực hành, phát huy tối đa tiềm năng của bản thân.</div>
                                     </div>
                                 </div>
                             </div>
@@ -93,12 +93,12 @@ export default function About() {
                         <div className='p-2 bd-highlight intro'>
                             <div className='d-flex justify-content-center' style={{ width: "570px" }}>
                                 <div className='p-2 bd-highlight intro'>
-                                    <img src={hc} style={{ width: "50px", height: "auto" }} alt="Logo công ty Gentech" />
+                                    <img src={hc} style={{ width: "50px", height: "auto" }} alt="Logo công ty Kidoedu" />
                                 </div>
                                 <div className='p-2 bd-highlight intro'>
                                     <div >
                                         <h2>Môi trường học tập tốt</h2>
-                                        <div>Ichi Skill trang bị cho các em học sinh đầy đủ kiến thức, kỹ năng, năng động, sáng tạo và có năng lực nền tảng vững chắc cho tương lai.</div>
+                                        <div>Kidoedu trang bị cho các em học sinh đầy đủ kiến thức, kỹ năng, năng động, sáng tạo và có năng lực nền tảng vững chắc cho tương lai.</div>
                                     </div>
                                 </div>
                             </div>
@@ -106,12 +106,12 @@ export default function About() {
                         <div className='p-2 bd-highlight intro'>
                             <div className='d-flex justify-content-center' style={{ width: "570px" }}>
                                 <div className='p-2 bd-highlight intro'>
-                                    <img src={vs} style={{ width: "50px", height: "auto" }} alt="Logo công ty Gentech" />
+                                    <img src={vs} style={{ width: "50px", height: "auto" }} alt="Logo công ty Kidoedu" />
                                 </div>
                                 <div className='p-2 bd-highlight intro'>
                                     <div>
                                         <h2>Giáo trình độc quyền</h2>
-                                        <div class="des-tsc">ICHI SKILL đã xây dựng chương trình giáo dục Kỹ năng sống cho học sinh trên nền tảng phần mềm đạt tiêu chuẩn quốc tế với đầy đủ, video, hình ảnh, âm thanh,…sống động và hấp dẫn.</div>
+                                        <div class="des-tsc">Kidoedu đã xây dựng chương trình giáo dục Kỹ năng sống cho học sinh trên nền tảng phần mềm đạt tiêu chuẩn quốc tế với đầy đủ, video, hình ảnh, âm thanh,…sống động và hấp dẫn.</div>
                                     </div>
                                 </div>
                             </div>
@@ -121,7 +121,7 @@ export default function About() {
             </div>
             <div class="d-flex justify-content-center">
                 <div class="bd-highlight p-1">
-                    <img src={HDKH1} style={{ width: "auto", height: "580px" }} alt="Logo công ty Gentech" />
+                    <img src={HDKH1} style={{ width: "auto", height: "580px" }} alt="Logo công ty Kidoedu" />
                 </div>
                 <div className="bd-highlight p-1">
                     <div
@@ -132,21 +132,21 @@ export default function About() {
                             <img
                                 src={HDKH2}
                                 style={{ width: "395px", height: "auto" }}
-                                alt="Logo công ty Gentech"
+                                alt="Logo công ty Kidoedu"
                             />
                         </div>
                         <div className="bd-highlight">
                             <img
                                 src={HDKH3}
                                 style={{ width: "395px", height: "auto" }}
-                                alt="Logo công ty Gentech"
+                                alt="Logo công ty Kidoedu"
                             />
                         </div>
                     </div>
                 </div>
 
                 <div class="bd-highlight p-1">
-                    <img src={HDKH4} style={{ width: "auto", height: "580px" }} alt="Logo công ty Gentech" />
+                    <img src={HDKH4} style={{ width: "auto", height: "580px" }} alt="Logo công ty Kidoedu" />
                 </div>
             </div>
         </div>

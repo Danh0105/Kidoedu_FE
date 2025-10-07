@@ -40,7 +40,7 @@ export default function ProductHome({ prod }) {
     || PLACEHOLDER_IMG;
 
   return (
-    <div className="card nav-link mb-2">
+    <div className="card nav-link mb-2 p-2">
       <Link to={`/productdetail/${id}`} className="nav-link p-0">
         <img
           src={firstImage}
@@ -53,7 +53,7 @@ export default function ProductHome({ prod }) {
       <div className="row p-0 d-flex justify-content-center">
         <h5 className="card-title" style={{ fontSize: "15px", fontWeight: 700 }}>
           <Link to={`/productdetail/${id}`} className="nav-link p-0">
-            {trimText(name, 25)}
+            {trimText(name, 35)}
           </Link>
         </h5>
       </div>
