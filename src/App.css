@@ -367,3 +367,18 @@ body.app-loaded {
 @media (min-width: 576px){
   .checkout-page .w-sm-auto { width: auto !important; }
 }
+/* Cho phép thanh menu cuộn ngang nhẹ trên mobile nếu dài */
+.header-menu-scroll {
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: thin;
+}
+.header-menu-scroll > li { display: inline-block; }
+
+/* Khi header sticky + scroll, giảm padding logo / nav nhẹ */
+@media (max-width: 991.98px){
+  .sticky-lg-top header.container { padding-top: .25rem !important; }
+}
+/* tăng vùng chạm, hiển thị focus rõ */
+.nav-link-menu { padding-block: .5rem; }
+.nav-link-menu:focus-visible { outline: 2px solid #ff6b6b; outline-offset: 2px; }

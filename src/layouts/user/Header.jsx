@@ -7,7 +7,7 @@ import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie';
 import { CartContext } from '../../hooks/CartContext';
-
+import '../../components/user/css/Header.css'
 export default function Header() {
     const navigate = useNavigate();
     const [scrolled, setScrolled] = useState(false);
@@ -92,14 +92,14 @@ export default function Header() {
                             className={`navbar navbar-expand-lg sticky-lg-top ${scrolled ? 'bg-success-subtle' : 'bg-white'} flex-grow-1`}
                             aria-label="Eleventh navbar example"
                         >
-                            <div className="container-fluid px-0">
-                                {/* giữ nguyên collapse (không thêm toggler để không đổi cấu trúc) */}
-                                <div className="collapse navbar-collapse show" id="navbarsExample09">
-                                    <ul className="navbar-nav me-auto mb-2 mb-lg-0 p-2 header-menu-scroll">
-                                        <Menu />
-                                    </ul>
+                            <nav
+                                className={`navbar navbar-expand-lg sticky-lg-top ${scrolled ? 'bg-success-subtle' : 'bg-white'} flex-grow-1`}
+                                aria-label="Eleventh navbar example"
+                            >
+                                <div className="container-fluid px-0 d-flex justify-content-center">
+                                    <Menu />
                                 </div>
-                            </div>
+                            </nav>
                         </nav>
                     </div>
 
