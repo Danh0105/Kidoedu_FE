@@ -282,8 +282,8 @@ export default function ModalInfo({ onUpdate }) {
               aria-label="Close"
             ></button>
           </div>
-          <button class="btn btn-light rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#1760319218204" aria-expanded="false" aria-controls="collapseExample">
-            Địa chỉ mới
+          <button class="btn btn-light rounded-0 text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#1760319218204" aria-expanded="false" aria-controls="collapseExample">
+            Thêm địa chỉ mới
           </button>
           <div class="collapse rounded-0" id="1760319218204">
             <div class="card card-body rounded-0">
@@ -533,7 +533,7 @@ export default function ModalInfo({ onUpdate }) {
                     )}
                   </div>
                   <div className="col">
-                    <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1" onChange={() => onchangeAddress(s.id)} />
+                    <input class="form-check-input border-danger" type="radio" name="radioDefault" id="radioDefault1" onChange={() => onchangeAddress(s.id)} />
                   </div>
                   <div className="col-md-6">
                     {s.address.is_default == true ?
@@ -552,7 +552,7 @@ export default function ModalInfo({ onUpdate }) {
                       Sữa
                     </button> */}
                     <button class="btn btn-outline-danger " type="button" onClick={() => handleDelete(s.id)}>
-                      Xóa
+                      X
                     </button>
                   </div>
                 </div>
