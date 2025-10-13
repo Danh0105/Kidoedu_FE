@@ -1,17 +1,11 @@
 // Store.jsx
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useDebounce, buildPager, toVND, useSafeBuildUrl } from "../../hooks/useUiUtils";
+import { useDebounce, buildPager } from "../../hooks/useUiUtils";
 import axios from "axios";
-
 
 import Product from "../../components/user/category/Product";
 import SidebarCategories from "../../components/user/SidebarCategories";
 
-/**
- * Props:
- *  - apiBase: BE base URL (vd "https://kidoedu.vn")
- *  - pageSizeOptions: mảng số item/trang
- */
 export default function Store({
     apiBase = "https://kidoedu.vn",
     pageSizeOptions = [6, 12, 24, 48],
@@ -28,9 +22,12 @@ export default function Store({
 
     // -------- UI state -------------
     const [q, setQ] = useState("");
-    const [limit, setLimit] = useState(pageSizeOptions?.[1] ?? 12); // default 12/trang
+    const [limit, setLimit] = useState(pageSizeOptions?.[1] ?? 12);
     const [page, setPage] = useState(1);
     const [selectedCatId, setSelectedCatId] = useState(null);
+
+    // ✅ NEW: sort ('' | 'price_asc' | 'price_desc')
+    const [sort, setSort] = useState("");
 
     // -------- Data state -----------
     const [items, setItems] = useState([]);
@@ -48,6 +45,13 @@ export default function Store({
         [categories]
     );
 
+    // ✅ NEW: label hiển thị cho dropdown sort
+    const sortLabel = useMemo(() => {
+        if (sort === "price_asc") return "Giá thấp → cao";
+        if (sort === "price_desc") return "Giá cao → thấp";
+        return "Sắp xếp";
+    }, [sort]);
+
     // -------- Fetchers -------------
     const fetchCategories = useCallback(async () => {
         try {
@@ -58,59 +62,69 @@ export default function Store({
         }
     }, [api]);
 
-    const fetchProducts = useCallback(async (abortSignal) => {
-        setLoading(true);
-        setErr("");
+    const fetchProducts = useCallback(
+        async (abortSignal) => {
+            setLoading(true);
+            setErr("");
 
-        try {
-            const params = { page, limit };
-            if (selectedCatId) params.category_id = selectedCatId;  // <-- THÊM DÒNG NÀY
+            try {
+                // Gộp params chung
+                const baseParams = { page, limit };
+                if (selectedCatId) baseParams.category_id = selectedCatId;
 
-            let res;
-            // Có từ khóa -> dùng /search/products
-            if ((debouncedQ).trim()) {
-                res = await api.get("/search/products", {
-                    params: { q: debouncedQ, page, limit, category_id: selectedCatId || undefined }, // <-- GỬI KÈM
-                    signal: abortSignal,
-                });
-                const data = res.data ?? {};
-                setItems(data.items ?? []);
-                setMeta({
-                    page: data.pagination?.page ?? page,
-                    last_page: data.pagination?.pages ?? 0,
-                    total: data.pagination?.total ?? 0,
-                    limit: data.pagination?.limit ?? limit,
-                });
-            } else {
-                // Không có từ khóa -> /products bình thường
-                res = await api.get("/products", { params, signal: abortSignal });
-                setItems(res.data?.data ?? []);
-                setMeta(res.data?.meta ?? { page, last_page: 0, total: 0, limit });
+                // ✅ NEW: gửi kèm param sort cho BE (nếu BE hỗ trợ)
+                // Ví dụ 1: ?sort=price_asc | price_desc
+                // (Nếu BE yêu cầu dạng khác, map lại tại đây)
+                if (sort) baseParams.sort = sort;
+
+                let res;
+
+                if (debouncedQ.trim()) {
+                    // Tìm kiếm
+                    res = await api.get("/search/products", {
+                        params: { q: debouncedQ, ...baseParams },
+                        signal: abortSignal,
+                    });
+                    const data = res.data ?? {};
+                    setItems(data.items ?? []);
+                    setMeta({
+                        page: data.pagination?.page ?? page,
+                        last_page: data.pagination?.pages ?? 0,
+                        total: data.pagination?.total ?? 0,
+                        limit: data.pagination?.limit ?? limit,
+                    });
+                } else {
+                    // Không có keyword: /products
+                    res = await api.get("/products", { params: baseParams, signal: abortSignal });
+                    setItems(res.data?.data ?? []);
+                    setMeta(res.data?.meta ?? { page, last_page: 0, total: 0, limit });
+
+                    // Nếu có chọn category thì fallback qua /search/products để lọc theo category
+                    if (selectedCatId) {
+                        res = await api.get("/search/products", {
+                            params: { ...baseParams },
+                            signal: abortSignal,
+                        });
+                        const data = res.data ?? {};
+                        setItems(data.items ?? []);
+                        setMeta({
+                            page: data.pagination?.page ?? page,
+                            last_page: data.pagination?.pages ?? 0,
+                            total: data.pagination?.total ?? 0,
+                            limit: data.pagination?.limit ?? limit,
+                        });
+                    }
+                }
+            } catch (e) {
+                if (e.name !== "CanceledError" && e.code !== "ERR_CANCELED") {
+                    setErr(e?.message || "Đã có lỗi xảy ra");
+                }
+            } finally {
+                setLoading(false);
             }
-            if (!(debouncedQ).trim() && selectedCatId) {
-                console.log(2)
-                // Không có từ khóa -> /products bình thường
-                res = await api.get("/search/products", {
-                    params: { page, limit, category_id: selectedCatId },
-                    signal: abortSignal,
-                });
-                const data = res.data ?? {};
-                setItems(data.items ?? []);
-                setMeta({
-                    page: data.pagination?.page ?? page,
-                    last_page: data.pagination?.pages ?? 0,
-                    total: data.pagination?.total ?? 0,
-                    limit: data.pagination?.limit ?? limit,
-                });
-            }
-        } catch (e) {
-            if (e.name !== "CanceledError" && e.code !== "ERR_CANCELED") {
-                setErr(e?.message || "Đã có lỗi xảy ra");
-            }
-        } finally {
-            setLoading(false);
-        }
-    }, [api, page, limit, debouncedQ, selectedCatId]);
+        },
+        [api, page, limit, debouncedQ, selectedCatId, sort]
+    );
 
     // -------- Effects --------------
     useEffect(() => {
@@ -126,23 +140,30 @@ export default function Store({
         return () => ctl.abort();
     }, [fetchProducts]);
 
-    // Cuộn lên khi đổi trang
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     }, [page]);
 
+    // ✅ NEW: Sắp xếp trên FE (fallback nếu BE không xử lý sort)
+    const sortedItems = useMemo(() => {
+        if (!Array.isArray(items) || !items.length || !sort) return items;
+        const getPrice = (p) => Number(p?.price ?? 0);
+        const copy = [...items];
+        if (sort === "price_asc") copy.sort((a, b) => getPrice(a) - getPrice(b));
+        if (sort === "price_desc") copy.sort((a, b) => getPrice(b) - getPrice(a));
+        return copy;
+    }, [items, sort]);
+
     // -------- Render ---------------
     return (
         <div className="container" style={{ maxWidth: "95%" }}>
-            {/*        <Slick1 /> */}
-
             <div className="d-flex bg-white p-2">
                 {/* Sidebar */}
                 <SidebarCategories
                     roots={roots}
                     selectedCatId={selectedCatId}
                     onSelect={(id) => {
-                        setSelectedCatId(id == null ? null : Number(id)); // ✅ ép về number
+                        setSelectedCatId(id == null ? null : Number(id));
                         setPage(1);
                     }}
                     onClear={() => {
@@ -150,7 +171,6 @@ export default function Store({
                         setPage(1);
                     }}
                 />
-
 
                 {/* Main */}
                 <section className="p-2 flex-fill">
@@ -163,19 +183,47 @@ export default function Store({
                                     type="button"
                                     data-bs-toggle="dropdown"
                                 >
-                                    Sắp xếp
+                                    {sortLabel}
                                 </button>
                                 <ul className="dropdown-menu">
                                     <li>
-                                        <button className="dropdown-item" disabled>
-                                            Giá thấp → cao (demo)
+                                        <button
+                                            className={`dropdown-item ${sort === "price_asc" ? "active" : ""}`}
+                                            onClick={() => {
+                                                setSort("price_asc");
+                                                setPage(1);
+                                            }}
+                                        >
+                                            Giá thấp → cao
                                         </button>
                                     </li>
                                     <li>
-                                        <button className="dropdown-item" disabled>
-                                            Giá cao → thấp (demo)
+                                        <button
+                                            className={`dropdown-item ${sort === "price_desc" ? "active" : ""}`}
+                                            onClick={() => {
+                                                setSort("price_desc");
+                                                setPage(1);
+                                            }}
+                                        >
+                                            Giá cao → thấp
                                         </button>
                                     </li>
+                                    {sort && (
+                                        <>
+                                            <li><hr className="dropdown-divider" /></li>
+                                            <li>
+                                                <button
+                                                    className="dropdown-item"
+                                                    onClick={() => {
+                                                        setSort("");
+                                                        setPage(1);
+                                                    }}
+                                                >
+                                                    Bỏ sắp xếp
+                                                </button>
+                                            </li>
+                                        </>
+                                    )}
                                 </ul>
                             </div>
                         </div>
@@ -192,51 +240,14 @@ export default function Store({
                                 }}
                             />
                         </div>
-
-                        {/*     <div className="col-auto">
-                            <select
-                                className="form-select"
-                                value={limit}
-                                onChange={(e) => {
-                                    setLimit(Number(e.target.value));
-                                    setPage(1);
-                                }}
-                            >
-                                {pageSizeOptions.map((n) => (
-                                    <option key={n} value={n}>
-                                        {n}/trang
-                                    </option>
-                                ))}
-                            </select>
-                        </div> */}
-
-                        {/*  <div className="col-auto">
-                            <button
-                                className="btn btn-primary"
-                                onClick={() => fetchProducts()}
-                                disabled={loading}
-                            >
-                                {loading ? (
-                                    <>
-                                        <span
-                                            className="spinner-border spinner-border-sm me-2"
-                                            aria-hidden="true"
-                                        />
-                                        Đang tải…
-                                    </>
-                                ) : (
-                                    "Làm mới"
-                                )}
-                            </button>
-                        </div> */}
                     </div>
 
                     {err && <div className="alert alert-danger">Lỗi: {err}</div>}
 
                     {/* Product List */}
                     <div className="d-flex flex-wrap" style={{ width: "1120px", gap: "10px" }}>
-                        {items.length ? (
-                            items.map((prod) => (
+                        {sortedItems.length ? (
+                            sortedItems.map((prod) => (
                                 <div className="col" key={prod.product_id} style={{ flex: "0 0 10%" }}>
                                     <Product prod={prod} status={prod?.status} />
                                 </div>
@@ -249,8 +260,6 @@ export default function Store({
                             </div>
                         )}
                     </div>
-
-
 
                     {/* Pagination */}
                     {meta?.last_page > 1 && (
@@ -288,9 +297,7 @@ export default function Store({
                                 >
                                     <button
                                         className="page-link"
-                                        onClick={() =>
-                                            setPage((p) => Math.min(meta.last_page, p + 1))
-                                        }
+                                        onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
                                     >
                                         »
                                     </button>
