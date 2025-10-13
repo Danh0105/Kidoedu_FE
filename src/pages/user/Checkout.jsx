@@ -26,18 +26,25 @@ export default function Checkout() {
     if (selectedProducts?.length) setProducts(selectedProducts);
 
     const saved = Cookies.get("shippingInfo");
-    console.log(saved)
     if (saved) {
-      const data = JSON.parse(saved);
-      const defaultAddress = data.find(item => item.address?.is_default === true);
       try {
-        setShippingInfo(defaultAddress);
+        let data = JSON.parse(saved);
+
+        // ✅ Nếu không phải mảng, ép thành mảng
+        if (!Array.isArray(data)) {
+          data = [data];
+        }
+
+        // ✅ Lấy địa chỉ mặc định
+        const defaultAddress = data.find(item => item.address?.is_default === true);
+
+        setShippingInfo(defaultAddress || data[0]); // fallback: nếu chưa có mặc định
       } catch (err) {
         console.error("Không thể parse shippingInfo từ cookie:", err);
       }
     }
-
   }, [selectedProducts]);
+
 
   // Tính tổng tiền
   const totalPrice = products.reduce(
