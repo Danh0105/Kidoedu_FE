@@ -21,11 +21,11 @@ export default function ModalPayment({ show, onClose, onConfirm }) {
       label: "Thanh toán qua MoMo",
       icon: "https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png",
     },
-    {
-      id: "vnpay",
-      label: "Thanh toán qua VNPay",
-      icon: "https://stcd02206177151.cloud.edgevnpay.vn/assets/images/logo-icon/logo-primary.svg",
-    },
+    /*     {
+          id: "vnpay",
+          label: "Thanh toán qua VNPay",
+          icon: "https://stcd02206177151.cloud.edgevnpay.vn/assets/images/logo-icon/logo-primary.svg",
+        }, */
   ];
 
   return (
