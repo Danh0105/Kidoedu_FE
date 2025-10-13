@@ -282,9 +282,11 @@ export default function ModalInfo({ onUpdate }) {
               aria-label="Close"
             ></button>
           </div>
-          <button class="btn btn-light rounded-0 text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#1760319218204" aria-expanded="false" aria-controls="collapseExample">
-            Thêm địa chỉ mới
-          </button>
+          <div className="p-2 d-flex justify-content-center">
+            <button class="btn btn-outline-success rounded-0 " type="button" data-bs-toggle="collapse" data-bs-target="#1760319218204" aria-expanded="false" aria-controls="collapseExample">
+              Thêm địa chỉ mới
+            </button>
+          </div>
           <div class="collapse rounded-0" id="1760319218204">
             <div class="card card-body rounded-0">
               <div className="modal-body">
