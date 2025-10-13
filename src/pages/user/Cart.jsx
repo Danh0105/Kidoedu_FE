@@ -184,26 +184,26 @@ export default function Cart() {
                 <div style={{ height: "590px" }}>
                     <table className="table cart-table">
                         <thead>
-                            <tr>
-                                <th style={{ width: "18px" }}>
-                                    <input
-                                        className="form-check-input"
-                                        type="checkbox"
-                                        checked={products.length > 0 && products.every(p => p.selected)}
-                                        onChange={(e) => {
-                                            const checked = e.target.checked;
-                                            setProducts(prev =>
-                                                prev.map(p => ({ ...p, selected: checked }))
-                                            );
-                                        }}
-                                    />
-                                </th>
-                                <th>Sản phẩm</th>
-                                <th className='text-center d-none d-sm-table-cell'>Đơn giá</th> {/* ẩn ở xs */}
-                                <th className='text-center'>Số lượng</th>
-                                <th className='text-center' style={{ width: "145px" }}>Số tiền</th>
-                                <th className='text-center d-none d-sm-table-cell'>Thao tác</th> {/* ẩn ở xs */}
-                            </tr>
+
+                            <th style={{ width: "18px" }}>
+                                <input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    checked={products.length > 0 && products.every(p => p.selected)}
+                                    onChange={(e) => {
+                                        const checked = e.target.checked;
+                                        setProducts(prev =>
+                                            prev.map(p => ({ ...p, selected: checked }))
+                                        );
+                                    }}
+                                />
+                            </th>
+                            <th>Sản phẩm</th>
+                            <th className='text-center d-none d-sm-table-cell'>Đơn giá</th> {/* ẩn ở xs */}
+                            <th className='text-center'>Số lượng</th>
+                            <th className='text-center' style={{ width: "145px" }}>Số tiền</th>
+                            <th className='text-center d-none d-sm-table-cell'>Thao tác</th> {/* ẩn ở xs */}
+
                         </thead>
                         <tbody>
                             {products.length > 0 ? (

@@ -4,7 +4,7 @@ import UserAppRoutes from "./routes/UserAppRoutes";
 import AdminAppRoutes from "./routes/AdminAppRoutes";
 import useAutoLogout from "./hooks/useAutoLogout";
 import { CartProvider } from "./hooks/CartContext";
-import MobileBlocker from "./hooks/MobileBlocker";
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 function App() {
 
 

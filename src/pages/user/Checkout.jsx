@@ -26,13 +26,17 @@ export default function Checkout() {
     if (selectedProducts?.length) setProducts(selectedProducts);
 
     const saved = Cookies.get("shippingInfo");
+    console.log(saved)
     if (saved) {
+      const data = JSON.parse(saved);
+      const defaultAddress = data.find(item => item.address?.is_default === true);
       try {
-        setShippingInfo(JSON.parse(saved));
+        setShippingInfo(defaultAddress);
       } catch (err) {
         console.error("Không thể parse shippingInfo từ cookie:", err);
       }
     }
+
   }, [selectedProducts]);
 
   // Tính tổng tiền
@@ -74,6 +78,7 @@ export default function Checkout() {
   const handleMomoPayment = async () => {
     try {
       const saved = Cookies.get("shippingInfo");
+
       if (!saved) {
         alert("⚠️ Vui lòng nhập thông tin giao hàng trước khi thanh toán!");
         return;
@@ -122,11 +127,11 @@ export default function Checkout() {
         label: "Thanh toán qua MoMo",
         icon: "https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png",
       },
-      vnpay: {
+      /* vnpay: {
         id: "vnpay",
         label: "Thanh toán qua VNPay",
         icon: "https://stcd02206177151.cloud.edgevnpay.vn/assets/images/logo-icon/logo-primary.svg",
-      },
+      }, */
     };
     setOpt(methods[selectedMethod]);
   };
@@ -165,9 +170,13 @@ export default function Checkout() {
             </div>
 
             <div className="text-end ms-auto">
-              <span className="badge bg-light text-danger border border-danger me-2 d-none d-sm-inline">
-                Mặc định
-              </span>
+              {shippingInfo.address.is_default == true ? (
+                <span className="badge bg-light text-danger border border-danger me-2 d-none d-sm-inline">
+                  Mặc định
+                </span>
+              ) : (
+                <></>
+              )}
               <a
                 href="#"
                 className="text-primary text-decoration-none"
