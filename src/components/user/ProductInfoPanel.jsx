@@ -54,7 +54,7 @@ export function ProductInfoPanel({ product, images = [] }) {
         const payload = { productId, quantity };
 
         const res = await axios.post(
-          `https://kidoedu.vn/cart/${userId}/items`,
+          `${process.env.REACT_APP_API_URL}/cart/${userId}/items`,
           payload,
           {
             headers: {
@@ -88,7 +88,7 @@ export function ProductInfoPanel({ product, images = [] }) {
     const token = localStorage.getItem('Authorization') || null;
     if (typeof token === 'string' && token.trim() !== '') {
       const decoded = jwtDecode(token);
-      const resCart = await axios.get(`https://kidoedu.vn/cart/${decoded.sub}`, {
+      const resCart = await axios.get(`${process.env.REACT_APP_API_URL}/cart/${decoded.sub}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const cart = resCart.data;

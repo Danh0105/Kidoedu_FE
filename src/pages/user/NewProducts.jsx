@@ -3,7 +3,7 @@ import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ROBOT from "../../assets/user/ROBOT.png";
 
-export default function NewProducts({ apiBase = "https://kidoedu.vn" }) {
+export default function NewProducts({ apiBase = `{process.env.react_app_api_url}` }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");

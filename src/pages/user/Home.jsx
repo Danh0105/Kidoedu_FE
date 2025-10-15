@@ -40,7 +40,7 @@ const Ribbon = ({ text, position, className }) => (
     </span>
 );
 
-export default function Home({ apiBase = "https://kidoedu.vn" }) {
+export default function Home({ apiBase = `{process.env.react_app_api_url}` }) {
     const [categories, setCategories] = useState([]);
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);

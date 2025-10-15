@@ -50,7 +50,7 @@ export default function Product({ prod }) {
 
     const fetchProductAndOpen = async (pid, openType) => {
         try {
-            const res = await axios.get(`https://kidoedu.vn/products/${pid}`);
+            const res = await axios.get(`${process.env.REACT_APP_API_URL}/products/${pid}`);
             const data = res.data?.data || null;
             setProduct(data);
             setImages((data?.images || []).map((img) => img?.image_url).filter(Boolean));

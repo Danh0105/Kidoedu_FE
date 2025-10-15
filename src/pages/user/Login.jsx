@@ -37,7 +37,7 @@ export default function Login() {
         event.preventDefault();
         try {
             console.log('Logging in with', { email, password });
-            const res = await fetch('https://kidoedu.vn/auth/login', {
+            const res = await fetch('{process.env.react_app_api_url}/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),

@@ -7,7 +7,7 @@ export default function Category({ onChange }) {
   const [categoryName, setCategoryName] = useState("");
   const [parentId, setParentId] = useState(null);
   useEffect(() => {
-    axios.get("https://kidoedu.vn/categories").then((res) => {
+    axios.get("${process.env.react_app_api_url}/categories").then((res) => {
       const roots = res.data.filter((cat) => cat.parent === null);
       setCategories(roots);
     });
@@ -23,9 +23,9 @@ export default function Category({ onChange }) {
     }
 
     try {
-      await axios.delete(`https://kidoedu.vn/categories/${id}`);
+      await axios.delete(`{process.env.react_app_api_url}/categories/${id}`);
 
-      const res = await axios.get("https://kidoedu.vn/categories");
+      const res = await axios.get(`{process.env.react_app_api_url}/categories`);
       const roots = res.data.filter((cat) => cat.parent === null);
       setCategories(roots);
     } catch (error) {
@@ -47,7 +47,7 @@ export default function Category({ onChange }) {
         category_name: categoryName,
         parent_category_id: parentId || null,
       };
-      const res = await axios.post("https://kidoedu.vn/categories", dto);
+      const res = await axios.post(`{process.env.react_app_api_url}/categories`, dto);
       const newCat = res.data;
       if (newCat.parent) {
         setCategories((prev) =>

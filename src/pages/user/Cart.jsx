@@ -22,7 +22,7 @@ export default function Cart() {
                 }
 
                 const productRequests = guestCart.map((item) =>
-                    axios.get(`https://kidoedu.vn/products/${item.productId}`)
+                    axios.get(`{process.env.react_app_api_url}/products/${item.productId}`)
                 );
 
                 const responses = await Promise.all(productRequests);
@@ -43,7 +43,7 @@ export default function Cart() {
             }
 
             const resCart = await axios.get(
-                `https://kidoedu.vn/cart/${decoded.sub}`,
+                `{process.env.react_app_api_url}/cart/${decoded.sub}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -51,7 +51,7 @@ export default function Cart() {
             const productIds = cart.items.map((item) => item.product.product_id);
 
             const productRequests = productIds.map((id) =>
-                axios.get(`https://kidoedu.vn/products/${id}`)
+                axios.get(`{process.env.react_app_api_url}/products/${id}`)
             );
             const responses = await Promise.all(productRequests);
             const productsData = responses.map((res) => res.data);
@@ -110,7 +110,7 @@ export default function Cart() {
 
         try {
             await axios.put(
-                `https://kidoedu.vn/cart/${decoded.sub}/items/${productId}`,
+                `{process.env.react_app_api_url}/cart/${decoded.sub}/items/${productId}`,
                 { quantity: newQty },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -166,7 +166,7 @@ export default function Cart() {
             }
 
             await axios.delete(
-                `https://kidoedu.vn/cart/${userId}/items/${product_id}`,
+                `{process.env.react_app_api_url}/cart/${userId}/items/${product_id}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 

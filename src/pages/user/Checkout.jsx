@@ -101,7 +101,7 @@ export default function Checkout() {
         method: "momo",
       }));
 
-      const res = await axios.post("https://kidoedu.vn/momo/create-payment", {
+      const res = await axios.post(`{process.env.react_app_api_url}/momo/create-payment`, {
         amount: finalTotal,
         orderId,
         items: products.map((p) => ({

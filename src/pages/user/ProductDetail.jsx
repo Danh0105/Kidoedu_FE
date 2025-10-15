@@ -40,7 +40,7 @@ export default function ProductDetail() {
 
     const fetchProduct = async () => {
         try {
-            const res = await axios.get(`https://kidoedu.vn/products/${id}`);
+            const res = await axios.get(`${process.env.REACT_APP_API_URL}/products/${id}`);
             const data = res?.data?.data ?? res?.data;
             setProduct(data);
 

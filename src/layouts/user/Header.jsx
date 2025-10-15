@@ -31,7 +31,7 @@ export default function Header() {
                 return;
             }
 
-            const resCart = await axios.get(`https://kidoedu.vn/cart/${decoded.sub}`, {
+            const resCart = await axios.get(`${process.env.react_app_api_url}/cart/${decoded.sub}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const cart = resCart.data;

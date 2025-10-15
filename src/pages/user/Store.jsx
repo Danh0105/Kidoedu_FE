@@ -7,7 +7,7 @@ import Product from "../../components/user/category/Product";
 import SidebarCategories from "../../components/user/SidebarCategories";
 
 export default function Store({
-    apiBase = "https://kidoedu.vn",
+    apiBase = process.env.REACT_APP_API_URL,
     pageSizeOptions = [6, 12, 24, 48],
 }) {
     // -------- API client ----------

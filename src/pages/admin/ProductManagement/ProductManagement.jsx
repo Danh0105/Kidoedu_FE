@@ -8,7 +8,7 @@ export default function ProductManagement() {
 
     const fetchProducts = async (page = 1, limit = 10) => {
         try {
-            const res = await axios.get("https://kidoedu.vn/products", {
+            const res = await axios.get(`{process.env.react_app_api_url}/products`, {
                 params: { page, limit }
             });
 
@@ -26,7 +26,7 @@ export default function ProductManagement() {
         if (!window.confirm("Bạn có chắc muốn xóa sản phẩm này?")) return;
 
         try {
-            await axios.delete(`https://kidoedu.vn/products/${id}`);
+            await axios.delete(`{process.env.react_app_api_url}/products/${id}`);
 
             // ✅ Xóa khỏi state mà không cần reload
             setProducts((prev) => prev.filter((p) => p.product_id !== id));

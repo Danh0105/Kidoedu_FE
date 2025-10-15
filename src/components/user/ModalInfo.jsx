@@ -118,7 +118,7 @@ export default function ModalInfo({ onUpdate }) {
       let payload = {};
 
       if (activeTab === "personal") {
-        url = "https://kidoedu.vn/users/register-individual";
+        url = `${process.env.REACT_APP_API_URL}/users/register-individual`;
         payload = {
           id: Date.now(),
           username: form.email_personal.split("@")[0],
@@ -137,7 +137,7 @@ export default function ModalInfo({ onUpdate }) {
           API: url,
         };
       } else if (activeTab === "business") {
-        url = "https://kidoedu.vn/users/register-business";
+        url = `${process.env.REACT_APP_API_URL}/users/register-business`;
         payload = {
           id: Date.now(),
           username: form.email_business.split("@")[0],

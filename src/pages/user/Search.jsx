@@ -8,7 +8,7 @@ import { useDebounce, buildPager, toVND, useSafeBuildUrl } from "../../hooks/use
  *  - pageSizeOptions: number[] (vd [6, 12, 24, 48])
  */
 export default function SearchProducts({
-  apiBase = "https://kidoedu.vn",
+  apiBase = process.env.REACT_APP_API_URL,
   pageSizeOptions = [6, 12, 24, 48],
 }) {
   // -------- UI state ----------

@@ -13,7 +13,7 @@ export default function Register() {
 
     const login = async () => {
         try {
-            const res = await fetch('https://kidoedu.vn/auth/register', {
+            const res = await fetch(process.env.REACT_APP_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password, email, role }),
