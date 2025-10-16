@@ -53,7 +53,8 @@ export default function ContactFeedbackPage() {
                         </h5>
                         <p>
                             Bộ phận chăm sóc khách hàng <br />
-                            <strong>ĐT: 0915 802 903</strong>
+                            <strong>ĐT: 0789 636 979
+                            </strong>
                         </p>
                     </div>
                 </div>
@@ -64,7 +65,7 @@ export default function ContactFeedbackPage() {
                             Gửi thư góp ý
                         </h5>
                         <p className="mb-1">
-                            Bộ phận chăm sóc khách hàng – <strong>Công ty TNHH Máy tính G7</strong>
+                            Bộ phận chăm sóc khách hàng – <strong>CÔNG TY TNHH KIDO EDU</strong>
                         </p>
                         <p className="mb-1">
                             <FontAwesomeIcon icon={faLocationDot} className="me-2 text-danger" />
