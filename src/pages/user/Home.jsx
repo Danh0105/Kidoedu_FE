@@ -5,7 +5,17 @@ import ROBOT from "../../assets/user/ROBOT.png";
 import Carousel from "../../components/user/Carousel";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { Menu, Tv, Smartphone, Cpu, Wrench, HomeIcon, Gem, Zap, Gift } from "lucide-react";
+import {
+    Menu,
+    Tv,
+    Smartphone,
+    Cpu,
+    Wrench,
+    HomeIcon,
+    Gem,
+    Zap,
+    Gift,
+} from "lucide-react";
 import ProductHome from "../../components/user/ProductHome";
 import ModalBuy from "../../components/user/ModalBuy";
 
@@ -13,7 +23,8 @@ import ModalBuy from "../../components/user/ModalBuy";
 const pickRibbonsFromStatus = (raw) => {
     const s = Number(raw ?? 0);
     if (s === 2) return [{ text: "Mới", className: "bg-danger", position: "left" }];
-    if (s === 1) return [{ text: "Nổi bật", className: "bg-warning text-dark", position: "left" }];
+    if (s === 1)
+        return [{ text: "Nổi bật", className: "bg-warning text-dark", position: "left" }];
     if (s === 12)
         return [
             { text: "Mới", className: "bg-danger", position: "left" },
@@ -80,7 +91,9 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         async (categoryId) => {
             try {
                 setLoading(true);
-                const res = await api.get("/search/products", { params: { category_id: categoryId } });
+                const res = await api.get("/search/products", {
+                    params: { category_id: categoryId },
+                });
                 const data = res.data ?? {};
                 setItems(data.items ?? []);
             } catch (e) {
@@ -115,12 +128,38 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
             const res = await api.get(`/products/${id}`);
             const data = res.data?.data || null;
             setBuyProduct(data);
-            setBuyImages((data?.images || []).map((img) => img?.image_url).filter(Boolean));
+            setBuyImages(
+                (data?.images || []).map((img) => img?.image_url).filter(Boolean)
+            );
             setShowModalBuy(true);
         } catch (e) {
             console.error("handleBuy error:", e);
         }
     };
+
+    // ===== Placeholder UI =====
+    const SkeletonCard = () => (
+        <div
+            className="card border-0 shadow-sm rounded-4 overflow-hidden p-2 placeholder-glow"
+            style={{ maxWidth: 300 }}
+        >
+            <div
+                className="bg-light placeholder rounded w-100 mb-3"
+                style={{ height: 200 }}
+            ></div>
+            <div className="card-body text-center">
+                <p className="placeholder-glow mb-2">
+                    <span className="placeholder col-8"></span>
+                </p>
+                <p className="placeholder-glow mb-3">
+                    <span className="placeholder col-5"></span>
+                </p>
+                <div className="d-flex justify-content-center">
+                    <span className="placeholder btn btn-primary col-6"></span>
+                </div>
+            </div>
+        </div>
+    );
 
     // ===== UI pieces =====
     const CategorySidebar = () => (
@@ -135,8 +174,8 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                         <li
                             key={cat.category_id}
                             className={`list-group-item list-group-item-action d-flex align-items-center justify-content-between ${selectedCatId === cat.category_id
-                                ? "active border-danger bg-danger-subtle text-danger fw-semibold"
-                                : ""
+                                    ? "active border-danger bg-danger-subtle text-danger fw-semibold"
+                                    : ""
                                 }`}
                             style={{ cursor: "pointer" }}
                             onClick={() => {
@@ -147,13 +186,17 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                             <div className="d-flex align-items-center">
                                 <Cpu
                                     size={18}
-                                    className={`me-2 ${selectedCatId === cat.category_id ? "text-danger" : "text-primary"
+                                    className={`me-2 ${selectedCatId === cat.category_id
+                                            ? "text-danger"
+                                            : "text-primary"
                                         }`}
                                 />
                                 <span>{cat.category_name}</span>
                             </div>
                             <span
-                                className={`badge ${selectedCatId === cat.category_id ? "bg-danger text-white" : "bg-danger-subtle text-danger"
+                                className={`badge ${selectedCatId === cat.category_id
+                                        ? "bg-danger text-white"
+                                        : "bg-danger-subtle text-danger"
                                     }`}
                             >
                                 SALE
@@ -161,36 +204,11 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                         </li>
                     ))
                 ) : (
-                    <>
-                        <li className="list-group-item">
-                            <Zap size={18} className="me-2 text-warning" />
-                            Top Sản Phẩm Mới Hot
+                    Array.from({ length: 5 }).map((_, i) => (
+                        <li key={i} className="list-group-item placeholder-glow">
+                            <span className="placeholder col-8"></span>
                         </li>
-                        <li className="list-group-item">
-                            <Tv size={18} className="me-2 text-primary" />
-                            Camera Quan Sát - Hành Trình
-                        </li>
-                        <li className="list-group-item">
-                            <HomeIcon size={18} className="me-2 text-info" />
-                            Quạt Hơi Nước - Quạt Mini
-                        </li>
-                        <li className="list-group-item">
-                            <Smartphone size={18} className="me-2 text-success" />
-                            Đồ Gia Dụng - Đời Sống
-                        </li>
-                        <li className="list-group-item">
-                            <Wrench size={18} className="me-2 text-danger" />
-                            Phụ Kiện Nhà Bếp - Nhà Tắm
-                        </li>
-                        <li className="list-group-item">
-                            <Gem size={18} className="me-2 text-secondary" />
-                            Chăm Sóc Làm Đẹp
-                        </li>
-                        <li className="list-group-item">
-                            <Gift size={18} className="me-2 text-purple" />
-                            Khuyến Mãi Đặc Biệt
-                        </li>
-                    </>
+                    ))
                 )}
             </ul>
         </div>
@@ -198,23 +216,35 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
     const ProductGrid = () => (
         <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 flex-grow-1 ps-3">
-            {loading ? (
-                <p className="text-center text-muted">Đang tải dữ liệu...</p>
-            ) : items.length > 0 ? (
-                items.map((prod) => {
-                    const ribbons = pickRibbonsFromStatus(prod?.status);
-                    return (
-                        <div className="col position-relative" key={prod.product_id}>
-                            {ribbons.map((rb, i) => (
-                                <Ribbon key={i} text={rb.text} position={rb.position} className={rb.className} />
-                            ))}
-                            <ProductHome prod={prod} onBuy={() => handleBuy(prod.product_id)} />
-                        </div>
-                    );
-                })
-            ) : (
-                <p className="text-center text-muted">Không có sản phẩm nào</p>
-            )}
+            {loading
+                ? Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="col d-flex justify-content-center">
+                        <SkeletonCard />
+                    </div>
+                ))
+                : items.length > 0
+                    ? items.map((prod) => {
+                        const ribbons = pickRibbonsFromStatus(prod?.status);
+                        return (
+                            <div className="col position-relative" key={prod.product_id}>
+                                {ribbons.map((rb, i) => (
+                                    <Ribbon
+                                        key={i}
+                                        text={rb.text}
+                                        position={rb.position}
+                                        className={rb.className}
+                                    />
+                                ))}
+                                <ProductHome
+                                    prod={prod}
+                                    onBuy={() => handleBuy(prod.product_id)}
+                                />
+                            </div>
+                        );
+                    })
+                    : (
+                        <p className="text-center text-muted">Không có sản phẩm nào</p>
+                    )}
         </div>
     );
 
@@ -248,7 +278,10 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
                 {products.length > 4 && (
                     <div className="text-center mt-3">
-                        <button onClick={toggleShow} className="btn btn-outline-danger rounded-pill px-4">
+                        <button
+                            onClick={toggleShow}
+                            className="btn btn-outline-danger rounded-pill px-4"
+                        >
                             {showAll ? "Thu gọn" : "Xem thêm"}
                         </button>
                     </div>
@@ -263,10 +296,18 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
         return (
             <div className="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex justify-content-center">
-                <div className="card shadow-sm border-0 rounded-4 overflow-hidden hover-shadow" style={{ maxWidth: 300 }}>
+                <div
+                    className="card shadow-sm border-0 rounded-4 overflow-hidden hover-shadow"
+                    style={{ maxWidth: 300 }}
+                >
                     <div className="position-relative">
                         {ribbons.map((rb, i) => (
-                            <Ribbon key={i} text={rb.text} position={rb.position} className={rb.className} />
+                            <Ribbon
+                                key={i}
+                                text={rb.text}
+                                position={rb.position}
+                                className={rb.className}
+                            />
                         ))}
                         <a href={`/productdetail/${p.product_id}`}>
                             <img
@@ -278,11 +319,20 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                         </a>
                     </div>
                     <div className="card-body text-center">
-                        <h6 className="fw-semibold text-truncate mb-2" title={p.product_name}>
+                        <h6
+                            className="fw-semibold text-truncate mb-2"
+                            title={p.product_name}
+                        >
                             {p.product_name}
                         </h6>
-                        <p className="text-danger fw-bold mb-3">{Number(p.price || 0).toLocaleString()} ₫</p>
-                        <button onClick={() => handleBuy(p.product_id)} className="btn btn-primary" style={{ fontSize: 15 }}>
+                        <p className="text-danger fw-bold mb-3">
+                            {Number(p.price || 0).toLocaleString()} ₫
+                        </p>
+                        <button
+                            onClick={() => handleBuy(p.product_id)}
+                            className="btn btn-primary"
+                            style={{ fontSize: 15 }}
+                        >
                             Mua ngay
                         </button>
                     </div>
@@ -295,15 +345,12 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         <div style={{ backgroundColor: "#fff" }}>
             <Carousel />
             <div className="container py-4">
-
-
                 <div className="d-none d-md-flex" style={{ height: "calc(80vh - 100px)" }}>
                     <CategorySidebar />
                     <div style={{ overflowY: "auto", flex: 1 }}>
                         <ProductGrid />
                     </div>
                 </div>
-
 
                 {/* Hero Section */}
                 <div className="text-center my-5">
@@ -348,7 +395,10 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                     </div>
                     <div className="row justify-content-center text-center">
                         {[CDS, STEM, ROBOT].map((img, idx) => (
-                            <div key={idx} className="col-lg-4 col-md-6 mb-4 d-flex justify-content-center">
+                            <div
+                                key={idx}
+                                className="col-lg-4 col-md-6 mb-4 d-flex justify-content-center"
+                            >
                                 <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
                                     <img
                                         src={img}
