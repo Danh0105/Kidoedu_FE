@@ -8,7 +8,7 @@ export default function ProductManagement() {
 
     const fetchProducts = async (page = 1, limit = 10) => {
         try {
-            const res = await axios.get(`{process.env.react_app_api_url}/products`, {
+            const res = await axios.get(`${process.env.REACT_APP_API_URL}/products`, {
                 params: { page, limit }
             });
 
