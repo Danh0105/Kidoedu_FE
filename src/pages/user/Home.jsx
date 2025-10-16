@@ -273,7 +273,6 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                                 src={img}
                                 alt={p.product_name}
                                 className="img-fluid"
-                                style={{ height: 220, width: "100%", objectFit: "cover" }}
                                 onError={(e) => (e.currentTarget.src = ROBOT)}
                             />
                         </a>
@@ -298,7 +297,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
             <div className="container py-4">
 
 
-                <div className="d-none d-md-flex" style={{ height: "calc(100vh - 100px)" }}>
+                <div className="d-none d-md-flex" style={{ height: "calc(80vh - 100px)" }}>
                     <CategorySidebar />
                     <div style={{ overflowY: "auto", flex: 1 }}>
                         <ProductGrid />
