@@ -298,9 +298,11 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
             <div className="container py-4">
 
 
-                <div className="d-none d-md-flex" style={{ height: 505 }} aria-hidden="true">
+                <div className="d-none d-md-flex" style={{ height: "calc(100vh - 100px)" }}>
                     <CategorySidebar />
-                    <ProductGrid />
+                    <div style={{ overflowY: "auto", flex: 1 }}>
+                        <ProductGrid />
+                    </div>
                 </div>
 
 
