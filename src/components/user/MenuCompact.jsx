@@ -21,8 +21,8 @@ export default function MenuCompact() {
         <li><NavLink to="/quotation" className="dropdown-item">Báo giá</NavLink></li>
         <li><NavLink to="/newproduct" className="dropdown-item">Sản phẩm mới</NavLink></li>
         <li><NavLink to="/featuredproducts" className="dropdown-item">Sản phẩm nổi bật</NavLink></li>
-        <li><NavLink to="/about" className="dropdown-item">About</NavLink></li>
-      </ul>
+        {/*         <li><NavLink to="/about" className="dropdown-item">About</NavLink></li>
+ */}      </ul>
     </div>
   );
 }
