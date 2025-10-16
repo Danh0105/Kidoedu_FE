@@ -23,9 +23,9 @@ export default function Category({ onChange }) {
     }
 
     try {
-      await axios.delete(`{process.env.react_app_api_url}/categories/${id}`);
+      await axios.delete(`${process.env.REACT_APP_API_URL}/categories/${id}`);
 
-      const res = await axios.get(`{process.env.react_app_api_url}/categories`);
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/categories`);
       const roots = res.data.filter((cat) => cat.parent === null);
       setCategories(roots);
     } catch (error) {
@@ -47,7 +47,7 @@ export default function Category({ onChange }) {
         category_name: categoryName,
         parent_category_id: parentId || null,
       };
-      const res = await axios.post(`{process.env.react_app_api_url}/categories`, dto);
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/categories`, dto);
       const newCat = res.data;
       if (newCat.parent) {
         setCategories((prev) =>
