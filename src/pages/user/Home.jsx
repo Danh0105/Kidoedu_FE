@@ -40,7 +40,7 @@ const Ribbon = ({ text, position, className }) => (
     </span>
 );
 
-export default function Home({ apiBase = `{process.env.react_app_api_url}` }) {
+export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     const [categories, setCategories] = useState([]);
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
