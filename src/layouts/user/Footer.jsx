@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebookMessenger } from '@fortawesome/free-brands-svg-icons';
 import { faArrowUp, faLocationDot, faPhone, faEnvelope, faGlobe } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 export default function Footer() {
     const [showScroll, setShowScroll] = useState(false);
 
@@ -40,10 +41,12 @@ export default function Footer() {
                             <p style={{ fontWeight: 600, marginBottom: "0px" }}>Chính sách</p>
                         </div>
                         <div style={{ color: "#444444" }}>
-                            <p className="text-wrap">CHÍNH SÁCH THANH TOÁN</p>
-                            <p className="text-wrap"> CHÍNH SÁCH BẢO MẬT THÔNG TIN</p>
-                            <p className="text-wrap"> ĐĂNG KÝ HỌC VIÊN</p>
-                            <p className="text-wrap">  QUYỀN LỢI CỦA HỌC SINH</p>
+                            <Link className="text-wrap nav-link" to="/PaymentPolicyPage">Chính sách thanh toán</Link>
+                            <Link className="text-wrap nav-link" to="/ComplaintHandlingPolicyPage">Chính sách xử lý khiếu nại</Link>
+                            <Link className="text-wrap nav-link" to="/ShippingPolicyPage">Chính sách vận chuyển</Link>
+                            <Link className="text-wrap nav-link" to="/MaintenancePolicyPage">Chính Sách Bảo Trì</Link>
+                            <Link className="text-wrap nav-link" to="/ReturnPolicyPage">Chính Sách Đổi Trả Hàng</Link>
+                            <Link className="text-wrap nav-link" to="/PrivacyPolicyPage">Chính sách bảo mật thông tin</Link>
                         </div>
                     </div>
                     <div className="p-2 bd-highlight" style={{ fontFamily: "Poppins, sans-serif", fontSize: "16px", lineHeight: "1.6" }}>
@@ -51,22 +54,19 @@ export default function Footer() {
                             <p style={{ fontWeight: 600, marginBottom: "0px" }}>Dịch vụ khách hàng</p>
                         </div>
                         <div style={{ color: "#444444" }}>
-                            <p className="text-wrap">Về chúng tôi</p>
-                            <p className="text-wrap">Liên hệ với chúng tôi</p>
-                            <p className="text-wrap">FAQ</p>
-                            <p className="text-wrap">Hệ thống của hàng</p>
+                            <Link className="text-wrap nav-link" to="/PaymentPolicy">Điều khoản thanh toán</Link>
+                            <Link className="text-wrap nav-link" to="/ContactFeedbackPage">Liên hệ góp ý</Link>
+                            <Link className="text-wrap nav-link" to="/RepairServicePage">Sữa chữa Surface</Link>
+                            <Link className="text-wrap nav-link" to="/ReturnPolicyGuide">Hướng dẫn đổi trả hàng </Link>
+                            <Link className="text-wrap nav-link" to="/warrantypolicy">Bảo hành sản phẩm</Link>
+
                         </div>
                     </div>
                     <div className="p-2 bd-highlight" style={{ fontFamily: "Poppins, sans-serif", fontSize: "16px", lineHeight: "1.6" }}>
-                        <div className="mb-1" style={{ position: "relative" }}>
-                            <p style={{ fontWeight: 600, marginBottom: "0px" }}>Email Newsletter</p>
+                        <div className="mb-1" style={{ position: "relative", width: "200px" }}>
+
                         </div>
-                        <div className="d-flex align-items-center justify-content-center gap-2 mt-2" style={{ color: "#444444" }}>
-                            <div class="input-group ">
-                                <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="basic-addon2" />
-                            </div>
-                            <button type="button" class="btn btn-success">Gửi</button>
-                        </div>
+
                     </div>
                 </div>
             </div>

@@ -22,6 +22,17 @@ import SearchProducts from "../pages/user/Search";
 import Quotation from "../pages/user/Quotation";
 import NewProducts from "../pages/user/NewProducts";
 import FeaturedProducts from "../pages/user/FeaturedProducts";
+import WarrantyPolicy from "../pages/user/customerSupport/WarrantyPolicy";
+import ReturnPolicyGuide from "../pages/user/customerSupport/showReturnPolicyGuide";
+import RepairServicePage from "../pages/user/customerSupport/RepairServicePage";
+import PaymentPolicy from "../pages/user/customerSupport/PaymentPolicy";
+import ContactFeedbackPage from "../pages/user/customerSupport/ContactFeedbackPage";
+import ComplaintHandlingPolicyPage from "../pages/user/policy/ComplaintHandlingPolicyPage";
+import MaintenancePolicyPage from "../pages/user/policy/MaintenancePolicyPage";
+import PaymentPolicyPage from "../pages/user/policy/PaymentPolicyPage";
+import PrivacyPolicyPage from "../pages/user/policy/PrivacyPolicyPage";
+import ReturnPolicyPage from "../pages/user/policy/ReturnPolicyPage";
+import ShippingPolicyPage from "../pages/user/policy/ShippingPolicyPage";
 export default function AppRoutes() {
 
     return (
@@ -91,6 +102,44 @@ export default function AppRoutes() {
                 <Route path="/order" element={<UserLayout />}>
                     <Route index element={<Order />} />
                 </Route>
+
+                {/*     CustomerSupport */}
+                <Route path="/warrantypolicy" element={<UserLayout />}>
+                    <Route index element={<WarrantyPolicy />} />
+                </Route>
+                <Route path="/ReturnPolicyGuide" element={<UserLayout />}>
+                    <Route index element={<ReturnPolicyGuide />} />
+                </Route>
+                <Route path="/RepairServicePage" element={<UserLayout />}>
+                    <Route index element={<RepairServicePage />} />
+                </Route>
+                <Route path="/PaymentPolicy" element={<UserLayout />}>
+                    <Route index element={<PaymentPolicy />} />
+                </Route>
+                <Route path="/ContactFeedbackPage" element={<UserLayout />}>
+                    <Route index element={<ContactFeedbackPage />} />
+                </Route>
+                {/*     CustomerSupport */}
+                {/*     Policy */}
+                <Route path="/ComplaintHandlingPolicyPage" element={<UserLayout />}>
+                    <Route index element={<ComplaintHandlingPolicyPage />} />
+                </Route>
+                <Route path="/MaintenancePolicyPage" element={<UserLayout />}>
+                    <Route index element={<MaintenancePolicyPage />} />
+                </Route>
+                <Route path="/PaymentPolicyPage" element={<UserLayout />}>
+                    <Route index element={<PaymentPolicyPage />} />
+                </Route>
+                <Route path="/PrivacyPolicyPage" element={<UserLayout />}>
+                    <Route index element={<PrivacyPolicyPage />} />
+                </Route>
+                <Route path="/ReturnPolicyPage" element={<UserLayout />}>
+                    <Route index element={<ReturnPolicyPage />} />
+                </Route>
+                <Route path="/ShippingPolicyPage" element={<UserLayout />}>
+                    <Route index element={<ShippingPolicyPage />} />
+                </Route>
+                {/*     Policy */}
                 <Route path="/search" element={<UserLayout />}>
                     <Route index element={<SearchProducts />} />
                 </Route>
