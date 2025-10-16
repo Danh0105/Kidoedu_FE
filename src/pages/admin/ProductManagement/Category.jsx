@@ -7,7 +7,7 @@ export default function Category({ onChange }) {
   const [categoryName, setCategoryName] = useState("");
   const [parentId, setParentId] = useState(null);
   useEffect(() => {
-    axios.get("${process.env.react_app_api_url}/categories").then((res) => {
+    axios.get(`${process.env.REACT_APP_API_URL}/categories`).then((res) => {
       const roots = res.data.filter((cat) => cat.parent === null);
       setCategories(roots);
     });

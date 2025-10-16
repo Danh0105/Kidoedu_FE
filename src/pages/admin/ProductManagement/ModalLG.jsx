@@ -89,7 +89,7 @@ export default function ModalLG({ onProductAdded }) {
             };
 
             console.log("DTO gửi đến backend:", dto);
-            const res = await axios.post("{process.env.react_app_api_url}/products", dto);
+            const res = await axios.post(`${process.env.REACT_APP_API_URL}/products`, dto);
             if (onProductAdded) {
                 console.log("Sản phẩm mới:", res.data.data);
                 onProductAdded(res.data.data);
