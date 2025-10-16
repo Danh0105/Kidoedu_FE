@@ -4,7 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { NavLink } from "react-router-dom";
 import { CartContext } from "../../hooks/CartContext";
 
-export default function Quotation({ apiBase = `{process.env.react_app_api_url}` }) {
+export default function Quotation({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
   const [products, setProducts] = useState([]);
   const [quality, setQuality] = useState(1); // ✅ Khai báo state quality
   const { setSelectedProducts } = useContext(CartContext);
