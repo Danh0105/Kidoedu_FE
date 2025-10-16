@@ -26,7 +26,7 @@ export default function ProductManagement() {
         if (!window.confirm("Bạn có chắc muốn xóa sản phẩm này?")) return;
 
         try {
-            await axios.delete(`{process.env.react_app_api_url}/products/${id}`);
+            await axios.delete(`${process.env.REACT_APP_API_URL}/products/${id}`);
 
             // ✅ Xóa khỏi state mà không cần reload
             setProducts((prev) => prev.filter((p) => p.product_id !== id));
