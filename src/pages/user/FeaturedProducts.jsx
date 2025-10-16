@@ -3,7 +3,7 @@ import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ROBOT from "../../assets/user/ROBOT.png";
 
-export default function FeaturedProducts({ apiBase = `{process.env.react_app_api_url}` }) {
+export default function FeaturedProducts({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
@@ -92,8 +92,7 @@ export default function FeaturedProducts({ apiBase = `{process.env.react_app_api
                     alt={p.product_name}
                     className="card-img-top"
                     style={{
-                      height: "220px",
-                      objectFit: "cover",
+
                       backgroundColor: "#f8f9fa",
                     }}
                   />

@@ -90,8 +90,6 @@ export default function NewProducts({ apiBase = `${process.env.REACT_APP_API_URL
                     alt={p.product_name}
                     className="card-img-top"
                     style={{
-                      height: "220px",
-                      objectFit: "cover",
                       backgroundColor: "#f8f9fa",
                     }}
                   />
