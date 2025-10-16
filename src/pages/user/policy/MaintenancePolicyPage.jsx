@@ -2,104 +2,134 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-    faTruck,
-    faBoxOpen,
-    faClock,
-    faMapMarkedAlt,
-    faInfoCircle,
+    faScrewdriverWrench,
+    faLaptop,
+    faShieldAlt,
     faHandshake,
+    faClock,
+    faCheckCircle,
+    faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
 
-export default function MaintenancePolicyPage() {
+export default function ChinhSachBaoTri() {
     return (
         <div className="container my-5">
             {/* Header */}
             <div className="text-center mb-5">
                 <h1 className="fw-bold text-primary mb-3">
-                    <FontAwesomeIcon icon={faTruck} className="me-2" />
-                    Chính Sách Vận Chuyển
+                    <FontAwesomeIcon icon={faScrewdriverWrench} className="me-2" />
+                    Chính Sách Bảo Trì & Bảo Hành
                 </h1>
                 <p className="text-muted fs-5">
-                    Kido luôn nỗ lực giao hàng nhanh chóng – an toàn – đúng hẹn để đảm bảo trải nghiệm tốt nhất cho khách hàng.
+                    Kidocam kết mang đến cho khách hàng dịch vụ bảo trì, bảo hành tận tâm – nhanh chóng – minh bạch, đảm bảo quyền lợi tối đa cho người mua.
                 </p>
             </div>
 
-            {/* Nội dung chính */}
+            {/* Chính sách đổi mới trong 30 ngày */}
             <div className="card shadow-sm border-0 p-4 mb-5">
-                {/* a) Phương thức giao hàng */}
                 <h4 className="fw-bold text-success mb-3">
-                    a) Các phương thức giao hàng
+                    <FontAwesomeIcon icon={faHandshake} className="me-2" />
+                    1. Chính sách đổi máy mới trong 30 ngày đầu
                 </h4>
-                <p>Chúng tôi áp dụng 2 hình thức giao hàng linh hoạt để phù hợp với nhu cầu của khách hàng:</p>
+                <p>
+                    Tất cả sản phẩm Laptop được bán tại <strong>Kido</strong> (trừ sản phẩm do nhà phân phối bảo hành riêng, ghi rõ trong phần chi tiết) sẽ được
+                    <strong> đổi mới trong 30 ngày đầu</strong> nếu gặp <strong>lỗi phần cứng</strong> không thể sửa chữa hoặc thay linh kiện.
+                </p>
                 <ul>
+                    <li>Khách hàng không phải chi trả bất kỳ chi phí nào.</li>
+                    <li>Sản phẩm được kiểm tra và xác nhận lỗi bởi kỹ thuật viên Kido.</li>
+                </ul>
+            </div>
+
+            {/* Quyền lợi và điều kiện */}
+            <div className="card shadow-sm border-0 p-4 mb-5">
+                <h4 className="fw-bold text-primary mb-3">
+                    <FontAwesomeIcon icon={faShieldAlt} className="me-2" />
+                    2. Quyền lợi và điều kiện bảo hành
+                </h4>
+                <p>
+                    Khách hàng mua sản phẩm tại <strong>Kido</strong> sẽ được hưởng đầy đủ quyền lợi bảo hành theo quy định của <strong>hãng sản xuất</strong>.
+                    Kidokhông thay đổi chính sách gốc mà chỉ hỗ trợ thêm trong phạm vi cho phép.
+                </p>
+                <p>
+                    <strong>Điều kiện đổi/bảo hành:</strong>
+                </p>
+                <ul>
+                    <li>Sản phẩm còn nguyên vẹn, không trầy xước hoặc bị can thiệp phần cứng.</li>
+                    <li>Giữ đầy đủ phụ kiện, thùng hộp, sách hướng dẫn, phiếu bảo hành của Kido.</li>
+                    <li>Tem bảo hành còn nguyên vẹn, không bị rách, tẩy xóa hoặc cạo sửa.</li>
+                    <li>Mã số Serial / Service Tag trên máy trùng khớp với phiếu bảo hành.</li>
+                    <li>Máy không bị rơi, va đập, vào nước, chập điện hoặc chịu tác động vật lý khác.</li>
+                </ul>
+            </div>
+
+            {/* Trường hợp đặc biệt */}
+            <div className="card shadow-sm border-0 p-4 mb-5">
+                <h4 className="fw-bold text-success mb-3">
+                    <FontAwesomeIcon icon={faLaptop} className="me-2" />
+                    3. Trường hợp đặc biệt & xử lý khi hết hàng đổi
+                </h4>
+                <p>
+                    Trong trường hợp không còn sản phẩm mới để đổi, Kidosẽ chủ động <strong>thương lượng</strong> cùng khách hàng theo các hướng:
+                </p>
+                <ul>
+                    <li>Đổi sang <strong>dòng máy tương đương</strong> với giá trị giữ nguyên như lúc mua.</li>
+                    <li>Nếu chọn <strong>dòng máy cao hơn</strong>, khách hàng chỉ cần bù phần chênh lệch.</li>
+                    <li>Nếu chọn <strong>dòng máy thấp hơn</strong>, Kidosẽ hoàn lại phần chênh lệch tương ứng.</li>
+                </ul>
+            </div>
+
+            {/* Điều kiện bảo hành chi tiết */}
+            <div className="card shadow-sm border-0 p-4 mb-5">
+                <h4 className="fw-bold text-danger mb-3">
+                    <FontAwesomeIcon icon={faCheckCircle} className="me-2" />
+                    4. Điều kiện bảo hành hợp lệ
+                </h4>
+                <ul>
+                    <li>Mã vạch và số Serial còn nguyên vẹn, trùng với thông tin trong hệ thống Kido.</li>
+                    <li>Phiếu bảo hành hợp lệ, ghi rõ ngày tháng và model chính xác.</li>
+                    <li>Tem bảo hành còn nguyên, không bị rách, phai hoặc tẩy xóa.</li>
+                    <li>Máy không bị va đập, móp méo, vô nước, cháy nổ hoặc chập điện.</li>
                     <li>
-                        <FontAwesomeIcon icon={faBoxOpen} className="text-primary me-2" />
-                        <strong>Mua hàng trực tiếp</strong> tại công ty hoặc cửa hàng Kido.
-                    </li>
-                    <li>
-                        <FontAwesomeIcon icon={faTruck} className="text-success me-2" />
-                        <strong>Giao hàng tận nơi (Ship hàng)</strong> thông qua các đơn vị vận chuyển chuyên nghiệp.
+                        Các sản phẩm có bảo hành chính hãng, khách hàng cần liên hệ qua Kidođể được hướng dẫn, tránh rách tem hoặc tranh chấp.
                     </li>
                 </ul>
             </div>
 
-            {/* b) Thời hạn giao hàng */}
-            <div className="card shadow-sm border-0 p-4 mb-5">
-                <h4 className="fw-bold text-success mb-3">
-                    b) Thời hạn ước tính cho việc giao hàng
+            {/* Thời gian làm việc */}
+            <div className="bg-light p-4 rounded-3 shadow-sm mb-5">
+                <h4 className="fw-bold text-primary mb-3">
+                    <FontAwesomeIcon icon={faClock} className="me-2" />
+                    5. Thời gian bảo hành & bảo trì
                 </h4>
                 <p>
-                    Sau khi nhận được thông tin đặt hàng, chúng tôi sẽ <strong>xử lý đơn trong vòng 24 giờ</strong> và liên hệ xác nhận thông tin thanh toán – giao nhận với khách hàng.
+                    Thời gian làm việc tại Trung tâm bảo hành Kido:
                 </p>
-                <p>
-                    <FontAwesomeIcon icon={faClock} className="text-warning me-2" />
-                    Thời gian giao hàng dự kiến: <strong>3 – 5 ngày</strong> kể từ khi chốt đơn hoặc theo thỏa thuận.
-                </p>
-
-                <p className="fw-semibold mt-3">Một số trường hợp có thể kéo dài hơn do:</p>
-                <ul>
-                    <li>Không liên lạc được với khách hàng qua điện thoại.</li>
-                    <li>Địa chỉ giao hàng không chính xác hoặc khó tìm.</li>
-                    <li>Số lượng đơn hàng tăng đột biến làm chậm tiến độ xử lý.</li>
-                    <li>Đối tác cung cấp hoặc đơn vị vận chuyển bị chậm trễ ngoài dự kiến.</li>
-                </ul>
-
-                <p className="mt-3">
-                    <FontAwesomeIcon icon={faHandshake} className="text-info me-2" />
-                    <strong>Phí vận chuyển:</strong>
-                    Kido sử dụng dịch vụ vận chuyển ngoài, vì vậy phí giao hàng sẽ được tính theo biểu phí của đơn vị vận chuyển tùy khu vực và khối lượng hàng hóa.
-                    Chúng tôi sẽ thông báo cụ thể mức phí khi xác nhận đơn hàng.
-                </p>
-            </div>
-
-            {/* c) Giới hạn địa lý */}
-            <div className="card shadow-sm border-0 p-4 mb-5">
-                <h4 className="fw-bold text-success mb-3">
-                    c) Giới hạn về mặt địa lý cho việc giao hàng
-                </h4>
-                <p>
-                    Với khách hàng ở <strong>tỉnh xa hoặc mua số lượng lớn</strong>, Kido sẽ sử dụng dịch vụ giao nhận của các công ty vận chuyển uy tín.
-                    Cước phí sẽ được tính theo mức phí của đơn vị giao nhận hoặc theo thỏa thuận hợp đồng giữa hai bên.
-                </p>
-            </div>
-
-            {/* Lưu ý */}
-            <div className="bg-light p-4 rounded-3 shadow-sm">
-                <h5 className="fw-bold text-danger mb-3">
-                    <FontAwesomeIcon icon={faInfoCircle} className="me-2" />
-                    Lưu ý quan trọng
-                </h5>
                 <ul className="list-unstyled">
-                    <li className="mb-2">
-                        - Nếu có <strong>chậm trễ</strong> trong quá trình giao hàng, Kido sẽ thông báo kịp thời cho khách hàng.
-                    </li>
-                    <li className="mb-2">
-                        - Khách hàng có thể lựa chọn giữa việc <strong>hủy đơn hàng</strong> hoặc <strong>tiếp tục chờ nhận hàng</strong> tùy nhu cầu.
-                    </li>
-                    <li className="mb-0">
-                        - Chúng tôi luôn nỗ lực đảm bảo giao hàng đúng cam kết và bảo vệ tối đa quyền lợi khách hàng.
-                    </li>
+                    <li>🕘 <strong>Thứ 2 – Thứ 7:</strong> 9h30 – 16h30</li>
+                    <li>Chủ nhật & ngày lễ: nghỉ</li>
                 </ul>
+                <p className="text-muted small mt-2">
+                    Trong trường hợp cần hỗ trợ ngoài giờ, quý khách có thể liên hệ trước để được sắp xếp hỗ trợ nhanh nhất.
+                </p>
+            </div>
+
+            {/* Liên hệ hỗ trợ */}
+            <div className="bg-primary text-white p-4 rounded-3 shadow-sm text-center">
+                <h5 className="fw-bold mb-3">
+                    <FontAwesomeIcon icon={faInfoCircle} className="me-2" />
+                    Liên hệ hỗ trợ bảo hành & bảo trì
+                </h5>
+                <p className="fs-5 mb-1">
+                    Hotline:{" "}
+                    <a href="tel:0909538677" className="text-white text-decoration-underline">
+                        0789 636 979
+                    </a>
+                </p>
+                <p className="mb-1">Địa chỉ: Số 1 Đường Cộng Hòa 3 - Phường Phú Thọ Hòa - TP. Hồ Chí Minh.</p>
+                <p className="text-light small mb-0">
+                    Kido – Uy tín, tận tâm, bảo hành chuẩn mực 💙
+                </p>
             </div>
         </div>
     );
