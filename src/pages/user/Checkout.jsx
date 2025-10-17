@@ -63,18 +63,18 @@ export default function Checkout() {
     }
 
     try {
-      const parsed = JSON.parse(saved);
-      parsed.items = selectedProducts.map((p) => ({
+
+      shippingInfo.items = selectedProducts.map((p) => ({
         product_id: p.data.product_id,
         quantity: p.quantity,
         price_per_unit: Number(p.data.price),
       }));
 
-      const url = parsed[0].API;
+      const url = shippingInfo.API;
 
-      delete parsed[0].API;
+      delete shippingInfo.API;
 
-      const res = await axios.post(url, parsed[0]);
+      const res = await axios.post(url, shippingInfo);
       navigate("/invoice", { state: { order: res.data.order, items: products } });
     } catch (err) {
       console.error("❌ Lỗi gửi đơn hàng:", err);
