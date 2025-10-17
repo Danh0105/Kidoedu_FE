@@ -23,65 +23,106 @@ export default function Footer() {
     return (
         <footer className="mt-1 border-top border-3">
             <div style={{ backgroundColor: "#ECECE6", color: "#8a8a8a" }}>
-                <div className="container-xl py-3">
-                    <div className="row gy-3">
-                        {/* Col 1: Contact */}
-                        <div className="col-12 col-md-6 col-lg-4">
-                            <h6 className="fw-semibold mb-2">Thông tin liên hệ</h6>
-                            <address className="mb-0 small lh-base">
-                                <p className="mb-2 text-wrap">
-                                    <FontAwesomeIcon icon={faLocationDot} className="me-2" />
-                                    Số 1, Đường Cộng Hòa 3, Phường Phú Thọ Hòa, TP. Hồ Chí Minh
-                                </p>
-                                <p className="mb-2">
-                                    <FontAwesomeIcon icon={faPhone} className="me-2" />
-                                    <a className="link-dark text-decoration-none" href="tel:+84789636979">0789 636 979</a>
-                                </p>
-                                <p className="mb-2">
-                                    <FontAwesomeIcon icon={faEnvelope} className="me-2" />
-                                    <a className="link-dark text-decoration-none" href="mailto:lytran@ichiskill.edu.vn">lytran@ichiskill.edu.vn</a>
-                                </p>
-                                <p className="mb-0">
-                                    <FontAwesomeIcon icon={faGlobe} className="me-2" />
-                                    <a className="link-dark text-decoration-none" href="https://www.kidoedu.edu.vn" target="_blank" rel="noreferrer">
-                                        www.kidoedu.edu.vn
-                                    </a>
-                                </p>
-                            </address>
-                        </div>
+                <div className="footer-hero border-0 mt-4">
+                    {/* Dải gradient nhấn thương hiệu */}
+                    <div className="footer-accent w-100"></div>
 
-                        {/* Col 2: Policies (desktop list / mobile accordion) */}
-                        <div className="col-12 col-md-6 col-lg-4">
-                            <h6 className="fw-semibold mb-2 d-none d-md-block">Chính sách</h6>
-                            <details className="d-md-none mb-2">
-                                <summary className="fw-semibold">Chính sách</summary>
-                            </details>
-                            <ul className="list-unstyled small mb-0 two-col-md">
-                                <li><Link className="nav-link px-0" to="/PaymentPolicyPage">Chính sách thanh toán</Link></li>
-                                <li><Link className="nav-link px-0" to="/ComplaintHandlingPolicyPage">Chính sách xử lý khiếu nại</Link></li>
-                                <li><Link className="nav-link px-0" to="/ShippingPolicyPage">Chính sách vận chuyển</Link></li>
-                                <li><Link className="nav-link px-0" to="/MaintenancePolicyPage">Chính sách bảo trì</Link></li>
-                                <li><Link className="nav-link px-0" to="/ReturnPolicyPage">Chính sách đổi trả hàng</Link></li>
-                                <li><Link className="nav-link px-0" to="/PrivacyPolicyPage">Chính sách bảo mật thông tin</Link></li>
-                            </ul>
-                        </div>
+                    {/* Thân footer */}
+                    <div className="bg-dark text-light py-4">
+                        <div className="container-xl py-3">
+                            <div className="row gy-4 footer-columns">
+                                {/* Col 1: Contact */}
+                                <div className="col-12 col-md-6 col-lg-4">
+                                    <h6 className="footer-heading">Thông tin liên hệ</h6>
+                                    <address className="mb-0 small lh-base text-white-75">
+                                        <p className="mb-2 text-wrap">
+                                            <FontAwesomeIcon icon={faLocationDot} className="me-2 text-primary" />
+                                            Số 1, Đường Cộng Hòa 3, Phường Phú Thọ Hòa, TP. Hồ Chí Minh
+                                        </p>
+                                        <p className="mb-2">
+                                            <FontAwesomeIcon icon={faPhone} className="me-2 text-primary" />
+                                            <a className="link-light text-decoration-none" href="tel:+84789636979">0789 636 979</a>
+                                        </p>
+                                        <p className="mb-2">
+                                            <FontAwesomeIcon icon={faEnvelope} className="me-2 text-primary" />
+                                            <a className="link-light text-decoration-none" href="mailto:lytran@ichiskill.edu.vn">lytran@ichiskill.edu.vn</a>
+                                        </p>
+                                        <p className="mb-0">
+                                            <FontAwesomeIcon icon={faGlobe} className="me-2 text-primary" />
+                                            <a className="link-light text-decoration-none" href="https://www.kidoedu.edu.vn" target="_blank" rel="noreferrer">
+                                                www.kidoedu.edu.vn
+                                            </a>
+                                        </p>
+                                    </address>
+                                </div>
 
-                        {/* Col 3: Customer service */}
-                        <div className="col-12 col-md-6 col-lg-4">
-                            <h6 className="fw-semibold mb-2 d-none d-md-block">Dịch vụ khách hàng</h6>
-                            <details className="d-md-none mb-2">
-                                <summary className="fw-semibold">Dịch vụ khách hàng</summary>
-                            </details>
-                            <ul className="list-unstyled small mb-0 two-col-md">
-                                <li><Link className="nav-link px-0" to="/PaymentPolicy">Điều khoản thanh toán</Link></li>
-                                <li><Link className="nav-link px-0" to="/ContactFeedbackPage">Liên hệ góp ý</Link></li>
-                                <li><Link className="nav-link px-0" to="/RepairServicePage">Sửa chữa Surface</Link></li>
-                                <li><Link className="nav-link px-0" to="/ReturnPolicyGuide">Hướng dẫn đổi trả hàng</Link></li>
-                                <li><Link className="nav-link px-0" to="/warrantypolicy">Bảo hành sản phẩm</Link></li>
-                            </ul>
+                                {/* Col 2: Policies */}
+                                <div className="col-12 col-md-6 col-lg-4">
+                                    <h6 className="footer-heading d-none d-md-block">Chính sách</h6>
+                                    {/* Mobile accordion “native” */}
+                                    <details className="d-md-none mb-2 footer-details">
+                                        <summary className="fw-semibold text-white">Chính sách</summary>
+                                        <ul className="list-unstyled small mt-2 mb-0 two-col-md">
+                                            <li><Link className="footer-link nav-link px-0" to="/PaymentPolicyPage">Chính sách thanh toán</Link></li>
+                                            <li><Link className="footer-link nav-link px-0" to="/ComplaintHandlingPolicyPage">Chính sách xử lý khiếu nại</Link></li>
+                                            <li><Link className="footer-link nav-link px-0" to="/ShippingPolicyPage">Chính sách vận chuyển</Link></li>
+                                            <li><Link className="footer-link nav-link px-0" to="/MaintenancePolicyPage">Chính sách bảo trì</Link></li>
+                                            <li><Link className="footer-link nav-link px-0" to="/ReturnPolicyPage">Chính sách đổi trả hàng</Link></li>
+                                            <li><Link className="footer-link nav-link px-0" to="/PrivacyPolicyPage">Chính sách bảo mật thông tin</Link></li>
+                                        </ul>
+                                    </details>
+                                    {/* Desktop list */}
+                                    <ul className="list-unstyled small mb-0 two-col-md d-none d-md-block">
+                                        <li><Link className="footer-link nav-link px-0" to="/PaymentPolicyPage">Chính sách thanh toán</Link></li>
+                                        <li><Link className="footer-link nav-link px-0" to="/ComplaintHandlingPolicyPage">Chính sách xử lý khiếu nại</Link></li>
+                                        <li><Link className="footer-link nav-link px-0" to="/ShippingPolicyPage">Chính sách vận chuyển</Link></li>
+                                        <li><Link className="footer-link nav-link px-0" to="/MaintenancePolicyPage">Chính sách bảo trì</Link></li>
+                                        <li><Link className="footer-link nav-link px-0" to="/ReturnPolicyPage">Chính sách đổi trả hàng</Link></li>
+                                        <li><Link className="footer-link nav-link px-0" to="/PrivacyPolicyPage">Chính sách bảo mật thông tin</Link></li>
+                                    </ul>
+                                </div>
+
+                                {/* Col 3: Customer service */}
+                                <div className="col-12 col-md-6 col-lg-4">
+                                    <h6 className="footer-heading d-none d-md-block">Dịch vụ khách hàng</h6>
+                                    <details className="d-md-none mb-2 footer-details">
+                                        <summary className="fw-semibold text-white">Dịch vụ khách hàng</summary>
+                                        <ul className="list-unstyled small mt-2 mb-0 two-col-md">
+                                            <li><Link className="footer-link nav-link px-0" to="/PaymentPolicy">Điều khoản thanh toán</Link></li>
+                                            <li><Link className="footer-link nav-link px-0" to="/ContactFeedbackPage">Liên hệ góp ý</Link></li>
+                                            <li><Link className="footer-link nav-link px-0" to="/RepairServicePage">Sửa chữa Surface</Link></li>
+                                            <li><Link className="footer-link nav-link px-0" to="/ReturnPolicyGuide">Hướng dẫn đổi trả hàng</Link></li>
+                                            <li><Link className="footer-link nav-link px-0" to="/warrantypolicy">Bảo hành sản phẩm</Link></li>
+                                        </ul>
+                                    </details>
+                                    <ul className="list-unstyled small mb-0 two-col-md d-none d-md-block">
+                                        <li><Link className="footer-link nav-link px-0" to="/PaymentPolicy">Điều khoản thanh toán</Link></li>
+                                        <li><Link className="footer-link nav-link px-0" to="/ContactFeedbackPage">Liên hệ góp ý</Link></li>
+                                        <li><Link className="footer-link nav-link px-0" to="/RepairServicePage">Sửa chữa Surface</Link></li>
+                                        <li><Link className="footer-link nav-link px-0" to="/ReturnPolicyGuide">Hướng dẫn đổi trả hàng</Link></li>
+                                        <li><Link className="footer-link nav-link px-0" to="/warrantypolicy">Bảo hành sản phẩm</Link></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            {/* Divider */}
+                            <hr className="border-secondary-subtle my-4" />
+
+                            {/* Bottom bar */}
+                            <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-2">
+                                <div className="small text-white-50">
+                                    © 2025 <span className="text-white fw-semibold">KidoEdu</span>. All rights reserved.
+                                </div>
+                                <div className="d-flex align-items-center gap-3 small">
+                                    <span className="badge bg-primary-subtle text-primary border border-primary-subtle">Freeship</span>
+                                    <span className="badge bg-warning-subtle text-warning border border-warning-subtle">Trả góp 0%</span>
+                                    <span className="badge bg-info-subtle text-info border border-info-subtle">Đổi trả 7N</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+
             </div>
 
             <div className="bg-light d-none d-lg-block">
