@@ -15,7 +15,7 @@ export default function Invoice() {
       return;
     }
 
-    axios.post(`{process.env.react_app_api_url}/momo/payment-notify`, { orderId })
+    axios.post(`${process.env.REACT_APP_API_URL}/momo/payment-notify`, { orderId })
       .then((res) => {
         if (res.data.success) {
           setStatus("success");

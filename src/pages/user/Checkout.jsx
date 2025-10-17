@@ -71,6 +71,7 @@ export default function Checkout() {
       }));
 
       const url = parsed.API;
+
       delete parsed.API;
 
       const res = await axios.post(url, parsed);
@@ -101,7 +102,7 @@ export default function Checkout() {
         method: "momo",
       }));
 
-      const res = await axios.post(`{process.env.react_app_api_url}/momo/create-payment`, {
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/momo/create-payment`, {
         amount: finalTotal,
         orderId,
         items: products.map((p) => ({

@@ -22,7 +22,7 @@ export default function Cart() {
                 }
 
                 const productRequests = guestCart.map((item) =>
-                    axios.get(`{process.env.react_app_api_url}/products/${item.productId}`)
+                    axios.get(`${process.env.REACT_APP_API_URL}/products/${item.productId}`)
                 );
 
                 const responses = await Promise.all(productRequests);
@@ -43,7 +43,7 @@ export default function Cart() {
             }
 
             const resCart = await axios.get(
-                `{process.env.react_app_api_url}/cart/${decoded.sub}`,
+                `${process.env.REACT_APP_API_URL}/cart/${decoded.sub}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -51,7 +51,7 @@ export default function Cart() {
             const productIds = cart.items.map((item) => item.product.product_id);
 
             const productRequests = productIds.map((id) =>
-                axios.get(`{process.env.react_app_api_url}/products/${id}`)
+                axios.get(`${process.env.REACT_APP_API_URL}/products/${id}`)
             );
             const responses = await Promise.all(productRequests);
             const productsData = responses.map((res) => res.data);
@@ -110,7 +110,7 @@ export default function Cart() {
 
         try {
             await axios.put(
-                `{process.env.react_app_api_url}/cart/${decoded.sub}/items/${productId}`,
+                `${process.env.REACT_APP_API_URL}/cart/${decoded.sub}/items/${productId}`,
                 { quantity: newQty },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -166,7 +166,7 @@ export default function Cart() {
             }
 
             await axios.delete(
-                `{process.env.react_app_api_url}/cart/${userId}/items/${product_id}`,
+                `${process.env.react_app_api_url}/cart/${userId}/items/${product_id}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -184,26 +184,26 @@ export default function Cart() {
                 <div style={{ height: "590px" }}>
                     <table className="table cart-table">
                         <thead>
-
-                            <th style={{ width: "18px" }}>
-                                <input
-                                    className="form-check-input"
-                                    type="checkbox"
-                                    checked={products.length > 0 && products.every(p => p.selected)}
-                                    onChange={(e) => {
-                                        const checked = e.target.checked;
-                                        setProducts(prev =>
-                                            prev.map(p => ({ ...p, selected: checked }))
-                                        );
-                                    }}
-                                />
-                            </th>
-                            <th>Sản phẩm</th>
-                            <th className='text-center d-none d-sm-table-cell'>Đơn giá</th> {/* ẩn ở xs */}
-                            <th className='text-center'>Số lượng</th>
-                            <th className='text-center' style={{ width: "145px" }}>Số tiền</th>
-                            <th className='text-center d-none d-sm-table-cell'>Thao tác</th> {/* ẩn ở xs */}
-
+                            <tr>
+                                <th style={{ width: "18px" }}>
+                                    <input
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        checked={products.length > 0 && products.every(p => p.selected)}
+                                        onChange={(e) => {
+                                            const checked = e.target.checked;
+                                            setProducts(prev =>
+                                                prev.map(p => ({ ...p, selected: checked }))
+                                            );
+                                        }}
+                                    />
+                                </th>
+                                <th>Sản phẩm</th>
+                                <th className='text-center d-none d-sm-table-cell'>Đơn giá</th>
+                                <th className='text-center'>Số lượng</th>
+                                <th className='text-center' style={{ width: "145px" }}>Số tiền</th>
+                                <th className='text-center d-none d-sm-table-cell'>Thao tác</th>
+                            </tr>
                         </thead>
                         <tbody>
                             {products.length > 0 ? (
@@ -226,7 +226,7 @@ export default function Cart() {
                                             />
                                         </td>
 
-                                        {/* cột Sản phẩm: gom cột, cho co giãn trên mobile */}
+
                                         <td className='d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3'>
                                             <img
                                                 src={prd.data.images[0].image_url}
@@ -250,7 +250,7 @@ export default function Cart() {
                                                 >
                                                     {prd.data.product_name}
                                                 </a>
-                                                <div className="bd-highlight mt-1 d-none d-sm-block"> {/* ẩn promo ảnh ở xs */}
+                                                <div className="bd-highlight mt-1 d-none d-sm-block">
                                                     <img src={promotion} alt="Deal" width={208} height={18} />
                                                 </div>
                                             </div>
