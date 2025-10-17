@@ -70,11 +70,11 @@ export default function Checkout() {
         price_per_unit: Number(p.data.price),
       }));
 
-      const url = parsed.API;
+      const url = parsed[0].API;
 
-      delete parsed.API;
+      delete parsed[0].API;
 
-      const res = await axios.post(url, parsed);
+      const res = await axios.post(url, parsed[0]);
       navigate("/invoice", { state: { order: res.data.order, items: products } });
     } catch (err) {
       console.error("❌ Lỗi gửi đơn hàng:", err);
