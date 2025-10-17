@@ -300,7 +300,7 @@ export default function Cart() {
                                         </td>
 
                                         <td className='align-middle text-center d-sm-table-cell'>
-                                            <a className='btn btn-danger' onClick={() => handleDelete(prd.data.product_id)}> Xóa</a>
+                                            <a className='btn btn-outline-danger' onClick={() => handleDelete(prd.data.product_id)} style={{ width: "70px" }}> Xóa</a>
                                         </td>
                                     </tr>
                                 ))
