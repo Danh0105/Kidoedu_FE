@@ -1,13 +1,14 @@
+// Store.jsx
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
 import { useDebounce, buildPager } from "../../hooks/useUiUtils";
+import axios from "axios";
+import "../../components/user/css/Store.css";
 import Product from "../../components/user/category/Product";
 import SidebarCategories from "../../components/user/SidebarCategories";
-import "../../components/user/css/Store.css";
 
 /* --------- Hook breakpoint để phân nhánh Desktop/Mobile ---------- */
 function useIsDesktop() {
-    const get = () => window.matchMedia("(min-width: 992px)").matches; // Bootstrap lg
+    const get = () => window.matchMedia("(min-width: 992px)").matches; // Bootstrap lg breakpoint
     const [isDesktop, setIsDesktop] = useState(get);
     useEffect(() => {
         const mq = window.matchMedia("(min-width: 992px)");
@@ -22,7 +23,7 @@ function useIsDesktop() {
     return isDesktop;
 }
 
-/* --------- Skeleton khi loading --------- */
+/* --------- (Tuỳ chọn) Skeleton để hiển thị khi loading mobile --------- */
 function ProductSkeleton() {
     return (
         <div className="card shadow-sm border-0">
@@ -42,31 +43,33 @@ export default function Store({
     apiBase = process.env.REACT_APP_API_URL,
     pageSizeOptions = [6, 12, 24, 48],
 }) {
-    /* -------- API client ---------- */
+    // -------- API client ----------
     const api = useMemo(
         () =>
             axios.create({
-                baseURL: (apiBase || "").replace(/\/+$/, ""),
+                baseURL: apiBase.replace(/\/+$/, ""),
                 timeout: 10000,
             }),
         [apiBase]
     );
 
-    /* -------- UI state ------------- */
+    // -------- UI state -------------
     const [q, setQ] = useState("");
     const [limit, setLimit] = useState(pageSizeOptions?.[1] ?? 12);
     const [page, setPage] = useState(1);
     const [selectedCatId, setSelectedCatId] = useState(null);
-    const [sort, setSort] = useState(""); // '' | 'price_asc' | 'price_desc'
 
-    /* -------- Data state ----------- */
+    // sort ('' | 'price_asc' | 'price_desc')
+    const [sort, setSort] = useState("");
+
+    // -------- Data state -----------
     const [items, setItems] = useState([]);
     const [meta, setMeta] = useState({ page: 1, last_page: 0, total: 0, limit });
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState("");
 
-    /* -------- Helpers -------------- */
+    // -------- Helpers --------------
     const debouncedQ = useDebounce(q, 500);
     const firstLoad = useRef(true);
     const isDesktop = useIsDesktop();
@@ -82,7 +85,7 @@ export default function Store({
         return "Sắp xếp";
     }, [sort]);
 
-    /* -------- Fetchers ------------- */
+    // -------- Fetchers -------------
     const fetchCategories = useCallback(async () => {
         try {
             const res = await api.get("/categories");
@@ -96,6 +99,7 @@ export default function Store({
         async (abortSignal) => {
             setLoading(true);
             setErr("");
+
             try {
                 const baseParams = { page, limit };
                 if (selectedCatId) baseParams.category_id = selectedCatId;
@@ -121,7 +125,6 @@ export default function Store({
                     setItems(res.data?.data ?? []);
                     setMeta(res.data?.meta ?? { page, last_page: 0, total: 0, limit });
 
-                    // Nếu có category filter, nhưng API /products không trả theo filter → fallback /search
                     if (selectedCatId) {
                         res = await api.get("/search/products", {
                             params: { ...baseParams },
@@ -148,13 +151,15 @@ export default function Store({
         [api, page, limit, debouncedQ, selectedCatId, sort]
     );
 
-    /* -------- Effects -------------- */
+    // -------- Effects --------------
     useEffect(() => {
         fetchCategories();
     }, [fetchCategories]);
 
     useEffect(() => {
-        if (firstLoad.current) firstLoad.current = false;
+        if (firstLoad.current) {
+            firstLoad.current = false;
+        }
         const ctl = new AbortController();
         fetchProducts(ctl.signal);
         return () => ctl.abort();
@@ -164,7 +169,7 @@ export default function Store({
         window.scrollTo({ top: 0, behavior: "smooth" });
     }, [page]);
 
-    /* -------- FE fallback sort ------ */
+    // -------- FE fallback sort ------
     const sortedItems = useMemo(() => {
         if (!Array.isArray(items) || !items.length || !sort) return items;
         const getPrice = (p) => Number(p?.price ?? 0);
@@ -251,7 +256,7 @@ export default function Store({
                                 </div>
                             </div>
 
-                            <div className="col-4">
+                            <div className="col-4 ">
                                 <input
                                     type="search"
                                     className="form-control"
@@ -267,25 +272,32 @@ export default function Store({
 
                         {err && <div className="alert alert-danger">Lỗi: {err}</div>}
 
-                        {/* Grid sản phẩm: 1 cột xs, 2 cột sm, 3 cột md */}
-                        <div className="row g-2 g-sm-3 mt-2">
-                            {sortedItems.map((prod) => (
-                                <div key={prod.product_id} className="col-12 col-sm-6 col-md-4 d-flex">
-                                    <div className="product-card w-100 d-flex">
+                        {/* Product List */}
+                        <div className="d-flex flex-wrap" style={{ width: "1120px", gap: "10px" }}>
+                            {sortedItems.length ? (
+                                sortedItems.map((prod) => (
+                                    <div className="col" key={prod.product_id} style={{ flex: "0 0 10%" }}>
                                         <Product prod={prod} status={prod?.status} />
                                     </div>
+                                ))
+                            ) : (
+                                <div className="col">
+                                    <p className="text-muted mb-0">
+                                        {loading ? "Đang tải dữ liệu…" : "Không có sản phẩm nào"}
+                                    </p>
                                 </div>
-                            ))}
+                            )}
                         </div>
-
-
 
                         {/* Pagination */}
                         {meta?.last_page > 1 && (
                             <nav className="mt-3" aria-label="Pagination">
                                 <ul className="pagination justify-content-center flex-wrap">
                                     <li className={`page-item ${meta.page <= 1 ? "disabled" : ""}`}>
-                                        <button className="page-link" onClick={() => setPage((p) => Math.max(1, p - 1))}>
+                                        <button
+                                            className="page-link"
+                                            onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                        >
                                             «
                                         </button>
                                     </li>
@@ -296,7 +308,10 @@ export default function Store({
                                                 <span className="page-link">…</span>
                                             </li>
                                         ) : (
-                                            <li key={p.key} className={`page-item ${p.current ? "active" : ""}`}>
+                                            <li
+                                                key={p.key}
+                                                className={`page-item ${p.current ? "active" : ""}`}
+                                            >
                                                 <button className="page-link" onClick={() => setPage(p.num)}>
                                                     {p.label}
                                                 </button>
@@ -304,7 +319,9 @@ export default function Store({
                                         )
                                     )}
 
-                                    <li className={`page-item ${meta.page >= meta.last_page ? "disabled" : ""}`}>
+                                    <li
+                                        className={`page-item ${meta.page >= meta.last_page ? "disabled" : ""}`}
+                                    >
                                         <button
                                             className="page-link"
                                             onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
@@ -451,3 +468,6 @@ export default function Store({
         </div>
     );
 }
+
+
+

@@ -202,7 +202,8 @@ export default function Cart() {
                                 <th className='text-center d-none d-sm-table-cell'>Đơn giá</th>
                                 <th className='text-center'>Số lượng</th>
                                 <th className='text-center' style={{ width: "145px" }}>Số tiền</th>
-                                <th className='text-center d-none d-sm-table-cell'>Thao tác</th>
+                                <th className='text-center d-sm-table-cell' >Thao tác</th>
+
                             </tr>
                         </thead>
                         <tbody>
@@ -298,7 +299,7 @@ export default function Cart() {
                                             </p>
                                         </td>
 
-                                        <td className='align-middle text-center d-none d-sm-table-cell'>
+                                        <td className='align-middle text-center d-sm-table-cell'>
                                             <a className='btn btn-danger' onClick={() => handleDelete(prd.data.product_id)}> Xóa</a>
                                         </td>
                                     </tr>
