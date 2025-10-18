@@ -311,6 +311,24 @@ export default function ModalInfo({ onUpdate }) {
                           </option>
                         ))}
                       </select>
+                      {/* Select Phường/Xã */}
+                      <select
+                        name="ward"
+                        onChange={handleWardChange}
+                        className="w-full p-2 border rounded-xl"
+                        required
+                      >
+                        <option value="">Chọn Phường/Xã</option>
+                        {wards.map((w) => (
+                          <option key={w.id} value={w.id}>
+                            {w.full_name}
+                          </option>
+                        ))}
+                      </select>
+
+                    </div>
+
+                    <div className="d-flex flex-column gap-3 w-50">
 
                       {/* Select Quận/Huyện */}
                       <select
@@ -323,23 +341,6 @@ export default function ModalInfo({ onUpdate }) {
                         {districts.map((d) => (
                           <option key={d.id} value={d.id}>
                             {d.full_name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="d-flex flex-column gap-3 w-50">
-                      {/* Select Phường/Xã */}
-                      <select
-                        name="ward"
-                        onChange={handleWardChange}
-                        className="w-full p-2 border rounded-xl"
-                        required
-                      >
-                        <option value="">Chọn Phường/Xã</option>
-                        {wards.map((w) => (
-                          <option key={w.id} value={w.id}>
-                            {w.full_name}
                           </option>
                         ))}
                       </select>
