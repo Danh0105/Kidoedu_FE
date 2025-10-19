@@ -22,7 +22,7 @@ export default function Cart() {
                 }
 
                 const productRequests = guestCart.map((item) =>
-                    axios.get(`{process.env.react_app_api_url}/products/${item.productId}`)
+                    axios.get(`${process.env.react_app_api_url}/products/${item.productId}`)
                 );
 
                 const responses = await Promise.all(productRequests);
