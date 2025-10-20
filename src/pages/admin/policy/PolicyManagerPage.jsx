@@ -6,7 +6,7 @@ export default function PolicyManagerPage() {
 
     const fetchPolicies = async () => {
         try {
-            const res = await fetch("http://localhost:3000/policies");
+            const res = await fetch(`${process.env.REACT_APP_API_URL}/policies`);
             const data = await res.json();
             setPolicies(data);
         } catch (err) {
