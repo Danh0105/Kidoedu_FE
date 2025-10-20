@@ -59,7 +59,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     const [newProducts, setNewProducts] = useState([]);
     const [showAllFeatured, setShowAllFeatured] = useState(false);
     const [showAllNew, setShowAllNew] = useState(false);
-    const [selectedCatId, setSelectedCatId] = useState(8);
+    const [selectedCatId, setSelectedCatId] = useState(null);
 
     // Modal Buy (đặt 1 lần)
     const [showModalBuy, setShowModalBuy] = useState(false);
@@ -87,9 +87,11 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         }
     }, [api]);
 
+
     const checkCategory = useCallback(
         async (categoryId) => {
             try {
+                if (!categoryId) categoryId = 10;
                 setLoading(true);
                 const res = await api.get("/search/products", {
                     params: { category_id: categoryId },
@@ -116,11 +118,27 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         }
     }, [api]);
 
+    // Lần đầu chỉ fetch dữ liệu, không gọi checkCategory ở đây
     useEffect(() => {
-        checkCategory(selectedCatId);
         fetchCategories();
         fetchProducts();
-    }, [checkCategory, fetchCategories, fetchProducts, selectedCatId]);
+    }, [fetchCategories, fetchProducts]);
+
+    // Khi có categories => tự động chọn danh mục đầu tiên
+    useEffect(() => {
+        if (categories.length > 0 && !selectedCatId) {
+            const firstCatId = categories[0].category_id;
+            setSelectedCatId(firstCatId);
+            checkCategory(firstCatId);
+        }
+    }, [categories, selectedCatId, checkCategory]);
+
+    // Khi người dùng click đổi danh mục => load lại sản phẩm
+    useEffect(() => {
+        if (selectedCatId) {
+            checkCategory(selectedCatId);
+        }
+    }, [selectedCatId, checkCategory]);
 
     // ===== Actions =====
     const handleBuy = async (id) => {
@@ -174,8 +192,8 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                         <li
                             key={cat.category_id}
                             className={`list-group-item list-group-item-action d-flex align-items-center justify-content-between ${selectedCatId === cat.category_id
-                                    ? "active border-danger bg-danger-subtle text-danger fw-semibold"
-                                    : ""
+                                ? "active border-danger bg-danger-subtle text-danger fw-semibold"
+                                : ""
                                 }`}
                             style={{ cursor: "pointer" }}
                             onClick={() => {
@@ -187,16 +205,16 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                                 <Cpu
                                     size={18}
                                     className={`me-2 ${selectedCatId === cat.category_id
-                                            ? "text-danger"
-                                            : "text-primary"
+                                        ? "text-danger"
+                                        : "text-primary"
                                         }`}
                                 />
                                 <span>{cat.category_name}</span>
                             </div>
                             <span
                                 className={`badge ${selectedCatId === cat.category_id
-                                        ? "bg-danger text-white"
-                                        : "bg-danger-subtle text-danger"
+                                    ? "bg-danger text-white"
+                                    : "bg-danger-subtle text-danger"
                                     }`}
                             >
                                 SALE

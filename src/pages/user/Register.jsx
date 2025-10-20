@@ -11,9 +11,11 @@ export default function Register() {
     const role = 'customer'
     const navigate = useNavigate();
 
-    const login = async () => {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         try {
-            const res = await fetch(process.env.REACT_APP_API_URL, {
+            console.log(process.env.REACT_APP_API_URL)
+            const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password, email, role }),
@@ -224,7 +226,7 @@ export default function Register() {
     return (
         <div className="py-4 bg-body-tertiary d-flex justify-content-center">
 
-            <form style={{ width: "300px" }} onSubmit={login} ref={containerRef}>
+            <form style={{ width: "300px" }} onSubmit={handleSubmit} ref={containerRef}>
                 <div className="svgContainer">
                     <div>
                         <svg
