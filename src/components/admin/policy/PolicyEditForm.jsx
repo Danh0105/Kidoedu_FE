@@ -36,9 +36,8 @@ export default function PolicyEditForm({ policy, onUpdated }) {
         e.preventDefault();
         setLoading(true);
         setMessage(null);
-
         try {
-            const res = await fetch(`http://localhost:3000/policies/${policy.id}`, {
+            const res = await fetch(`${process.env.REACT_APP_API_URL}/policies/${policy.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(form),
