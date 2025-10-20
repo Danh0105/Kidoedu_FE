@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -7,9 +7,31 @@ import {
     faBoxOpen,
     faTruck,
     faInfoCircle,
+    faPhone,
+    faEnvelope,
 } from "@fortawesome/free-solid-svg-icons";
 
-export default function showReturnPolicyGuide() {
+export default function ReturnPolicyGuide() {
+    const [policies, setPolicies] = useState([]);
+
+    useEffect(() => {
+        const fetchPolicies = async () => {
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_URL}/policies`);
+                const data = await res.json();
+                const filtered = data.filter((p) => p.slug === "CSDTH");
+                setPolicies(filtered);
+            } catch (err) {
+                console.error("Lỗi tải chính sách đổi trả hàng:", err);
+            }
+        };
+        fetchPolicies();
+    }, []);
+
+    const icons = [faClipboardCheck, faFileSignature, faBoxOpen, faTruck];
+    const colors = ["primary", "info", "warning", "success"];
+    const steps = ["I.", "II.", "III.", "IV."];
+
     return (
         <div className="container my-5">
             {/* Header */}
@@ -20,7 +42,7 @@ export default function showReturnPolicyGuide() {
                 </p>
             </div>
 
-            {/* Lưu ý đầu trang */}
+            {/* Warning */}
             <div className="alert alert-warning shadow-sm">
                 <FontAwesomeIcon icon={faInfoCircle} className="me-2 text-danger" />
                 <strong>Lưu ý:</strong>
@@ -31,127 +53,79 @@ export default function showReturnPolicyGuide() {
                     <li>
                         Đối với khách hàng tại <strong>TP.HCM</strong>, có thể liên hệ trực tiếp đổi/trả tại:
                         <br />
-                        <em>
-                            Công ty Máy tính Số 1 Đường Cộng Hòa 3 - Phường Phú Thọ Hòa - TP. Hồ Chí Minh.
-                        </em>
+                        <em>Công ty Máy tính Số 1, Đường Cộng Hòa 3 - Phường Phú Thọ Hòa - TP. Hồ Chí Minh.</em>
                     </li>
                 </ul>
             </div>
 
-            {/* Quy trình hướng dẫn */}
-            <section className="timeline position-relative ps-4 mt-5 mb-5">
-                {/* Bước 1 */}
-                <div className="d-flex mb-4 align-items-start">
-                    <FontAwesomeIcon icon={faClipboardCheck} className="fs-3 text-primary me-3" />
-                    <div>
-                        <h5 className="fw-bold text-dark">I. Kiểm tra điều kiện đổi trả hàng</h5>
-                        <p className="text-muted">
-                            Vui lòng đảm bảo sản phẩm đáp ứng các điều kiện đổi trả theo chính sách của Kido:
-                        </p>
-                        <ul>
-                            <li>Sản phẩm thuộc danh mục mặt hàng được đổi trả.</li>
-                            <li>Không quá 30 ngày kể từ ngày nhận hàng.</li>
-                            <li>
-                                Sản phẩm <strong>còn nguyên bao bì, đầy đủ phụ kiện, tem và quà tặng kèm</strong> (nếu có).
-                            </li>
-                            <li>
-                                Gửi kèm <strong>hóa đơn mua hàng</strong> khi gửi sản phẩm đổi/trả.
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+            {/* Timeline */}
+            <div className="timeline position-relative bg-light p-4 rounded-3 shadow-sm my-5">
+                {policies.length > 0 ? (
+                    policies.map((policy, index) => (
+                        <div key={policy.id} className="timeline-item d-flex mb-5">
+                            <div className={`timeline-icon bg-${colors[index % colors.length]} text-white`}>
+                                <FontAwesomeIcon icon={icons[index % icons.length]} />
+                            </div>
+                            <div className="timeline-content ms-4">
+                                <h5 className="fw-bold">{steps[index] || `${index + 1}.`} {policy.title}</h5>
+                                <p className="text-muted">{policy.description}</p>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <p className="text-muted text-center">Chưa có chính sách đổi trả (slug = "CSDTH").</p>
+                )}
+            </div>
 
-                {/* Bước 2 */}
-                <div className="d-flex mb-4 align-items-start">
-                    <FontAwesomeIcon icon={faFileSignature} className="fs-3 text-info me-3" />
-                    <div>
-                        <h5 className="fw-bold text-dark">
-                            II. In và điền thông tin vào "Phiếu đăng ký đổi trả sản phẩm"
-                        </h5>
-                        <ul>
-                            <li>
-                                Tải <a href="#" className="text-decoration-none text-primary">Phiếu đăng ký đổi trả sản phẩm</a>, in và điền đầy đủ thông tin theo hướng dẫn.
-                            </li>
-                            <li>
-                                Đơn hàng gửi về mà <strong>không có phiếu đăng ký</strong> sẽ không được xử lý.
-                            </li>
-                            <li>
-                                Cắt rời <strong>nhãn đổi trả</strong> từ Phiếu đổi trả sản phẩm để dán lên kiện hàng.
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                {/* Bước 3 */}
-                <div className="d-flex mb-4 align-items-start">
-                    <FontAwesomeIcon icon={faBoxOpen} className="fs-3 text-warning me-3" />
-                    <div>
-                        <h5 className="fw-bold text-dark">III. Đóng gói hàng hóa</h5>
-                        <ul>
-                            <li>Đóng gói sản phẩm + hóa đơn + phiếu đăng ký đổi trả hàng.</li>
-                            <li>Dán nhãn đổi trả ra bên ngoài kiện hàng.</li>
-                        </ul>
-                        <p className="text-muted">
-                            <strong>Lưu ý:</strong> Quý khách chịu trách nhiệm đảm bảo hàng hóa còn nguyên vẹn khi gửi về Kido.
-                            Không gửi nhiều đơn hàng trong cùng một kiện để tránh thất lạc.
-                        </p>
-                    </div>
-                </div>
-
-                {/* Bước 4 */}
-                <div className="d-flex mb-4 align-items-start">
-                    <FontAwesomeIcon icon={faTruck} className="fs-3 text-success me-3" />
-                    <div>
-                        <h5 className="fw-bold text-dark">IV. Gửi hàng về Kido</h5>
-                        <p className="text-muted">
-                            Liên hệ bưu cục <strong>VNPT gần nhất</strong> để chuyển hàng theo thông tin có trên nhãn đổi trả.
-                            Kido không chịu trách nhiệm về chi phí vận chuyển hoặc thất lạc nếu quý khách không gửi đúng hướng dẫn.
-                        </p>
-                        <p>
-                            Kido <strong>không tiếp nhận đổi trả trực tiếp</strong> tại văn phòng hoặc kho hàng.
-                            Mọi trường hợp gửi sai địa chỉ hoặc tự ý giao hàng sẽ không được xử lý.
-                        </p>
-                    </div>
-                </div>
-            </section>
-
-            {/* Hỗ trợ */}
+            {/* Contact Section */}
             <div className="bg-light p-4 rounded-3 shadow-sm">
                 <h5 className="fw-bold text-primary mb-2">
                     <FontAwesomeIcon icon={faInfoCircle} className="me-2" />
-                    Hỗ trợ và liên hệ
+                    Hỗ trợ & Liên hệ
                 </h5>
                 <p className="mb-0">
                     Nếu quý khách có thắc mắc hoặc cần hỗ trợ thêm, vui lòng liên hệ qua:
                     <br />
-                    🌐{" "}
-                    <a
-                        href="tel:0789 636 979"
-                        className="text-decoration-none text-success"
-                    >
-                        Gọi 0789 636 979
-                    </a>
+                    📞 <a href="tel:0789636979" className="text-decoration-none text-success">Gọi 0789 636 979</a>
+                    <br />
+                    📧 <a href="mailto:lytran@ichiskill.edu.vn" className="text-decoration-none text-primary">lytran@ichiskill.edu.vn</a>
                 </p>
             </div>
 
-            {/* Custom timeline style */}
-            <style>
-                {`
-          .timeline::before {
-            content: '';
-            position: absolute;
-            left: 15px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background-color: #d0d0d0;
-          }
-          .timeline > div {
-            position: relative;
-            padding-left: 10px;
-          }
-        `}
-            </style>
+            {/* Custom styles */}
+            <style>{`
+                .timeline {
+                    position: relative;
+                    padding-left: 40px;
+                    border-left: 3px solid #dee2e6;
+                }
+                .timeline-item {
+                    position: relative;
+                    animation: fadeInUp 0.5s ease-in-out;
+                }
+                .timeline-icon {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.2rem;
+                    position: absolute;
+                    left: -22px;
+                    top: 2px;
+                }
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+            `}</style>
         </div>
     );
 }

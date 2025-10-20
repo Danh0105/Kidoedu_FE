@@ -98,8 +98,8 @@ export default function Footer() {
                                     <ul className="list-unstyled small mb-0 two-col-md d-none d-md-block">
                                         <li><Link className="footer-link nav-link px-0" to="/PaymentPolicy">Điều khoản thanh toán</Link></li>
                                         <li><Link className="footer-link nav-link px-0" to="/ContactFeedbackPage">Liên hệ góp ý</Link></li>
-                                        <li><Link className="footer-link nav-link px-0" to="/RepairServicePage">Sửa chữa Surface</Link></li>
-                                        <li><Link className="footer-link nav-link px-0" to="/ReturnPolicyGuide">Hướng dẫn đổi trả hàng</Link></li>
+                                        {/*                                         <li><Link className="footer-link nav-link px-0" to="/RepairServicePage">Sửa chữa Surface</Link></li>
+ */}                                        <li><Link className="footer-link nav-link px-0" to="/ReturnPolicyGuide">Hướng dẫn đổi trả hàng</Link></li>
                                         <li><Link className="footer-link nav-link px-0" to="/warrantypolicy">Bảo hành sản phẩm</Link></li>
                                     </ul>
                                 </div>

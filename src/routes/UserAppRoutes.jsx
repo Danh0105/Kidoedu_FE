@@ -33,6 +33,7 @@ import PaymentPolicyPage from "../pages/user/policy/PaymentPolicyPage";
 import PrivacyPolicyPage from "../pages/user/policy/PrivacyPolicyPage";
 import ReturnPolicyPage from "../pages/user/policy/ReturnPolicyPage";
 import ShippingPolicyPage from "../pages/user/policy/ShippingPolicyPage";
+import PolicyManagerPage from "../pages/admin/policy/PolicyManagerPage";
 export default function AppRoutes() {
 
     return (
@@ -159,6 +160,10 @@ export default function AppRoutes() {
                 <Route path="/productdetail/:id" element={<UserLayout />}>
                     <Route index element={<ProductDetail />} />
                 </Route>
+                <Route path="/PolicyManagerPage" element={<UserLayout />}>
+                    <Route index element={<PolicyManagerPage />} />
+                </Route>
+
             </Routes>
         </BrowserRouter>
     );

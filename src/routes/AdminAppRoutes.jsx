@@ -16,6 +16,7 @@ import Shipping from "../pages/admin/Shipping";
 import CouponManagement from "../pages/admin/CouponManagement";
 import OrderDetail from "../pages/admin/OrderManagement/Order-detail";
 import PrivateRoute from "../components/user/PrivateRoute";
+import PolicyManagerPage from "../pages/admin/policy/PolicyManagerPage";
 export default function AppRoutes() {
 
     return (
@@ -55,6 +56,7 @@ export default function AppRoutes() {
                 <Route path="/order-detail" element={<AdminLayout title="Order detail" />}>
                     <Route index element={<OrderDetail />} />
                 </Route>
+
             </Routes>
         </BrowserRouter >
     );
