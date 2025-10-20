@@ -63,12 +63,14 @@ export default function ReturnPolicyGuide() {
                 {policies.length > 0 ? (
                     policies.map((policy, index) => (
                         <div key={policy.id} className="timeline-item d-flex mb-5">
-                            <div className={`timeline-icon bg-${colors[index % colors.length]} text-white`}>
-                                <FontAwesomeIcon icon={icons[index % icons.length]} />
+                            <div className={`timeline-icon bg-${colors[index % colors.length] || "secondary"} text-white`}>
+                                <FontAwesomeIcon icon={icons[index % icons.length] || faClipboardCheck} />
                             </div>
                             <div className="timeline-content ms-4">
-                                <h5 className="fw-bold">{steps[index] || `${index + 1}.`} {policy.title}</h5>
-                                <p className="text-muted">{policy.description}</p>
+                                <h5 className="fw-bold">
+                                    {["I.", "II.", "III.", "IV.", "V."][index] || `${index + 1}.`} {policy.title}
+                                </h5>
+                                <p className="text-muted" style={{ whiteSpace: "pre-line" }}>{policy.description}</p>
                             </div>
                         </div>
                     ))
