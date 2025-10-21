@@ -308,56 +308,171 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         );
     };
 
-    const ProductCard = ({ p }) => {
-        const ribbons = pickRibbonsFromStatus(p?.status);
-        const img = p?.images?.[0]?.image_url || ROBOT;
+    // ProductCard.jsx
+
+    // util: format VND ngắn gọn, không bị undefined
+    const formatVND = (n) =>
+        new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 0 }).format(Number(n || 0));
+
+    /**
+     * ProductCard
+     * @param {object} props
+     * @param {object} props.product - dữ liệu sản phẩm
+     * @param {(id:string)=>void} props.onBuy - callback khi bấm "Mua ngay"
+     * @param {string} [props.className] - className bổ sung
+     * @param {(status:any)=>Array<{text:string,position?:'tl'|'tr'|'bl'|'br',className?:string}>} props.pickRibbonsFromStatus
+     * @param {string} props.fallbackImage - ảnh dự phòng
+     */
+    function ProductCard({
+        p,
+        onBuy,
+        className = "",
+        pickRibbonsFromStatus,
+        fallbackImage,
+    }) {
+        const [buying, setBuying] = useState(false);
+        const ribbons = (pickRibbonsFromStatus?.(p?.status) || []).slice(0, 3);
+        const imgSrc = p?.images?.[0]?.image_url || fallbackImage;
+
+        const handleBuy = async (id) => {
+            try {
+                const res = await api.get(`/products/${id}`);
+                const data = res.data?.data || null;
+                setBuyProduct(data);
+                setBuyImages(
+                    (data?.images || []).map((img) => img?.image_url).filter(Boolean)
+                );
+                setShowModalBuy(true);
+            } catch (e) {
+                console.error("handleBuy error:", e);
+            }
+        };
+
+        // Nếu có giá khuyến mãi, tính % giảm
+        const hasSale = p?.sale_price && Number(p.sale_price) < Number(p.price);
+        const discountPercent = hasSale
+            ? Math.round(((Number(p.price) - Number(p.sale_price)) / Number(p.price)) * 100)
+            : 0;
 
         return (
-            <div className="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex justify-content-center">
-                <div
-                    className="card shadow-sm border-0 rounded-4 overflow-hidden hover-shadow"
-                    style={{ maxWidth: 300 }}
+            <div className={`col-12 col-sm-6 col-md-4 col-lg-3 mb-4 d-flex ${className}`}>
+                <article
+                    className="card product-card shadow-sm border-0 rounded-4 overflow-hidden w-100 h-100"
+                    itemScope
+                    itemType="https://schema.org/Product"
                 >
                     <div className="position-relative">
+                        {/* Ribbons/Badges */}
                         {ribbons.map((rb, i) => (
-                            <Ribbon
+                            <span
                                 key={i}
-                                text={rb.text}
-                                position={rb.position}
-                                className={rb.className}
-                            />
+                                className={`badge position-absolute ribbon ${rb.className || "text-bg-warning"}`}
+                                data-pos={rb.position || "tl"}
+                            >
+                                {rb.text}
+                            </span>
                         ))}
-                        <a href={`/productdetail/${p.product_id}`}>
+                        {hasSale && (
+                            <span className="badge position-absolute ribbon text-bg-danger" data-pos="tr" aria-label={`Giảm ${discountPercent}%`}>
+                                -{discountPercent}%
+                            </span>
+                        )}
+
+                        {/* Khung ảnh tỉ lệ cố định để tránh layout shift */}
+                        <a
+                            href={`/productdetail/${p.product_id}`}
+                            className="d-block ratio ratio-4x3 bg-light-subtle"
+                            aria-label={p?.product_name}
+                        >
                             <img
-                                src={img}
-                                alt={p.product_name}
-                                className="img-fluid"
-                                onError={(e) => (e.currentTarget.src = ROBOT)}
+                                src={imgSrc}
+                                alt={p?.product_name}
+                                loading="lazy"
+                                decoding="async"
+                                className="w-100 h-100"
+                                style={{ objectFit: 'scale-down', objectPosition: 'center', padding: '8px' }} // ✅ không phóng to
+                                onError={(e) => {
+                                    if (fallbackImage && e.currentTarget.src !== fallbackImage) {
+                                        e.currentTarget.src = fallbackImage;
+                                    }
+                                }}
                             />
                         </a>
+
                     </div>
-                    <div className="card-body text-center">
-                        <h6
-                            className="fw-semibold text-truncate mb-2"
-                            title={p.product_name}
+
+                    <div className="card-body d-flex flex-column text-center">
+                        <h3
+                            className="product-title fw-semibold text-body-emphasis mb-2 two-line-clamp"
+                            title={p?.product_name}
+                            itemProp="name"
                         >
-                            {p.product_name}
-                        </h6>
-                        <p className="text-danger fw-bold mb-3">
-                            {Number(p.price || 0).toLocaleString()} ₫
-                        </p>
-                        <button
-                            onClick={() => handleBuy(p.product_id)}
-                            className="btn btn-primary"
-                            style={{ fontSize: 15 }}
-                        >
-                            Mua ngay
-                        </button>
+                            {p?.product_name}
+                        </h3>
+
+                        {/* Giá */}
+                        <div className="mb-3" itemProp="offers" itemScope itemType="https://schema.org/Offer">
+                            {hasSale ? (
+                                <>
+                                    <div className="d-flex justify-content-center align-items-baseline gap-2">
+                                        <span className="fs-5 fw-bold text-danger" itemProp="price">
+                                            {formatVND(p.sale_price)} ₫
+                                        </span>
+                                        <s className="text-secondary small">{formatVND(p.price)} ₫</s>
+                                    </div>
+                                    <meta itemProp="priceCurrency" content="VND" />
+                                </>
+                            ) : (
+                                <>
+                                    <span className="fs-5 fw-bold text-danger" itemProp="price">
+                                        {formatVND(p.price)} ₫
+                                    </span>
+                                    <meta itemProp="priceCurrency" content="VND" />
+                                </>
+                            )}
+                            <link itemProp="availability" href="https://schema.org/InStock" />
+                        </div>
+
+                        {/* CTA */}
+                        <div className="mt-auto">
+                            <button
+                                type="button"
+                                onClick={() => handleBuy(p.product_id)}
+                                className="btn btn-cta w-50 d-inline-flex align-items-center justify-content-center gap-2"
+                                disabled={buying}
+                                aria-pressed={buying}
+                                aria-busy={buying}
+                            >
+                                {buying ? (
+                                    <>
+                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+                                        <span>Đang thêm...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="btn-icon" aria-hidden="true"><CartIcon /></span>
+                                        <span>Mua ngay</span>
+                                    </>
+                                )}
+                                <span className="visually-hidden">Thêm sản phẩm vào giỏ</span>
+                            </button>
+
+                        </div>
                     </div>
-                </div>
+                </article>
             </div>
         );
-    };
+    }
+
+
+    function CartIcon(props) {
+        // SVG thuần để khỏi phụ thuộc thư viện icon
+        return (
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" {...props}>
+                <path d="M7 4h-2l-1 2h2l3.6 7.59-1.35 2.44A2 2 0 0 0 10 19h9v-2h-9l1.1-2h6.45a2 2 0 0 0 1.8-1.1l3.58-7.16A1 1 0 0 0 22 4H7zM7 20a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
+            </svg>
+        );
+    }
 
     return (
         <div style={{ backgroundColor: "#fff" }}>
