@@ -31,79 +31,175 @@ export default function Footer() {
                     <div className="bg-dark text-light py-4">
                         <div className="container-xl py-3">
                             <div className="row gy-4 footer-columns">
-                                {/* Col 1: Contact */}
-                                <div className="col-12 col-md-6 col-lg-4">
+                                <div className="col-12 col-md-4">
                                     <h6 className="footer-heading">Thông tin liên hệ</h6>
                                     <address className="mb-0 small lh-base text-white-75">
                                         <p className="mb-2 text-wrap">
-                                            <FontAwesomeIcon icon={faLocationDot} className="me-2 text-primary" />
+                                            <FontAwesomeIcon
+                                                icon={faLocationDot}
+                                                className="me-2 text-primary"
+                                            />
                                             Số 1, Đường Cộng Hòa 3, Phường Phú Thọ Hòa, TP. Hồ Chí Minh
                                         </p>
                                         <p className="mb-2">
-                                            <FontAwesomeIcon icon={faPhone} className="me-2 text-primary" />
-                                            <a className="link-light text-decoration-none" href="tel:+84789636979">0789 636 979</a>
+                                            <FontAwesomeIcon
+                                                icon={faPhone}
+                                                className="me-2 text-primary"
+                                            />
+                                            <a
+                                                href="tel:+84789636979"
+                                                className="link-light text-decoration-none"
+                                            >
+                                                0789 636 979
+                                            </a>
                                         </p>
                                         <p className="mb-2">
-                                            <FontAwesomeIcon icon={faEnvelope} className="me-2 text-primary" />
-                                            <a className="link-light text-decoration-none" href="mailto:lytran@ichiskill.edu.vn">lytran@ichiskill.edu.vn</a>
+                                            <FontAwesomeIcon
+                                                icon={faEnvelope}
+                                                className="me-2 text-primary"
+                                            />
+                                            <a
+                                                href="mailto:lytran@ichiskill.edu.vn"
+                                                className="link-light text-decoration-none"
+                                            >
+                                                lytran@ichiskill.edu.vn
+                                            </a>
                                         </p>
                                         <p className="mb-0">
-                                            <FontAwesomeIcon icon={faGlobe} className="me-2 text-primary" />
-                                            <a className="link-light text-decoration-none" href="https://www.kidoedu.edu.vn" target="_blank" rel="noreferrer">
+                                            <FontAwesomeIcon
+                                                icon={faGlobe}
+                                                className="me-2 text-primary"
+                                            />
+                                            <a
+                                                href="https://www.kidoedu.edu.vn"
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="link-light text-decoration-none"
+                                            >
                                                 www.kidoedu.edu.vn
                                             </a>
                                         </p>
                                     </address>
                                 </div>
-
-                                {/* Col 2: Policies */}
-                                <div className="col-12 col-md-6 col-lg-4">
-                                    <h6 className="footer-heading d-none d-md-block">Chính sách</h6>
-                                    {/* Mobile accordion “native” */}
-                                    <details className="d-md-none mb-2 footer-details">
-                                        <summary className="fw-semibold text-white">Chính sách</summary>
-                                        <ul className="list-unstyled small mt-2 mb-0 two-col-md">
-                                            <li><Link className="footer-link nav-link px-0" to="/PaymentPolicyPage">Chính sách thanh toán</Link></li>
-                                            <li><Link className="footer-link nav-link px-0" to="/ComplaintHandlingPolicyPage">Chính sách xử lý khiếu nại</Link></li>
-                                            <li><Link className="footer-link nav-link px-0" to="/ShippingPolicyPage">Chính sách vận chuyển</Link></li>
-                                            <li><Link className="footer-link nav-link px-0" to="/MaintenancePolicyPage">Chính sách bảo trì</Link></li>
-                                            <li><Link className="footer-link nav-link px-0" to="/ReturnPolicyPage">Chính sách đổi trả hàng</Link></li>
-                                            <li><Link className="footer-link nav-link px-0" to="/PrivacyPolicyPage">Chính sách bảo mật thông tin</Link></li>
-                                        </ul>
-                                    </details>
-                                    {/* Desktop list */}
-                                    <ul className="list-unstyled small mb-0 two-col-md d-none d-md-block">
-                                        <li><Link className="footer-link nav-link px-0" to="/PaymentPolicyPage">Chính sách thanh toán</Link></li>
-                                        <li><Link className="footer-link nav-link px-0" to="/ComplaintHandlingPolicyPage">Chính sách xử lý khiếu nại</Link></li>
-                                        <li><Link className="footer-link nav-link px-0" to="/ShippingPolicyPage">Chính sách vận chuyển</Link></li>
-                                        <li><Link className="footer-link nav-link px-0" to="/MaintenancePolicyPage">Chính sách bảo trì</Link></li>
-                                        <li><Link className="footer-link nav-link px-0" to="/ReturnPolicyPage">Chính sách đổi trả hàng</Link></li>
-                                        <li><Link className="footer-link nav-link px-0" to="/PrivacyPolicyPage">Chính sách bảo mật thông tin</Link></li>
+                                <div className="col-12 col-md-4">
+                                    <h6 className="footer-heading">Chính sách</h6>
+                                    <ul className="list-unstyled small mb-0">
+                                        <li>
+                                            <Link class="text-decoration-none" to="/PriceInfoPage" >THÔNG TIN VỀ GIÁ SẢN PHẨM</Link>
+                                        </li>
+                                        <li>
+                                            <Link class="text-decoration-none" to="/PaymentPolicyPage">
+                                                Chính sách thanh toán
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link class="text-decoration-none" to="/ShippingPolicyPage">
+                                                Chính sách vận chuyển
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link class="text-decoration-none" to="/InspectionPolicyPage">
+                                                Chính sách kiểm hàng
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link class="text-decoration-none" to="/ReturnsRefundsPolicyPage">
+                                                Chính sách đổi trả và hoàn tiền
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link class="text-decoration-none" to="/PrivacyPolicyPage">
+                                                Chính sách bảo mật thông tin
+                                            </Link>
+                                        </li>
                                     </ul>
                                 </div>
-
-                                {/* Col 3: Customer service */}
-                                <div className="col-12 col-md-6 col-lg-4">
-                                    <h6 className="footer-heading d-none d-md-block">Dịch vụ khách hàng</h6>
-                                    <details className="d-md-none mb-2 footer-details">
-                                        <summary className="fw-semibold text-white">Dịch vụ khách hàng</summary>
-                                        <ul className="list-unstyled small mt-2 mb-0 two-col-md">
-                                            <li><Link className="footer-link nav-link px-0" to="/PaymentPolicy">Điều khoản thanh toán</Link></li>
-                                            <li><Link className="footer-link nav-link px-0" to="/ContactFeedbackPage">Liên hệ góp ý</Link></li>
-                                            <li><Link className="footer-link nav-link px-0" to="/RepairServicePage">Sửa chữa Surface</Link></li>
-                                            <li><Link className="footer-link nav-link px-0" to="/ReturnPolicyGuide">Hướng dẫn đổi trả hàng</Link></li>
-                                            <li><Link className="footer-link nav-link px-0" to="/warrantypolicy">Bảo hành sản phẩm</Link></li>
-                                        </ul>
-                                    </details>
-                                    <ul className="list-unstyled small mb-0 two-col-md d-none d-md-block">
-                                        <li><Link className="footer-link nav-link px-0" to="/PaymentPolicy">Điều khoản thanh toán</Link></li>
-                                        <li><Link className="footer-link nav-link px-0" to="/ContactFeedbackPage">Liên hệ góp ý</Link></li>
-                                        {/*                                         <li><Link className="footer-link nav-link px-0" to="/RepairServicePage">Sửa chữa Surface</Link></li>
- */}                                        <li><Link className="footer-link nav-link px-0" to="/ReturnPolicyGuide">Hướng dẫn đổi trả hàng</Link></li>
-                                        <li><Link className="footer-link nav-link px-0" to="/warrantypolicy">Bảo hành sản phẩm</Link></li>
+                                {/* Col 2: Chính sách */}
+                                {/*     <div className="col-12 col-md-4">
+                                    <h6 className="footer-heading">Chính sách</h6>
+                                    <ul className="list-unstyled small mb-0">
+                                        <li>
+                                            <Link class="text-decoration-none" to="/PaymentPolicyPage" >Chính sách thanh toán</Link>
+                                        </li>
+                                        <li>
+                                            <Link class="text-decoration-none" to="/ComplaintHandlingPolicyPage">
+                                                Chính sách xử lý khiếu nại
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link class="text-decoration-none" to="/ShippingPolicyPage">
+                                                Chính sách vận chuyển
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link class="text-decoration-none" to="/MaintenancePolicyPage">
+                                                Chính sách bảo trì
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link class="text-decoration-none" to="/ReturnPolicyPage">Chính sách đổi trả hàng</Link>
+                                        </li>
+                                        <li>
+                                            <Link class="text-decoration-none" to="/PrivacyPolicyPage">
+                                                Chính sách bảo mật thông tin
+                                            </Link>
+                                        </li>
                                     </ul>
+                                </div> */}
+
+                                {/* Col 3: Dịch vụ khách hàng */}
+                                {/*       <div className="col-12 col-md-4">
+                                    <h6 className="footer-heading">Dịch vụ khách hàng</h6>
+                                    <ul className="list-unstyled small mb-0">
+                                        <li>
+                                            <Link class="text-decoration-none" to="/PaymentPolicy">Điều khoản thanh toán</Link>
+                                        </li>
+                                        <li>
+                                            <Link class="text-decoration-none" to="/ContactFeedbackPage">Liên hệ góp ý</Link>
+                                        </li>
+                                        <li>
+                                            <Link class="text-decoration-none" to="/ReturnPolicyGuide">
+                                                Hướng dẫn đổi trả hàng
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link class="text-decoration-none" to="/warrantypolicy">Bảo hành sản phẩm</Link>
+                                        </li>
+                                    </ul>
+                                </div> */}
+                                <div
+                                    className="col-8 col-md-4 text-center"
+                                    style={{ fontSize: "0.9rem", color: "#ccc" }}
+                                >
+                                    <p className="mb-1 fw-semibold text-white">
+                                        CÔNG TY TNHH KIDO EDU
+                                    </p>
+                                    <p className="mb-1">
+                                        GPKD số{" "}
+                                        <a
+                                            href="https://masothue.com/0319127924"
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="text-info text-decoration-none"
+                                        >
+                                            0319127924
+                                        </a>{" "}
+                                        do Sở KH & ĐT TP HCM cấp ngày 26/08/2025
+                                    </p>
+                                    <p className="mb-1">
+                                        Địa chỉ: Số 1 Đường Cộng Hòa 3, Phường Phú Thọ Hòa, TP Hồ Chí
+                                        Minh, Việt Nam
+                                    </p>
+                                    <p className="mb-0 fst-italic text-warning">
+                                        Website chạy thử chờ cấp phép của BCT
+                                    </p>
                                 </div>
                             </div>
+
+                            {/* Thông tin pháp lý */}
+
+
+
 
                             {/* Divider */}
                             <hr className="border-secondary-subtle my-4" />
@@ -322,7 +418,7 @@ export default function Footer() {
             </div>
 
 
-        </footer>
+        </footer >
 
 
     )

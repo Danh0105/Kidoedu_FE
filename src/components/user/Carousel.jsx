@@ -45,7 +45,7 @@ export default function Carousel() {
                         className={`d-block w-100 ${!loaded1 ? "d-none" : ""}`}
                         style={{
                             maxWidth: "100%",
-                            maxHeight: "700px",
+                            /*   maxHeight: "700px", */
                             margin: "0 auto",
                             objectFit: "cover",
                         }}

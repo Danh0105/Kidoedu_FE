@@ -16,7 +16,7 @@ export default function WarrantyPolicy() {
     useEffect(() => {
         const fetchPolicies = async () => {
             try {
-                const res = await fetch("http://localhost:3000/policies");
+                const res = await fetch(`${process.env.REACT_APP_API_URL}/policies`);
                 const data = await res.json();
                 const filtered = data.filter((p) => p.slug === "CSBTBH");
                 setPolicies(filtered);
@@ -55,7 +55,7 @@ export default function WarrantyPolicy() {
             {/* Timeline Steps */}
             <section className="mb-5">
                 <h3 className="fw-bold text-success mb-4 text-uppercase">Lưu đồ quy trình bảo hành</h3>
-                <div className="timeline position-relative">
+                <div className="timeline position-relative bg-light p-4 rounded-3 shadow-sm mb-5">
                     {policies.length > 0 ? (
                         policies.map((step, index) => (
                             <div key={index} className="timeline-item d-flex mb-5">
