@@ -1,4 +1,6 @@
 import React, { useEffect } from "react";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 /**
  * PRIVACY POLICY PAGE — React + Bootstrap 5 (Kidoedu)
@@ -38,6 +40,35 @@ export default function PrivacyPolicyPage({
     const telHref = `tel:${hotline.replaceAll(" ", "")}`;
     const mailHref = `mailto:${email}`;
 
+    // Hàm xử lý tải PDF
+    const handleDownloadPdf = () => {
+        const input = document.getElementById('policy-content-area'); // ID của phần nội dung bạn muốn in ra PDF
+
+        html2canvas(input, {
+            scale: 2 // Tăng scale để chất lượng hình ảnh tốt hơn trong PDF
+        })
+            .then((canvas) => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210; // Chiều rộng A4 trong mm
+                const pageHeight = 297; // Chiều cao A4 trong mm
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                pdf.save("chinh_sach_bao_mat_kidoedu.pdf");
+            });
+    };
+
     return (
         <main className="bg-light min-vh-100">
             {/* HERO */}
@@ -53,6 +84,10 @@ export default function PrivacyPolicyPage({
                                 <a href={telHref} className="btn btn-primary"><i className="bi bi-telephone-outbound me-2" />Gọi: {hotline}</a>
                                 <a href={mailHref} className="btn btn-outline-primary"><i className="bi bi-envelope-open me-2" />Email: {email}</a>
                                 <a href="#muc-dich" className="btn btn-outline-secondary"><i className="bi bi-shield-lock me-2" />Xem chi tiết</a>
+                                {/* Nút Tải PDF ở đây */}
+                                <button className="btn btn-info" onClick={handleDownloadPdf}>
+                                    <i className="bi bi-file-earmark-arrow-down me-2" />Tải PDF
+                                </button>
                             </div>
                         </div>
                         <div className="col-lg-4">
@@ -95,7 +130,7 @@ export default function PrivacyPolicyPage({
                     </aside>
 
                     {/* CONTENT */}
-                    <article className="col-lg-8 col-xl-9 order-lg-1">
+                    <article className="col-lg-8 col-xl-9 order-lg-1" id="policy-content-area"> {/* Thêm ID ở đây */}
                         {/* 1. Mục đích & phạm vi thu thập */}
                         <section id="muc-dich" className="mb-4">
                             <div className="card border-0 shadow-sm">
@@ -232,6 +267,8 @@ export default function PrivacyPolicyPage({
                     </article>
                 </div>
             </section>
+
+
         </main>
     );
 }

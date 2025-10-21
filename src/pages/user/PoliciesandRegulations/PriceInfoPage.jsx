@@ -1,12 +1,38 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
-// Component: PriceInfoPage
-// Hướng dẫn: Thêm file này vào project React (ví dụ create-react-app) như src/PriceInfoPage.jsx
-// - Cài Bootstrap: `npm install bootstrap` hoặc dùng CDN trong public/index.html
-// - Import file này trong App.jsx: `import PriceInfoPage from './PriceInfoPage';` và sử dụng <PriceInfoPage />
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export default function PriceInfoPage() {
+
+    const handleDownloadPdf = () => {
+        const input = document.getElementById('price-info-content'); // ID của phần nội dung bạn muốn in ra PDF
+
+        html2canvas(input, {
+            scale: 2 // Tăng scale để chất lượng hình ảnh tốt hơn trong PDF
+        })
+            .then((canvas) => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210; // Chiều rộng A4 trong mm
+                const pageHeight = 297; // Chiều cao A4 trong mm
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                pdf.save("thong_tin_gia_san_pham_kidoedu.pdf");
+            });
+    };
+
     return (
         <div className="container bg-light d-flex align-items-center">
             <div className="container py-4">
@@ -14,7 +40,7 @@ export default function PriceInfoPage() {
                     <div className="col-12 col-md-10 col-lg-8">
 
                         {/* Card chính */}
-                        <div className="card shadow-sm border-0">
+                        <div className="card shadow-sm border-0" id="price-info-content"> {/* Thêm ID ở đây */}
                             <div className="card-body p-4">
 
                                 {/* Header thân thiện cho học sinh */}
@@ -66,18 +92,23 @@ export default function PriceInfoPage() {
                                     </div>
                                 </section>
 
-                                {/* Footer action */}
-                                <footer className="mt-4 d-flex flex-column flex-sm-row gap-2 justify-content-between align-items-center">
-                                    <div>
-                                        <small className="text-muted">Cần trợ giúp? Liên hệ: <strong>support@kidoedu.edu.vn</strong></small>
-                                    </div>
-                                </footer>
-
                             </div>
                         </div>
 
-
-
+                        {/* Footer action */}
+                        <footer className="mt-4 d-flex flex-column flex-sm-row gap-2 justify-content-between align-items-center">
+                            <div>
+                                <small className="text-muted">Cần trợ giúp? Liên hệ: <strong>support@kidoedu.edu.vn</strong></small>
+                            </div>
+                            <div>
+                                <button className="btn btn-primary btn-sm" onClick={handleDownloadPdf}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-file-earmark-arrow-down-fill me-2" viewBox="0 0 16 16">
+                                        <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zm-1 4v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7.5 11.293V7.5a.5.5 0 0 1 1 0z" />
+                                    </svg>
+                                    Tải PDF
+                                </button>
+                            </div>
+                        </footer>
 
                     </div>
                 </div>

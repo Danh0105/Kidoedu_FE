@@ -1,18 +1,50 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 // File: ShippingPolicyPage.jsx
 // Hướng dẫn: Dán vào src/ShippingPolicyPage.jsx trong project React (ví dụ create-react-app)
 // Import trong App.jsx: import ShippingPolicyPage from './ShippingPolicyPage';
 
 export default function ShippingPolicyPage() {
+
+    // Hàm xử lý tải PDF
+    const handleDownloadPdf = () => {
+        const input = document.getElementById('shipping-policy-content'); // ID của phần nội dung bạn muốn in ra PDF
+
+        html2canvas(input, {
+            scale: 2 // Tăng scale để chất lượng hình ảnh tốt hơn trong PDF
+        })
+            .then((canvas) => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210; // Chiều rộng A4 trong mm
+                const pageHeight = 297; // Chiều cao A4 trong mm
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                pdf.save("chinh_sach_van_chuyen_kidoedu.pdf");
+            });
+    };
+
     return (
         <div className="min-vh-100 bg-light d-flex align-items-center">
             <div className="container py-4">
                 <div className="row justify-content-center">
                     <div className="col-12 col-md-10 col-lg-8">
 
-                        <div className="card shadow-sm border-0">
+                        <div className="card shadow-sm border-0" id="shipping-policy-content"> {/* Thêm ID ở đây */}
                             <div className="card-body p-4">
 
                                 <header className="d-flex align-items-center mb-3 gap-3">
@@ -96,7 +128,15 @@ export default function ShippingPolicyPage() {
                                     <div>
                                         <small className="text-muted">Cần giúp đỡ? Liên hệ: <strong>support@kidoedu.edu.vn</strong></small>
                                     </div>
-
+                                    {/* Nút Tải PDF ở đây */}
+                                    <div>
+                                        <button className="btn btn-primary btn-sm" onClick={handleDownloadPdf}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-file-earmark-arrow-down-fill me-2" viewBox="0 0 16 16">
+                                                <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zm-1 4v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7.5 11.293V7.5a.5.5 0 0 1 1 0z" />
+                                            </svg>
+                                            Tải PDF
+                                        </button>
+                                    </div>
                                 </footer>
 
                             </div>

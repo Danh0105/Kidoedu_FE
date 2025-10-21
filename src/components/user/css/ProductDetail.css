@@ -51,3 +51,27 @@
 .product-description h3 {
     margin-block: .5rem;
 }
+
+.spec-card {
+    background: #fff;
+}
+
+.spec-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--bs-primary);
+    display: inline-block;
+}
+
+.spec-row {
+    background: #fafafa;
+    border: 1px dashed #eee;
+}
+
+@media (prefers-color-scheme: dark) {
+    .spec-row {
+        background: #d1d1d1;
+        border-color: #000000;
+    }
+}

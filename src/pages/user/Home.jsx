@@ -363,15 +363,15 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         <div style={{ backgroundColor: "#fff" }}>
             <Carousel />
             <div className="container py-4">
-                <div className="d-none d-md-flex" style={{ height: "calc(80vh - 100px)" }}>
+                {/*  <div className="d-none d-md-flex" style={{ height: "calc(80vh - 100px)" }}>
                     <CategorySidebar />
                     <div style={{ overflowY: "auto", flex: 1 }}>
                         <ProductGrid />
                     </div>
-                </div>
+                </div> */}
 
                 {/* Hero Section */}
-                <div className="text-center my-5">
+                {/*            <div className="text-center my-5">
                     <h1 className="fw-bold mb-3">
                         <span>Ai cũng có thể trở thành </span>
                         <span style={{ color: "hsl(0,75%,60%)" }}>người đặc biệt</span>
@@ -379,7 +379,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                     <p className="lead">
                         Và <span style={{ color: "hsl(0,75%,60%)" }}>bạn</span> cũng có thể là người tiếp theo!
                     </p>
-                </div>
+                </div> */}
 
                 <ProductSection
                     title="🆕 Sản phẩm mới"
@@ -396,7 +396,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                 />
 
                 {/* Khóa học */}
-                <section className="my-5">
+                {/*     <section className="my-5">
                     <div className="text-center mb-4">
                         <h2 className="fw-bold" style={{ fontSize: "2rem" }}>
                             📘 Khóa học nổi bật
@@ -428,7 +428,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                             </div>
                         ))}
                     </div>
-                </section>
+                </section> */}
             </div>
 
             {/* Modal Buy (global) */}

@@ -29,7 +29,7 @@ import PaymentPolicy from "../pages/user/customerSupport/PaymentPolicy";
 import ContactFeedbackPage from "../pages/user/customerSupport/ContactFeedbackPage";
 import ComplaintHandlingPolicyPage from "../pages/user/policy/ComplaintHandlingPolicyPage";
 import MaintenancePolicyPage from "../pages/user/policy/MaintenancePolicyPage";
-import PaymentPolicyPage from "../pages/user/policy/PaymentPolicyPage";
+import PaymentPolicyPage from "../pages/user/PoliciesandRegulations/PaymentPolicyPage";
 
 import ReturnPolicyPage from "../pages/user/policy/ReturnPolicyPage";
 import ShippingPolicyPage from "../pages/user/PoliciesandRegulations/ShippingPolicyPage";
@@ -134,9 +134,9 @@ export default function AppRoutes() {
                 <Route path="/MaintenancePolicyPage" element={<UserLayout />}>
                     <Route index element={<MaintenancePolicyPage />} />
                 </Route>
-                <Route path="/PaymentPolicyPage" element={<UserLayout />}>
+                {/* <Route path="/PaymentPolicyPage" element={<UserLayout />}>
                     <Route index element={<PaymentPolicyPage />} />
-                </Route>
+                </Route> */}
                 <Route path="/ReturnPolicyPage" element={<UserLayout />}>
                     <Route index element={<ReturnPolicyPage />} />
                 </Route>
