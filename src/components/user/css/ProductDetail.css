@@ -75,3 +75,9 @@
         border-color: #000000;
     }
 }
+
+.manual-steps .badge {
+    min-width: 2rem;
+    justify-content: center;
+    display: inline-flex;
+}

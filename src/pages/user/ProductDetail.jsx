@@ -195,24 +195,90 @@ export default function ProductDetail() {
         return <CautionNotes notes={notes} />;
     };
 
+    // --- Nâng cấp UI/UX cho phần Hướng dẫn sử dụng (drop-in) ---
     const renderManual = (manual) => {
+        // Empty state
         if (!manual) return <p className="text-muted m-0">Chưa có hướng dẫn sử dụng.</p>;
 
+        // 1) Chuỗi: nếu là HTML -> giữ nguyên (behavior cũ); nếu là text -> auto-bullet
         if (typeof manual === "string") {
             const looksHtml = /<\/?[a-z][\s\S]*>/i.test(manual);
-            return looksHtml ? (
-                <div dangerouslySetInnerHTML={{ __html: manual }} />
+            if (looksHtml) return <div dangerouslySetInnerHTML={{ __html: manual }} />;
+
+            // Tự tách bước (– ; • . \n)
+            const splitSteps = (text) =>
+                String(text)
+                    .replace(/\r\n/g, "\n")
+                    .split(/\n+|\s+[–|-]\s+|;(?=\s)|\u2022|\•|\.\s+(?=[A-ZÀ-ỹ0-9])/g)
+                    .map((s) => s.trim())
+                    .filter(Boolean);
+
+            const steps = splitSteps(manual);
+
+            return steps.length ? (
+                <ol className="manual-steps list-unstyled m-0">
+                    {steps.map((s, i) => (
+                        <li key={i} className="d-flex gap-2 align-items-start py-1">
+                            <span className="badge rounded-pill bg-primary-subtle text-primary-emphasis me-1">{i + 1}</span>
+                            <span>{s}</span>
+                        </li>
+                    ))}
+                </ol>
             ) : (
-                <p className="mb-0">{manual}</p>
+                <p className="text-muted m-0">Chưa có hướng dẫn sử dụng.</p>
             );
         }
 
+        // 2) Object: hỗ trợ { pdf, video, steps }
         const pdf = manual?.pdf;
-        const video = manual?.video;
-        const steps = manual?.steps ?? [];
+        const video = manual?.video; // hỗ trợ link YouTube/Vimeo/file mp4
+        const rawSteps = manual?.steps ?? [];
+
+        // Chuẩn hoá steps: chấp nhận string | { title, desc } | { text }
+        const normSteps = rawSteps
+            .map((s) => {
+                if (typeof s === "string") return { title: s };
+                if (s && typeof s === "object") {
+                    const title = s.title || s.text || "";
+                    const desc = s.desc || s.description || "";
+                    return { title, desc };
+                }
+                return null;
+            })
+            .filter(Boolean);
+
+        // Helper: nhúng video responsive nếu là YouTube
+        const renderVideo = (url) => {
+            if (!url) return null;
+
+            const yt = url.match(
+                /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{6,})/
+            );
+            if (yt) {
+                const id = yt[1];
+                return (
+                    <div className="ratio ratio-16x9">
+                        <iframe
+                            src={`https://www.youtube.com/embed/${id}`}
+                            title="Video hướng dẫn"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                        />
+                    </div>
+                );
+            }
+
+            // Fallback: link ra ngoài (không đổi cấu trúc)
+            return (
+                <a href={url} target="_blank" rel="noreferrer" className="btn btn-outline-danger btn-sm">
+                    <i className="bi bi-youtube me-1" /> Xem video hướng dẫn
+                </a>
+            );
+        };
 
         return (
             <div className="vstack gap-3">
+                {/* Nút tài liệu nhanh */}
                 {(pdf || video) && (
                     <div className="d-flex flex-wrap gap-2">
                         {pdf && (
@@ -220,25 +286,46 @@ export default function ProductDetail() {
                                 <i className="bi bi-filetype-pdf me-1" /> Tải hướng dẫn PDF
                             </a>
                         )}
-                        {video && (
-                            <a href={video} target="_blank" rel="noreferrer" className="btn btn-outline-danger btn-sm">
-                                <i className="bi bi-youtube me-1" /> Xem video hướng dẫn
-                            </a>
-                        )}
+                        {/* Nếu là YouTube -> nhúng ngay bên dưới; nếu không phải, hiển thị nút */}
+                        {!/youtu(\.be|be\.com)/i.test(String(video || "")) && video && renderVideo(video)}
                     </div>
                 )}
-                {steps.length > 0 ? (
-                    <ol className="mb-0">
-                        {steps.map((s, i) => (
-                            <li key={i} className="mb-1">{s}</li>
+
+                {/* Nhúng YouTube (nếu có) */}
+                {/youtu(\.be|be\.com)/i.test(String(video || "")) && renderVideo(video)}
+
+                {/* Danh sách bước dạng đẹp, dễ đọc */}
+                {normSteps.length > 0 ? (
+                    <ol className="manual-steps list-unstyled m-0">
+                        {normSteps.map((s, i) => (
+                            <li key={i} className="p-2 rounded-3 border bg-light-subtle mb-2">
+                                <div className="d-flex align-items-start gap-2">
+                                    <span className="badge rounded-pill bg-primary-subtle text-primary-emphasis">{i + 1}</span>
+                                    <div className="flex-grow-1">
+                                        <div className="fw-semibold">{s.title}</div>
+                                        {s.desc && <div className="text-body-secondary small mt-1">{s.desc}</div>}
+                                    </div>
+                                </div>
+                            </li>
                         ))}
                     </ol>
                 ) : !pdf && !video ? (
                     <p className="text-muted m-0">Chưa có hướng dẫn sử dụng.</p>
                 ) : null}
+
+                {/* Callouts khuyến nghị (tuỳ chọn, chỉ hiển thị khi có nội dung chính) */}
+                {(normSteps.length > 0 || pdf || video) && (
+                    <div className="alert alert-info d-flex align-items-start gap-2 mb-0">
+                        <i className="bi bi-lightbulb"></i>
+                        <div>
+                            <strong>Mẹo:</strong> Khi bàn giao sản phẩm, hãy lưu tài liệu PDF vào mã QR trên tem dán để khách quét xem nhanh.
+                        </div>
+                    </div>
+                )}
             </div>
         );
     };
+
 
     // badges: xuất xứ + tồn kho
     const origin = product?.origin ?? null;
@@ -343,8 +430,8 @@ export default function ProductDetail() {
                         {typeof stock === "number" && (
                             <span
                                 className={`badge ${stock > 0
-                                        ? "bg-success-subtle text-success-emphasis"
-                                        : "bg-danger-subtle text-danger-emphasis"
+                                    ? "bg-success-subtle text-success-emphasis"
+                                    : "bg-danger-subtle text-danger-emphasis"
                                     }`}
                             >
                                 <i className="bi bi-box-seam me-1" /> Tồn kho:{" "}
