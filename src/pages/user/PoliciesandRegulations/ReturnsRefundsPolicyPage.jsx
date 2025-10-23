@@ -196,6 +196,7 @@ export default function ReturnRefundPolicyPage() {
             </div>
 
             <style>{`
+            
         .card-body h2 { font-weight:700; }
         ul { margin-left: 1rem; }
         #return-refund-policy-content a { text-decoration: none; }

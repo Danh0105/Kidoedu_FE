@@ -112,6 +112,11 @@ export default function Footer() {
                                                 Chính sách bảo mật thông tin
                                             </Link>
                                         </li>
+                                        <li>
+                                            <Link class="text-decoration-none" to="/overview">
+                                                CHÍNH SÁCH VÀ QUY ĐỊNH
+                                            </Link>
+                                        </li>
                                     </ul>
                                 </div>
                                 {/* Col 2: Chính sách */}

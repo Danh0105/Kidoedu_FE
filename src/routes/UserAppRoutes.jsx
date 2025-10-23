@@ -38,7 +38,7 @@ import PriceInfoPage from "../pages/user/PoliciesandRegulations/PriceInfoPage";
 import InspectionPolicyPage from "../pages/user/PoliciesandRegulations/InspectionPolicyPage";
 import ReturnsRefundsPolicyPage from "../pages/user/PoliciesandRegulations/ReturnsRefundsPolicyPage";
 import PrivacyPolicyPage from "../pages/user/PoliciesandRegulations/PrivacyPolicyPage";
-
+import PoliciesPage from "../pages/user/PoliciesandRegulations/Overview";
 
 export default function AppRoutes() {
 
@@ -181,6 +181,9 @@ export default function AppRoutes() {
                 </Route>
                 <Route path="/PrivacyPolicyPage" element={<UserLayout />}>
                     <Route index element={<PrivacyPolicyPage />} />
+                </Route>
+                <Route path="/overview" element={<UserLayout />}>
+                    <Route index element={<PoliciesPage />} />
                 </Route>
             </Routes>
         </BrowserRouter>
