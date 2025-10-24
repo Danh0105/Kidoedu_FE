@@ -1,172 +1,95 @@
-// import React, { useState } from "react";
-// import axios from "axios";
-import '../../App.css';
-import intro from '../../assets/user/intro.jpg';
-import gv from '../../assets/user/gv.png';
-import cup from '../../assets/user/cup.png';
-import hc from '../../assets/user/hc.png';
-import vs from '../../assets/user/vs.png';
-import HDKH1 from '../../assets/user/HDKH1.jpg';
-import HDKH2 from '../../assets/user/HDKH2.jpg';
-import HDKH3 from '../../assets/user/HDKH3.jpg';
-import HDKH4 from '../../assets/user/HDKH4.jpg';
-import Carousel from '../../components/user/Carousel';
+import React from "react";
 
-export default function About() {
-
-    // const [previewUrl, setPreviewUrl] = useState("");
-    // const [uploading, setUploading] = useState(false);
-
-    // const handleUpload = async (e) => {
-    //     const file = e.target.files[0];
-    //     if (!file || !file.name.endsWith(".zip")) {
-    //         alert("Vui lòng chọn file .zip");
-    //         return;
-    //     }
-
-    //     const formData = new FormData();
-    //     formData.append("zipfile", file);
-
-    //     setUploading(true);
-    //     try {
-    //         const res = await axios.post("http://localhost:5000/upload", formData);
-    //         console.log(res);
-    //         setPreviewUrl(res.data.url);
-    //     } catch (err) {
-    //         alert("Tải lên thất bại: " + err.message);
-    //     } finally {
-    //         setUploading(false);
-    //     }
-    // };
-
+export default function KidoEduIntro() {
     return (
-        <div>
-            <Carousel />
-            <div className='container'>
-                <div className="d-flex justify-content-center">
-                    <div className="p-2 bd-highlight intro" style={{ width: "570px" }}>
-                        <h2 classNameName='mb-4 pt-2'>GIỚI THIỆU VỀ Kidoedu </h2>
-                        <div className="des-about">Kidoedu có tên đầy đủ là: CÔNG TY CỔ PHẦN GIÁO DỤC KHOA HỌC CÔNG NGHỆ&nbsp; Kidoedu được thành lập vào ngày 28/12/2020. Mã số thuế: 0316660845
-                            Công ty chuyên về lĩnh vực giáo dục kỹ năng sống - Công dân số - STEM cho học sinh  từ cấp học mầm non, tiểu học, THCS và THPT.
-                            Kidoedu đang bước những bước đầu tiên thật vững chắc với đội ngũ chuyên gia nhiều kinh nghiệm, tự tin mang lại chương trình giáo dục tiên tiến cho thế hệ trẻ về hành trang kỹ năng sống, đầy đủ để xây dựng ước mơ cho cuộc đời mình.</div>
-                        <a>XEM THÊM</a>
-                    </div>
-                    <div className="p-2 bd-highlight">
-                        <img src={intro} style={{ width: "550px", height: "auto" }} alt="Logo công ty Kidoedu" />
-                    </div>
-                </div>
-            </div>
-            <div className='bg-warning'>
-                <div className='container'>
-                    <div className='d-flex justify-content-center'>
-                        <h2>Vì sao chọn Kidoedu</h2>
-                    </div>
-                    <div className='d-flex justify-content-center'>
-                        <div className='p-2 bd-highlight intro'>
-                            <div className='d-flex justify-content-center' style={{ width: "570px" }}>
-                                <div className='p-2 bd-highlight intro'>
-                                    <img src={gv} style={{ width: "50px", height: "auto" }} alt="Logo công ty Kidoedu" />
-                                </div>
-                                <div className='p-2 bd-highlight intro'>
-                                    <div >
-                                        <h2>Đội ngũ giáo viên chất lượng</h2>
-                                        <div >Học sinh của chúng tôi sẽ được hướng dẫn bởi những giáo viên năng động, sáng tạo, được đào tạo bài bản về giáo dục kỹ năng sống cho trẻ.</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className='p-2 bd-highlight intro'>
-                            <div className='d-flex justify-content-center' style={{ width: "570px" }}>
-                                <div className='p-2 bd-highlight intro'>
-                                    <img src={cup} style={{ width: "50px", height: "auto" }} alt="Logo công ty Kidoedu" />
-                                </div>
-                                <div className='p-2 bd-highlight intro'>
-                                    <div>
-                                        <h2>Phương pháp giảng dạy chuẩn</h2>
-                                        <div >Kidoedu chú trọng phương pháp học tập tương tác để giúp các em học sinh thực hành, phát huy tối đa tiềm năng của bản thân.</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className='d-flex justify-content-center'>
-                        <div className='p-2 bd-highlight intro'>
-                            <div className='d-flex justify-content-center' style={{ width: "570px" }}>
-                                <div className='p-2 bd-highlight intro'>
-                                    <img src={hc} style={{ width: "50px", height: "auto" }} alt="Logo công ty Kidoedu" />
-                                </div>
-                                <div className='p-2 bd-highlight intro'>
-                                    <div >
-                                        <h2>Môi trường học tập tốt</h2>
-                                        <div>Kidoedu trang bị cho các em học sinh đầy đủ kiến thức, kỹ năng, năng động, sáng tạo và có năng lực nền tảng vững chắc cho tương lai.</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className='p-2 bd-highlight intro'>
-                            <div className='d-flex justify-content-center' style={{ width: "570px" }}>
-                                <div className='p-2 bd-highlight intro'>
-                                    <img src={vs} style={{ width: "50px", height: "auto" }} alt="Logo công ty Kidoedu" />
-                                </div>
-                                <div className='p-2 bd-highlight intro'>
-                                    <div>
-                                        <h2>Giáo trình độc quyền</h2>
-                                        <div class="des-tsc">Kidoedu đã xây dựng chương trình giáo dục Kỹ năng sống cho học sinh trên nền tảng phần mềm đạt tiêu chuẩn quốc tế với đầy đủ, video, hình ảnh, âm thanh,…sống động và hấp dẫn.</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="d-flex justify-content-center">
-                <div class="bd-highlight p-1">
-                    <img src={HDKH1} style={{ width: "auto", height: "580px" }} alt="Logo công ty Kidoedu" />
-                </div>
-                <div className="bd-highlight p-1">
-                    <div
-                        className="d-flex flex-column justify-content-between align-items-center"
-                        style={{ height: "580px" }}
-                    >
-                        <div className="bd-highlight">
-                            <img
-                                src={HDKH2}
-                                style={{ width: "395px", height: "auto" }}
-                                alt="Logo công ty Kidoedu"
-                            />
-                        </div>
-                        <div className="bd-highlight">
-                            <img
-                                src={HDKH3}
-                                style={{ width: "395px", height: "auto" }}
-                                alt="Logo công ty Kidoedu"
-                            />
-                        </div>
-                    </div>
-                </div>
+        <div className="container py-5">
+            <header className="text-center mb-5">
+                <h1 className="display-4 fw-bold">GIỚI THIỆU VỀ CÔNG TY TNHH KIDO EDU</h1>
+                <p className="lead text-muted">Công nghệ – Giáo dục – Dịch vụ kỹ thuật số</p>
+            </header>
 
-                <div class="bd-highlight p-1">
-                    <img src={HDKH4} style={{ width: "auto", height: "580px" }} alt="Logo công ty Kidoedu" />
+            <section className="mb-5">
+                <h2 className="h4 border-bottom pb-2">1. Giới thiệu chung</h2>
+                <p className="text-justify">KIDO EDU là doanh nghiệp hoạt động đa lĩnh vực trong hệ sinh thái công nghệ – giáo dục – dịch vụ kỹ thuật số, định hướng phát triển bền vững dựa trên nền tảng đổi mới sáng tạo và ứng dụng công nghệ cao. Công ty chuyên sản xuất, phân phối và phát triển các giải pháp công nghệ thông minh, đồng thời là đơn vị tiên phong cung cấp phần mềm giáo dục, dịch vụ đào tạo kỹ năng và giải pháp chuyển đổi số cho trường học, doanh nghiệp và cơ quan hành chính.</p>
+            </section>
+
+            <section className="mb-5">
+                <h2 className="h4 border-bottom pb-2">2. Lịch sử hình thành & phát triển</h2>
+                <ul className="list-group list-group-flush">
+                    <li className="list-group-item">Giai đoạn khởi đầu: Nghiên cứu, sản xuất và cung cấp thiết bị công nghệ giáo dục.</li>
+                    <li className="list-group-item">Giai đoạn phát triển: Mở rộng sang phần mềm giáo dục, đào tạo kỹ năng và giải pháp số hóa.</li>
+                    <li className="list-group-item">Hiện nay: Đối tác tin cậy trong cộng đồng giáo dục và doanh nghiệp.</li>
+                </ul>
+            </section>
+
+            <section className="mb-5">
+                <h2 className="h4 border-bottom pb-2">3. Lĩnh vực hoạt động</h2>
+                <div className="row">
+                    <div className="col-md-6 mb-3">
+                        <h5>Sản xuất & Công nghệ</h5>
+                        <p>Sản xuất thiết bị điện tử, lập trình, xử lý dữ liệu, phát triển phần mềm.</p>
+                    </div>
+                    <div className="col-md-6 mb-3">
+                        <h5>Thương mại & Phân phối</h5>
+                        <p>Cung cấp sản phẩm công nghệ, sách, đồ chơi giáo dục, xuất nhập khẩu.</p>
+                    </div>
+                    <div className="col-md-6 mb-3">
+                        <h5>Dịch vụ & Sự kiện</h5>
+                        <p>Quảng cáo, hội nghị, sự kiện, dịch vụ ăn uống công nghiệp.</p>
+                    </div>
+                    <div className="col-md-6 mb-3">
+                        <h5>Giáo dục & Đào tạo</h5>
+                        <p>Đào tạo kỹ năng, tiếng Anh, tin học, nghệ thuật cho hệ phổ thông.</p>
+                    </div>
                 </div>
-            </div>
+            </section>
+
+            <section className="mb-5">
+                <h2 className="h4 border-bottom pb-2">4. Năng lực & Cam kết</h2>
+                <ul className="list-group list-group-flush">
+                    <li className="list-group-item">Đội ngũ kỹ sư, chuyên gia, giáo viên giàu kinh nghiệm.</li>
+                    <li className="list-group-item">Đối tác chiến lược uy tín trong và ngoài nước.</li>
+                    <li className="list-group-item">Cam kết đồng hành lâu dài, tạo giá trị thực và đáng tin cậy.</li>
+                </ul>
+            </section>
+
+            <section className="mb-5">
+                <h2 className="h4 border-bottom pb-2">5. Tầm nhìn (VISION)</h2>
+                <p className="fst-italic">Trở thành tập đoàn công nghệ – giáo dục hàng đầu Việt Nam, tiên phong tích hợp thiết bị điện tử, phần mềm và dịch vụ giáo dục thông minh.</p>
+            </section>
+
+            <section className="mb-5">
+                <h2 className="h4 border-bottom pb-2">6. Sứ mệnh (MISSION)</h2>
+                <ul className="list-group list-group-flush">
+                    <li className="list-group-item">Kết nối công nghệ với giáo dục, mang lại giải pháp hiệu quả.</li>
+                    <li className="list-group-item">Sáng tạo vì con người, sản phẩm thân thiện và ứng dụng cao.</li>
+                    <li className="list-group-item">Đồng hành cùng khách hàng kiến tạo giá trị và phát triển bền vững.</li>
+                </ul>
+            </section>
+
+            <section className="mb-5">
+                <h2 className="h4 border-bottom pb-2">7. Giá trị cốt lõi (CORE VALUES)</h2>
+                <div className="d-flex flex-wrap gap-3">
+                    <span className="badge bg-primary">Chất lượng</span>
+                    <span className="badge bg-success">Sáng tạo</span>
+                    <span className="badge bg-warning text-dark">Tận tâm</span>
+                    <span className="badge bg-info text-dark">Hợp tác</span>
+                    <span className="badge bg-secondary">Bền vững</span>
+                </div>
+            </section>
+
+            <section className="mb-5">
+                <h2 className="h4 border-bottom pb-2">8. Thông điệp từ Giám đốc</h2>
+                <blockquote className="blockquote">
+                    <p>“Mỗi bước tiến của công nghệ đều mở ra một cơ hội mới cho giáo dục.”</p>
+                </blockquote>
+                <p>KIDO EDU được thành lập với sứ mệnh kết nối tri thức và công nghệ, tạo nên cầu nối giữa học đường – doanh nghiệp – xã hội. Thành công đến từ sản phẩm tốt, niềm tin và giá trị bền vững mà chúng tôi mang lại.</p>
+                <p>Với đội ngũ trẻ trung và sáng tạo, KIDO EDU cam kết tiếp tục đổi mới và đóng góp tích cực cho giáo dục Việt Nam.</p>
+            </section>
+
+            <footer className="text-center">
+                <button className="btn btn-lg btn-primary">Liên hệ với chúng tôi</button>
+            </footer>
         </div>
-
-        // <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
-        //     <h2>🗂️ Tải và hiển thị file .zip xuất từ Storyline</h2>
-        //     <input type="file" accept=".zip" onChange={handleUpload} />
-        //     {uploading && <p>⏳ Đang tải lên...</p>}
-        //     {
-        //         previewUrl && (
-        //             <>
-        //                 <h3 style={{ marginTop: 20 }}>🖥️ Kết quả hiển thị:</h3>
-        //                 <iframe
-        //                     src={previewUrl}
-        //                     style={{ width: "100%", height: "85vh", border: "1px solid #ccc" }}
-        //                     title="Storyline Web"
-        //                 />
-        //             </>
-        //         )
-        //     }
-        // </div >
     );
 }
