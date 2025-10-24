@@ -185,15 +185,15 @@ export default function PoliciesPage() {
                                 <div className="row g-3">
                                     <div className="col-md-4">
                                         <label className="form-label">Tên tài khoản</label>
-                                        <input className="form-control" placeholder="(Điền tên tài khoản ngân hàng)" readOnly />
+                                        <input className="form-control" placeholder="(Tên tài khoản: CONG TY TNHH KIDO EDU)" readOnly />
                                     </div>
                                     <div className="col-md-4">
                                         <label className="form-label">Số tài khoản</label>
-                                        <input className="form-control" placeholder="(Điền số tài khoản)" readOnly />
+                                        <input className="form-control" placeholder="(933910665)" readOnly />
                                     </div>
                                     <div className="col-md-4">
                                         <label className="form-label">Ngân hàng</label>
-                                        <input className="form-control" placeholder="(Điền tên ngân hàng/chi nhánh)" readOnly />
+                                        <input className="form-control" placeholder="(TECHCOMBANK)" readOnly />
                                     </div>
                                 </div>
                                 <ul className="small mt-3 mb-0 ps-3">
