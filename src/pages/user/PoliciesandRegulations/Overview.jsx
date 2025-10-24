@@ -185,7 +185,7 @@ export default function PoliciesPage() {
                                 <div className="row g-3">
                                     <div className="col-md-4">
                                         <label className="form-label">Tên tài khoản</label>
-                                        <input className="form-control" placeholder="Tên tài khoản: CONG TY TNHH KIDO EDU" readOnly />
+                                        <input className="form-control" placeholder="CONG TY TNHH KIDO EDU" readOnly />
                                     </div>
                                     <div className="col-md-4">
                                         <label className="form-label">Số tài khoản</label>
