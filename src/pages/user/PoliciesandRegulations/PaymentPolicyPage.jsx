@@ -110,9 +110,9 @@ export default function PaymentPolicyPage() {
                                 <section className="mb-3">
                                     <h3 className="h6">Thông tin tài khoản (ví dụ)</h3>
                                     <div className="border rounded-3 p-3 bg-white">
-                                        <p className="mb-1"><strong>Tên tài khoản:</strong> <span className="text-muted">[Nhập tên tài khoản]</span></p>
-                                        <p className="mb-1"><strong>Số tài khoản:</strong> <span className="text-muted">[Nhập số tài khoản]</span></p>
-                                        <p className="mb-0"><strong>Ngân hàng:</strong> <span className="text-muted">[Nhập tên ngân hàng]</span></p>
+                                        <p className="mb-1"><strong>Tên tài khoản:</strong> <span className="text-muted">TECHCOMBANK</span></p>
+                                        <p className="mb-1"><strong>Số tài khoản:</strong> <span className="text-muted">933910665</span></p>
+                                        <p className="mb-0"><strong>Ngân hàng:</strong> <span className="text-muted">CONG TY TNHH KIDO EDU</span></p>
                                     </div>
 
                                     <div className="alert alert-warning mt-3" role="alert">
