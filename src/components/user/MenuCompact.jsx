@@ -86,6 +86,8 @@ export default function MenuCompactFixed() {
         <li><NavLink to="/quotation" className="dropdown-item" data-bs-dismiss="dropdown">Báo giá</NavLink></li>
         <li><NavLink to="/newproduct" className="dropdown-item" data-bs-dismiss="dropdown">Sản phẩm mới</NavLink></li>
         <li><NavLink to="/featuredproducts" className="dropdown-item" data-bs-dismiss="dropdown">Sản phẩm nổi bật</NavLink></li>
+        <li><NavLink to="/about" className="dropdown-item" data-bs-dismiss="dropdown">Giới thiệu</NavLink></li>
+
       </ul>
     </div>
   );

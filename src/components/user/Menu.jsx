@@ -23,7 +23,7 @@ export default function Menu() {
                 <NavLink className={({ isActive }) => `nav-link-menu ${isActive ? "active" : "nav-link-menu px-2 "}`} to="/lesson">Khóa học</NavLink>
             </li>*/}
             <li className="nav-item">
-                <NavLink className={({ isActive }) => `nav-link-menu ${isActive ? "active" : " nav-link-menu px-2 "}`} to="/about">About </NavLink>
+                <NavLink className={({ isActive }) => `nav-link-menu ${isActive ? "active" : " nav-link-menu px-2 "}`} to="/about">Giới thiệu</NavLink>
             </li>
         </>
 
