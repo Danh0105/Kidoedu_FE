@@ -216,7 +216,7 @@ body.app-loaded {
 
 .hotline-bubble {
   position: fixed;
-  bottom: 25px;
+  bottom: 0px;
   right: 25px;
   background: linear-gradient(45deg, #ff0000, #ff9100);
   color: #fff;

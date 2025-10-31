@@ -5,6 +5,7 @@ import { faFacebookMessenger } from '@fortawesome/free-brands-svg-icons';
 import { faArrowUp, faLocationDot, faPhone, faEnvelope, faGlobe } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import logo from "../../assets/user/Logo.png";
 
 export default function Footer() {
     const [showScroll, setShowScroll] = useState(false);
@@ -223,9 +224,13 @@ export default function Footer() {
 
                             {/* Bottom bar */}
                             <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-2">
-                                <div className="small text-white-50">
-                                    © 2025 <span className="text-white fw-semibold">KidoEdu</span>. All rights reserved.
-                                </div>
+                                <div className="small text-white-50 ">
+                                    <img
+                                        src={logo}
+                                        alt="Logo công ty Gentech"
+                                        className="img-fluid"
+                                        style={{ width: 'clamp(72px, 10vw, 90px)', height: 'auto' }}
+                                    />                                </div>
                                 <div className="d-flex align-items-center gap-3 small">
                                     <span className="badge bg-primary-subtle text-primary border border-primary-subtle">Freeship</span>
                                     <span className="badge bg-warning-subtle text-warning border border-warning-subtle">Trả góp 0%</span>
@@ -340,7 +345,6 @@ export default function Footer() {
 
             <div className="bg-dark text-light d-block d-sm-none">
                 <div className="container-xl d-flex justify-content-between align-items-center py-3 small">
-                    <div className="mb-0">© 2025 KidoEdu. All rights reserved.</div>
                     {/* optional: social icons on desktop */}
                 </div>
                 <a
