@@ -189,15 +189,27 @@ export default function Footer() {
                                         >
                                             0319127924
                                         </a>{" "}
-                                        do Sở KH & ĐT TP HCM cấp ngày 26/08/2025
+                                        do Sở KH & ĐT TP HCM cấp ngày 31/10/2025
                                     </p>
                                     <p className="mb-1">
                                         Địa chỉ: Số 1 Đường Cộng Hòa 3, Phường Phú Thọ Hòa, TP Hồ Chí
                                         Minh, Việt Nam
                                     </p>
-                                    <p className="mb-0 fst-italic text-warning">
-                                        Website chạy thử chờ cấp phép của BCT
+                                    <p className="mb-0">
+                                        <a
+                                            href="http://online.gov.vn/Home/WebDetails/137241?AspxAutoDetectCookieSupport=1"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <img
+                                                src="https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/FE/images/hompage_49.png"
+                                                alt="Đã đăng ký Bộ Công Thương"
+                                                style={{ height: "45px", marginTop: "5px" }}
+                                            />
+
+                                        </a>
                                     </p>
+
                                 </div>
                             </div>
 
