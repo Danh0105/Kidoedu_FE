@@ -63,6 +63,41 @@ export default function BirthdayKimChi() {
         const idx = order.indexOf(theme);
         setTheme(order[(idx + 1) % order.length]);
     };
+    // autotheme
+    useEffect(() => {
+        const order = themes.map((t) => t.key);
+        const interval = setInterval(() => {
+            setTheme((prev) => {
+                const idx = order.indexOf(prev);
+                return order[(idx + 1) % order.length];
+            });
+        }, 1500); // đổi mỗi 10 giây
+
+        return () => clearInterval(interval); // cleanup
+    }, []);
+    useEffect(() => {
+        const autoPlay = async () => {
+            const el = audioRef.current;
+            if (!el) return;
+
+            try {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) {
+                    if (!window.__appAudioCtx) window.__appAudioCtx = new Ctx();
+                    await window.__appAudioCtx.resume();
+                }
+
+                el.muted = false;
+                el.volume = 1;
+                await el.play();
+                setIsPlaying(true);
+            } catch (err) {
+                console.warn("Autoplay failed", err);
+            }
+        };
+
+        autoPlay();
+    }, []);
 
     // SHARE
     const shareWish = async () => {
@@ -211,45 +246,7 @@ ${url}`);
             )}
 
             <div className="container py-5 position-relative">
-                {/* CONTROL BAR */}
-                <div className="row justify-content-center mb-3">
-                    <div className="col-12 col-lg-10">
-                        <div className="d-flex flex-wrap gap-2 align-items-center justify-content-between bg-white bg-opacity-75 border rounded-4 p-3 shadow-sm">
-                            <div className="d-flex flex-wrap gap-2 align-items-center">
-                                <select className="form-select" style={{ maxWidth: 180 }} value={theme} onChange={(e) => setTheme(e.target.value)}>
-                                    {themes.map((t) => (
-                                        <option key={t.key} value={t.key}>{t.label}</option>
-                                    ))}
-                                </select>
-                                <button className="btn btn-outline-dark" onClick={switchTheme}><i className="bi bi-palette me-1" />Đổi theme</button>
-                                <div className="d-flex align-items-center gap-2">
-                                    <span className="small text-muted">Accent</span>
-                                    <input type="color" className="form-control form-control-color" value={accent} onChange={(e) => setAccent(e.target.value)} title="Chọn màu nhấn" />
-                                </div>
-                                <button className={`btn btn-${showConfetti ? "warning" : "success"}`} onClick={() => setShowConfetti((s) => !s)}>
-                                    {showConfetti ? "Tắt pháo giấy" : "Bật pháo giấy"}
-                                </button>
-                            </div>
 
-                            <div className="d-flex flex-wrap gap-2 align-items-center w-100">
-                                <div className="input-group" style={{ maxWidth: 300 }}>
-                                    <span className="input-group-text"><i className="bi bi-music-note-beamed" /></span>
-                                    <select className="form-select" value={track} onChange={(e) => onChangeTrack(e.target.value)}>
-                                        <option value={track}>Happy Birthday – Piano</option>
-                                        <option value={track}>Happy Birthday – Lite</option>
-                                        <option value={track}>Celebration – Beat</option>
-                                    </select>
-                                </div>
-                                <button className={`btn ${isPlaying ? "btn-danger" : "btn-primary"}`} onClick={togglePlay}>
-                                    {isPlaying ? <i className="bi bi-pause-fill me-1" /> : <i className="bi bi-play-fill me-1" />}
-                                    {isPlaying ? "Tạm dừng nhạc" : "Phát nhạc"}
-                                </button>
-                                <button className="btn btn-outline-primary" onClick={shareToFacebook}><i className="bi bi-facebook me-1" />Chia sẻ Facebook</button>
-                                <button className="btn btn-outline-success" onClick={shareToZalo}><i className="bi bi-chat-dots me-1" />Chia sẻ Zalo</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 {/* CARD */}
                 <div className="row justify-content-center">
@@ -317,6 +314,7 @@ ${url}`);
                         </div>
                     </div>
                 </div>
+
             </div>
 
             {/* Hidden audio element */}
@@ -366,4 +364,23 @@ const styles = `
   .confetti { position: absolute; top: -10vh; border-radius: 2px; background: linear-gradient(135deg, #ffffff, #ffffff); box-shadow: 0 0 0 1px rgba(0,0,0,.05) inset; animation-name: fall, sway; animation-timing-function: linear, ease-in-out; animation-iteration-count: infinite; }
   @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
   @keyframes sway { 0%, 100% { margin-left: 0 } 50% { margin-left: 16px } }
+html, body {
+transition: background 2s ease-in-out, filter 1.5s ease;
+}
+.sunrise, .aurora, .candy, .royal, .ocean, .sunset {
+transition: background 2s ease-in-out, filter 1.5s ease;
+will-change: background;
+}
+
+
+.theme-transition {
+animation: fadeTheme 2s ease-in-out;
+}
+
+
+@keyframes fadeTheme {
+from { filter: brightness(0.95) saturate(0.8); }
+to { filter: brightness(1) saturate(1); }
+}
+
 `;
