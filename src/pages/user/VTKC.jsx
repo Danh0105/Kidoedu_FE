@@ -231,8 +231,8 @@ ${url}`);
                                 </button>
                             </div>
 
-                            <div className="d-flex flex-wrap gap-2 align-items-center">
-                                <div className="input-group" style={{ maxWidth: 320 }}>
+                            <div className="d-flex flex-wrap gap-2 align-items-center w-100">
+                                <div className="input-group" style={{ maxWidth: 300 }}>
                                     <span className="input-group-text"><i className="bi bi-music-note-beamed" /></span>
                                     <select className="form-select" value={track} onChange={(e) => onChangeTrack(e.target.value)}>
                                         <option value={track}>Happy Birthday – Piano</option>
@@ -244,8 +244,6 @@ ${url}`);
                                     {isPlaying ? <i className="bi bi-pause-fill me-1" /> : <i className="bi bi-play-fill me-1" />}
                                     {isPlaying ? "Tạm dừng nhạc" : "Phát nhạc"}
                                 </button>
-                                <button className="btn btn-success" onClick={exportPNG}><i className="bi bi-download me-1" />Xuất thiệp PNG</button>
-                                {/* Share buttons */}
                                 <button className="btn btn-outline-primary" onClick={shareToFacebook}><i className="bi bi-facebook me-1" />Chia sẻ Facebook</button>
                                 <button className="btn btn-outline-success" onClick={shareToZalo}><i className="bi bi-chat-dots me-1" />Chia sẻ Zalo</button>
                             </div>
@@ -258,15 +256,11 @@ ${url}`);
                     <div className="col-12 col-lg-10">
                         <div ref={cardRef} className="card shadow-lg border-0 overflow-hidden rounded-4 birthday-card">
                             <div className="position-relative">
-                                {/* Ribbon */}
-                                <div className="ribbon">
-                                    <span>Happy Birthday</span>
-                                </div>
                                 {/* Hero */}
                                 <div className="hero p-4 p-md-5 text-center text-light">
                                     <div className="display-6 fw-bold text-shadow lh-1">Chúc mừng sinh nhật</div>
                                     <h1 className="display-4 fw-black mb-3 text-shadow">Vũ Thị Kim Chi</h1>
-                                    <p className="lead mb-0 opacity-75">Ngày hôm nay là của Chi — hãy tỏa sáng, tận hưởng và cười thật nhiều nhé! ✨</p>
+                                    <p className="lead mb-0 fw-bold text-shadow lh-1">Ngày hôm nay là của Chi — hãy tỏa sáng, tận hưởng và cười thật nhiều nhé! ✨</p>
                                 </div>
                             </div>
 
