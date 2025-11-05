@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Slider from "react-slick";
 import InnerImageZoom from "react-inner-image-zoom";
 import "slick-carousel/slick/slick.css";
@@ -8,60 +8,183 @@ import { NavLink, useParams } from "react-router-dom";
 import axios from "axios";
 import ModalCart from "../../components/user/ModalCart";
 import { ProductInfoPanel } from "../../components/user/ProductInfoPanel";
+import { ProductSpecs } from "./ProductSpecs";
+import "../../components/user/css/ProductDetail.css";
 
+const PLACEHOLDER = "/placeholder-800x800.png";
+
+/* ==========================================================================
+   Helper: CautionNotes - render danh sách lưu ý (mẹo / cảnh báo / nguy hiểm)
+   ========================================================================== */
+const CautionNotes = ({ notes, maxVisible = 6, title = "Lưu ý quan trọng" }) => {
+    const [expanded, setExpanded] = useState(false);
+
+    const META = {
+        info: { icon: "bi bi-info-circle-fill text-info", label: "Mẹo", badge: "text-bg-info" },
+        warning: { icon: "bi bi-exclamation-triangle-fill text-warning", label: "Cảnh báo", badge: "text-bg-warning" },
+        danger: { icon: "bi bi-exclamation-octagon-fill text-danger", label: "Nguy hiểm", badge: "text-bg-danger" },
+        default: { icon: "bi bi-dot text-secondary", label: "Lưu ý", badge: "text-bg-secondary" },
+    };
+
+    if (!notes) return <p className="text-muted m-0">Chưa có lưu ý.</p>;
+
+    const splitText = (t) =>
+        String(t)
+            .replace(/\r\n|\n|\t/g, " ")
+            .replace(/\s{2,}/g, " ")
+            .trim()
+            .split(/\s+[–|-]\s+|;(?=\s)|\u2022|\•|\.\s+(?=[A-ZÀ-ỹ0-9])/g)
+            .map((s) => s.trim())
+            .filter(Boolean);
+
+    const list = Array.isArray(notes)
+        ? notes.flatMap((n) => splitText(n))
+        : splitText(notes);
+
+    const items = list.map((text) => {
+        const m = text.match(/\((info|warning|danger)\)\s*$/i);
+        const level = m ? m[1].toLowerCase() : "default";
+        return { text: m ? text.replace(m[0], "").trim().replace(/[.;,]$/, "") : text, level };
+    });
+
+    const visible = expanded ? items : items.slice(0, maxVisible);
+
+    return (
+        <div className="vstack gap-2">
+            <div className="d-flex align-items-center gap-2">
+                <i className="bi bi-shield-check text-primary" />
+                <strong>{title}</strong>
+            </div>
+
+            <ul className="list-unstyled m-0">
+                {visible.map((it, i) => {
+                    const meta = META[it.level] ?? META.default;
+                    return (
+                        <li key={i} className="d-flex align-items-start gap-2 py-1">
+                            <i className={meta.icon} />
+                            <div>
+                                <span className={`badge rounded-pill me-2 ${meta.badge}`}>{meta.label}</span>
+                                <span>{it.text}</span>
+                            </div>
+                        </li>
+                    );
+                })}
+            </ul>
+
+            {items.length > maxVisible && (
+                <button
+                    type="button"
+                    className="btn btn-sm btn-outline-secondary align-self-start"
+                    onClick={() => setExpanded((v) => !v)}
+                >
+                    {expanded ? "Thu gọn" : `Xem thêm ${items.length - maxVisible} mục`}
+                </button>
+            )}
+        </div>
+    );
+};
+
+/* ==========================================================================
+   Component chính: ProductDetail
+   ========================================================================== */
 export default function ProductDetail() {
     const { id } = useParams();
-
-    // gallery nav
+    const [product, setProduct] = useState(null);
+    const [images, setImages] = useState([PLACEHOLDER]);
     const [nav1, setNav1] = useState(null);
     const [nav2, setNav2] = useState(null);
-
-    // data
-    const [product, setProduct] = useState(null);
-    const [images, setImages] = useState([]);
-
-    // modal cart preview
+    const [activeTab, setActiveTab] = useState("desc");
     const [showModalCart, setShowModalCart] = useState(false);
     const [cartPreview, setCartPreview] = useState(null);
 
-    const mainSettings = {
-        arrows: true,
-        fade: true,
-        dots: false,
+    // ----------- Fetch product -------------
+    useEffect(() => {
+        console.log("img", images)
+        if (!id) return;
+        (async () => {
+            try {
+                const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/products/${id}`);
+                const prod = data?.data ?? data;
+
+                setProduct(prod);
+
+                const prodImages = (prod?.imageUrl || []).map((i) => i?.image_url).filter(Boolean);
+                const variantImages = (prod?.variants || [])
+                    .flatMap((v) => v?.imageUrl || [])
+                    .map((img) => img?.imageUrl)
+                    .filter(Boolean);
+
+                const merged = [...new Set([...prodImages, ...variantImages])];
+                setImages(merged.length ? merged : [PLACEHOLDER]);
+            } catch (err) {
+                console.error("Lỗi khi lấy sản phẩm:", err);
+                setImages([PLACEHOLDER]);
+            }
+        })();
+    }, [id]);
+
+    // ----------- Helpers -------------
+
+    const handleVariantChange = (variant) => {
+        let variantImages = [];
+
+        const imgData = variant?.imageUrl;
+
+        if (Array.isArray(imgData)) {
+            // ✅ Trường hợp là mảng
+            variantImages = imgData.map((img) =>
+                typeof img === "string" ? img : img?.imageUrl
+            ).filter(Boolean);
+        } else if (typeof imgData === "string") {
+            // ✅ Trường hợp là chuỗi (1 ảnh)
+            variantImages = [imgData];
+        } else if (imgData && typeof imgData === "object") {
+            // ✅ Trường hợp là object đơn (ví dụ { imageUrl: "..." })
+            if (imgData.imageUrl) variantImages = [imgData.imageUrl];
+        }
+
+        // Nếu biến thể có ảnh riêng → hiển thị nó
+        if (variantImages.length > 0) {
+            setImages(variantImages);
+            return;
+        }
+
+        // Nếu không → fallback sang ảnh của product
+        const productImages = (product?.imageUrl || [])
+            .map((i) => (typeof i === "string" ? i : i?.image_url))
+            .filter(Boolean);
+
+        setImages(productImages.length ? productImages : [PLACEHOLDER]);
     };
 
+
+    const descHtml = product?.longDescription || "";
+    const specsData = useMemo(() => product?.specs ?? null, [product]);
+    const notes = useMemo(() => product?.cautionNotes ?? null, [product]);
+    const manual = useMemo(() => product?.userManual ?? null, [product]);
+    const origin = product?.origin ?? null;
+    const stock = typeof product?.stock_quantity === "number" ? product.stock_quantity : null;
+
+    const mainSettings = { arrows: true, fade: true, dots: false, adaptiveHeight: true };
     const thumbSettings = {
         slidesToShow: 4,
         swipeToSlide: true,
         focusOnSelect: true,
         arrows: false,
         dots: false,
+        responsive: [
+            { breakpoint: 992, settings: { slidesToShow: 5 } },
+            { breakpoint: 768, settings: { slidesToShow: 4 } },
+            { breakpoint: 576, settings: { slidesToShow: 4 } },
+        ],
     };
 
-    const fetchProduct = async () => {
-        try {
-            const res = await axios.get(`${process.env.REACT_APP_API_URL}/products/${id}`);
-            const data = res?.data?.data ?? res?.data;
-            setProduct(data);
-
-            const imageUrls =
-                data?.images?.map((img) => img?.image_url).filter(Boolean) ?? [];
-            setImages(imageUrls.length ? imageUrls : ["/placeholder-800x800.png"]);
-        } catch (err) {
-            console.error("Lỗi khi lấy sản phẩm:", err);
-            setImages(["/placeholder-800x800.png"]);
-        }
-    };
-
-    useEffect(() => {
-        if (id) fetchProduct();
-    }, [id]);
-
+    // ----------- Render -------------
     return (
         <div className="container py-4">
             {/* Breadcrumb */}
             <nav style={{ "--bs-breadcrumb-divider": "'>'" }} aria-label="breadcrumb">
-                <ol className="breadcrumb">
+                <ol className="breadcrumb mb-3">
                     <li className="breadcrumb-item">
                         <NavLink to="/store">Cửa hàng</NavLink>
                     </li>
@@ -72,68 +195,60 @@ export default function ProductDetail() {
             </nav>
 
             <div className="row g-4">
-                {/* Cột ảnh sản phẩm */}
-                <div className="col-md-6">
-                    <div className="product-slider bg-white p-3 rounded-4 shadow-sm position-relative" >
-                        {/* Slider chính (có zoom) */}
-                        <Slider
-                            {...mainSettings}
-                            asNavFor={nav2}
-                            ref={(slider1) => setNav1(slider1)}
-                            style={{ width: "204px", height: "311px", margin: "0 auto" }}
-                        >
-                            {images.map((src, idx) => (
-                                <div key={idx} >
-                                    <InnerImageZoom
-                                        src={src}
-                                        zoomSrc={src}
-                                        zoomType="hover"
-                                        zoomScale={1}
-                                        alt={`Ảnh ${idx + 1}`}
-                                        className="img-fluid"
-                                        style={{ maxHeight: "360px", objectFit: "contain" }}
-                                    />
-                                </div>
-                            ))}
-                        </Slider>
+                {/* Image gallery */}
+                <div className="col-12 col-md-6">
+                    <div className="product-slider bg-white p-3 rounded-4 shadow-sm position-relative">
+                        {images.length ? (
+                            <>
+                                <Slider {...mainSettings} asNavFor={nav2} ref={setNav1} className="main-slider">
+                                    {images.map((src, i) => (
+                                        <div key={i}>
+                                            <InnerImageZoom
+                                                src={src}
+                                                zoomSrc={src}
+                                                zoomType="hover"
+                                                zoomScale={1.2}
+                                                alt={`Ảnh sản phẩm ${i + 1}`}
+                                                className="img-fluid rounded-3"
+                                                onError={(e) => (e.currentTarget.src = PLACEHOLDER)}
+                                            />
+                                        </div>
+                                    ))}
+                                </Slider>
 
-                        {/* Slider thumbnail */}
-                        <div className="mt-3">
-                            <Slider
-                                {...thumbSettings}
-                                asNavFor={nav1}
-                                ref={(slider2) => setNav2(slider2)}
-                            >
-                                {images.map((src, idx) => (
-                                    <div key={idx} className="px-1">
-                                        <img
-                                            src={src}
-                                            alt={`Thumb ${idx + 1}`}
-                                            className="img-fluid"
-                                            style={{
-                                                height: "90px",
-                                                objectFit: "contain",
-                                                border: "1px solid #ddd",
-                                                borderRadius: "6px",
-                                                cursor: "pointer",
-                                                width: "100%",
-                                                background: "#fff",
-                                            }}
-                                        />
+                                {images.length > 1 && (
+                                    <div className="mt-2">
+                                        <Slider {...thumbSettings} asNavFor={nav1} ref={setNav2} className="thumb-slider">
+                                            {images.map((src, i) => (
+                                                <div key={i} className="px-1">
+                                                    <img
+                                                        src={src}
+                                                        alt={`Thumb ${i + 1}`}
+                                                        className="img-fluid rounded-2 thumb-img"
+                                                        onError={(e) => (e.currentTarget.src = PLACEHOLDER)}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </Slider>
                                     </div>
-                                ))}
-                            </Slider>
-                        </div>
-
-                        {/* nhắc có Zoom */}
-                        <span className="position-absolute bottom-0 end-0 m-2 badge bg-dark-subtle text-dark">
+                                )}
+                            </>
+                        ) : (
+                            <div className="text-center p-4 text-muted">
+                                <img src={PLACEHOLDER} alt="No image" className="img-fluid rounded-3" style={{ maxWidth: 400, opacity: 0.7 }} />
+                                <div className="mt-3">
+                                    <i className="bi bi-image me-2"></i> Chưa có hình ảnh sản phẩm
+                                </div>
+                            </div>
+                        )}
+                        <span className="zoom-hint position-absolute bottom-0 end-0 m-2 badge bg-dark-subtle text-dark">
                             <i className="bi bi-zoom-in me-1"></i> Zoom
                         </span>
                     </div>
                 </div>
 
-                {/* Cột thông tin sản phẩm (panel đã làm đẹp) */}
-                <div className="col-lg-6">
+                {/* Product info */}
+                <div className="col-12 col-lg-6">
                     <ProductInfoPanel
                         product={product}
                         images={images}
@@ -142,38 +257,73 @@ export default function ProductDetail() {
                             setShowModalCart(true);
                         }}
                         defaultQty={1}
+                        onVariantChange={handleVariantChange}
+                        onVariantsLoaded={setImages}
                     />
-                </div>
-            </div>
 
-            {/* Tab mô tả */}
-            <div className="row mt-4">
-
-
-                <div className="tab-content" id="pills-tabContent">
-                    <div
-                        className="tab-pane fade show active"
-                        id="pills-home"
-                        role="tabpanel"
-                        aria-labelledby="pills-home-tab"
-                        tabIndex="0"
-                    >
-                        <div
-                            className="product-description bg-white p-3 rounded-3 shadow-sm"
-                            dangerouslySetInnerHTML={{ __html: product?.long_description || "" }}
-                        />
+                    {/* Origin + stock badges */}
+                    <div className="d-flex flex-wrap gap-2 mt-3">
+                        {origin && (
+                            <span className="badge bg-secondary-subtle text-secondary-emphasis">
+                                <i className="bi bi-geo-alt me-1" /> Xuất xứ: <strong>{origin}</strong>
+                            </span>
+                        )}
+                        {typeof stock === "number" && (
+                            <span
+                                className={`badge ${stock > 0
+                                    ? "bg-success-subtle text-success-emphasis"
+                                    : "bg-danger-subtle text-danger-emphasis"
+                                    }`}
+                            >
+                                <i className="bi bi-box-seam me-1" /> Tồn kho: <strong>{stock}</strong>
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Modal xem nhanh giỏ */}
+            {/* Tabs */}
+            <div className="row mt-4">
+                <div className="col-12">
+                    <ul className="nav nav-tabs rounded-top overflow-auto">
+                        {[
+                            { key: "desc", label: "Chi tiết sản phẩm" },
+                            { key: "specs", label: "Thông số kỹ thuật" },
+                            { key: "notes", label: "Lưu ý" },
+                            { key: "manual", label: "Hướng dẫn sử dụng" },
+                        ].map((tab) => (
+                            <li key={tab.key} className="nav-item">
+                                <button
+                                    className={`nav-link ${activeTab === tab.key ? "active" : ""}`}
+                                    onClick={() => setActiveTab(tab.key)}
+                                >
+                                    {tab.label}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
 
+                    <div className="bg-white p-3 rounded-bottom shadow-sm border border-top-0">
+                        {activeTab === "desc" && (
+                            <div dangerouslySetInnerHTML={{ __html: descHtml }} />
+                        )}
+                        {activeTab === "specs" && <ProductSpecs specs={specsData} />}
+                        {activeTab === "notes" && <CautionNotes notes={notes} />}
+                        {activeTab === "manual" && <p className="text-muted m-0">Hướng dẫn đang cập nhật...</p>}
+                    </div>
+                </div>
+            </div>
 
-            {/* Sản phẩm liên quan (đặt sau) */}
-            <h2 className="mt-4 mb-2" style={{ fontWeight: "var(--h2-bold-font-weight,bold)" }}>
-                Sản phẩm liên quan
-            </h2>
-            {/* TODO: render grid sản phẩm liên quan từ category nếu cần */}
+            {/* Related products (placeholder) */}
+            <h2 className="mt-4 mb-2 fw-bold">Sản phẩm liên quan</h2>
+
+            {/* Quick cart modal */}
+            <ModalCart
+                show={showModalCart}
+                onClose={() => setShowModalCart(false)}
+                product={cartPreview || product}
+                images={images}
+            />
         </div>
     );
 }

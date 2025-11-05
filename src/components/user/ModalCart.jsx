@@ -104,7 +104,7 @@ export default function ModalCart({ show, onClose, product, images }) {
       >
         <div className="modal-content">
           <div className="modal-header">
-            <h1 className="modal-title fs-5">{product?.product_name || "Sản phẩm"}</h1>
+            <h1 className="modal-title fs-5">{product?.productName || "Sản phẩm"}</h1>
             <button type="button" className="btn-close" onClick={onClose}></button>
           </div>
           <div className="modal-body">
@@ -161,13 +161,13 @@ export default function ModalCart({ show, onClose, product, images }) {
                 </div>
               </div>
               <div className="col-md-6 position-relative">
-                <h2>{product?.product_name}</h2>
-                <p className="text-start">Mã sản phẩm: #{product?.product_id}</p>
+                <h2>{product?.productName}</h2>
+                <p className="text-start">Mã sản phẩm: #{product?.productId}</p>
                 <h4 className="text-danger">
                   {Number(product?.price).toLocaleString("vi-VN")} ₫
                 </h4>
                 <div className="overflow-auto" style={{ height: "240px" }}>
-                  <p className='text-start'>{product?.short_description}</p>
+                  <p className='text-start'>{product?.shortDescription}</p>
                 </div>
                 <div className=" position-absolute bottom-0 start-50 translate-middle-x w-100">
                   <div className="d-flex gap-2">
@@ -198,11 +198,11 @@ export default function ModalCart({ show, onClose, product, images }) {
                         +
                       </button>
                     </div>
-                    <button className="btn btn-danger me-2" onClick={() => addToCart(product?.product_id, quantity)}>Thêm vào giỏ hàng</button>
+                    <button className="btn btn-danger me-2" onClick={() => addToCart(product?.productId, quantity)}>Thêm vào giỏ hàng</button>
                   </div>
                   <div className="d-flex gap-2 mt-2">
                     <span>SKU: {product?.sku}</span>
-                    <span>Category: {product?.category?.category_name}</span>
+                    <span>Category: {product?.category?.categoryName}</span>
                   </div>
                 </div>
 

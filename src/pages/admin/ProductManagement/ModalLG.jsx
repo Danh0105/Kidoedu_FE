@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Category from './Category';
 import Image from './Image';
 import RichTextEditor from '../../../components/admin/RichTextEditor';
@@ -9,6 +9,10 @@ export default function ModalLG({ onProductAdded }) {
     const [categoryId, setCategoryId] = useState(null);
     const [count, setCount] = useState(1);
     const [shortDesc, setShortDesc] = useState("");
+    const [userManual, setuserManual] = useState("");
+    const [cautionNotes, setcautionNotes] = useState("");
+    const [origin, setOrigin] = useState("");
+    const [specs, setSpecs] = useState("");
     const [longDesc, setLongDesc] = useState("");
     const [nameproduct, setNameproduct] = useState("");
     const [price, setPrice] = useState(0);
@@ -75,10 +79,14 @@ export default function ModalLG({ onProductAdded }) {
 
 
             const dto = {
-                product_name: nameproduct?.trim() || "",
+                productName: nameproduct?.trim() || "",
                 sku: `SKU-${Date.now()}`,
-                short_description: stripHtml(shortDesc) || null,
-                long_description: longDesc || null,
+                shortDescription: stripHtml(shortDesc) || null,
+                longDescription: longDesc || null,
+                specs: specs || null,
+                userManual: userManual || null,
+                cautionNotes: cautionNotes || null,
+                origin: origin || null,
                 status: status ? Number(status) : 4,
                 price: Number(price) || 0,
                 stock_quantity: Number(count) || 1,
@@ -89,7 +97,7 @@ export default function ModalLG({ onProductAdded }) {
             };
 
             console.log("DTO gửi đến backend:", dto);
-            const res = await axios.post("{process.env.react_app_api_url}/products", dto);
+            const res = await axios.post(`${process.env.REACT_APP_API_URL}/products`, dto);
             if (onProductAdded) {
                 console.log("Sản phẩm mới:", res.data.data);
                 onProductAdded(res.data.data);
@@ -142,6 +150,30 @@ export default function ModalLG({ onProductAdded }) {
                                             placeholder="Mô tả ngắn"
                                             value={shortDesc}
                                             onChange={(val) => setShortDesc(val)}
+                                        />
+                                    </div>
+                                    <div className="text-start">
+                                        <div>Thông số kĩ thuật</div>
+                                        <RichTextEditor
+                                            placeholder="Thông số kĩ thuật"
+                                            value={specs}
+                                            onChange={(val) => setSpecs(val)}
+                                        />
+                                    </div>
+                                    <div className="text-start">
+                                        <div>Hướng dẫn sử dụng</div>
+                                        <RichTextEditor
+                                            placeholder="Thông số kĩ thuật"
+                                            value={specs}
+                                            onChange={(val) => setuserManual(val)}
+                                        />
+                                    </div>
+                                    <div className="text-start">
+                                        <div>Lưu ý an toàn / cảnh báo khi dùng.</div>
+                                        <RichTextEditor
+                                            placeholder="Thông số kĩ thuật"
+                                            value={specs}
+                                            onChange={(val) => setcautionNotes(val)}
                                         />
                                     </div>
                                     <div className="text-start">
@@ -212,6 +244,10 @@ export default function ModalLG({ onProductAdded }) {
                                                         <div className="d-flex w-100 align-items-center mb-1">
                                                             <span className="w-25" style={{ fontSize: "15px" }}>Giá bán(₫)</span>
                                                             <input onChange={(e) => setPrice(e.target.value)} type="text" className="form-control w-75" placeholder="" />
+                                                        </div>
+                                                        <div className="d-flex w-100 align-items-center mb-1">
+                                                            <span className="w-25" style={{ fontSize: "15px" }}>Xuất sứ</span>
+                                                            <input onChange={(e) => setOrigin(e.target.value)} type="text" className="form-control w-75" placeholder="" />
                                                         </div>
                                                         <div className="d-flex w-100 align-items-center mb-2">
                                                             <span style={{ fontSize: "15px", width: "140px" }}>Số lượng</span>

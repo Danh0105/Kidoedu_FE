@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -11,6 +11,35 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function ShippingPolicyPage() {
+    const [policies, setPolicies] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    // Lấy dữ liệu từ API backend (theo slug “CSGH”)
+    useEffect(() => {
+        const fetchPolicies = async () => {
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_URL}/policies`);
+                const data = await res.json();
+                const filtered = data.filter((p) => p.slug === "CSGH");
+                setPolicies(filtered);
+            } catch (error) {
+                console.error("Lỗi tải chính sách vận chuyển:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPolicies();
+    }, []);
+
+    // Map biểu tượng phù hợp cho từng mục
+    const icons = [faBoxOpen, faClock, faMapMarkedAlt];
+
+    if (loading)
+        return <div className="text-center mt-5 text-muted">Đang tải dữ liệu...</div>;
+
+    if (policies.length === 0)
+        return <div className="text-center mt-5 text-muted">Không có dữ liệu chính sách vận chuyển.</div>;
+
     return (
         <div className="container my-5">
             {/* Header */}
@@ -24,66 +53,24 @@ export default function ShippingPolicyPage() {
                 </p>
             </div>
 
-            {/* Nội dung chính */}
-            <div className="card shadow-sm border-0 p-4 mb-5">
-                {/* a) Phương thức giao hàng */}
-                <h4 className="fw-bold text-success mb-3">
-                    a) Các phương thức giao hàng
-                </h4>
-                <p>Chúng tôi áp dụng 2 hình thức giao hàng linh hoạt để phù hợp với nhu cầu của khách hàng:</p>
-                <ul>
-                    <li>
-                        <FontAwesomeIcon icon={faBoxOpen} className="text-primary me-2" />
-                        <strong>Mua hàng trực tiếp</strong> tại công ty hoặc cửa hàng Kido.
-                    </li>
-                    <li>
-                        <FontAwesomeIcon icon={faTruck} className="text-success me-2" />
-                        <strong>Giao hàng tận nơi (Ship hàng)</strong> thông qua các đơn vị vận chuyển chuyên nghiệp.
-                    </li>
-                </ul>
-            </div>
+            {/* Danh sách chính sách từ DB */}
+            {policies.map((p, index) => (
+                <div key={p.id} className="card shadow-sm border-0 p-4 mb-4">
+                    <h4 className="fw-bold text-success mb-3">
+                        <FontAwesomeIcon icon={icons[index % icons.length]} className="me-2" />
+                        {p.title}
+                    </h4>
+                    <div
+                        className="text-secondary"
+                        style={{ whiteSpace: "pre-line" }}
+                        dangerouslySetInnerHTML={{
+                            __html: p.description.replace(/\n/g, "<br/>"),
+                        }}
+                    />
+                </div>
+            ))}
 
-            {/* b) Thời hạn giao hàng */}
-            <div className="card shadow-sm border-0 p-4 mb-5">
-                <h4 className="fw-bold text-success mb-3">
-                    b) Thời hạn ước tính cho việc giao hàng
-                </h4>
-                <p>
-                    Sau khi nhận được thông tin đặt hàng, chúng tôi sẽ <strong>xử lý đơn trong vòng 24 giờ</strong> và liên hệ xác nhận thông tin thanh toán – giao nhận với khách hàng.
-                </p>
-                <p>
-                    <FontAwesomeIcon icon={faClock} className="text-warning me-2" />
-                    Thời gian giao hàng dự kiến: <strong>3 – 5 ngày</strong> kể từ khi chốt đơn hoặc theo thỏa thuận.
-                </p>
-
-                <p className="fw-semibold mt-3">Một số trường hợp có thể kéo dài hơn do:</p>
-                <ul>
-                    <li>Không liên lạc được với khách hàng qua điện thoại.</li>
-                    <li>Địa chỉ giao hàng không chính xác hoặc khó tìm.</li>
-                    <li>Số lượng đơn hàng tăng đột biến làm chậm tiến độ xử lý.</li>
-                    <li>Đối tác cung cấp hoặc đơn vị vận chuyển bị chậm trễ ngoài dự kiến.</li>
-                </ul>
-
-                <p className="mt-3">
-                    <FontAwesomeIcon icon={faHandshake} className="text-info me-2" />
-                    <strong>Phí vận chuyển:</strong>
-                    Kido sử dụng dịch vụ vận chuyển ngoài, vì vậy phí giao hàng sẽ được tính theo biểu phí của đơn vị vận chuyển tùy khu vực và khối lượng hàng hóa.
-                    Chúng tôi sẽ thông báo cụ thể mức phí khi xác nhận đơn hàng.
-                </p>
-            </div>
-
-            {/* c) Giới hạn địa lý */}
-            <div className="card shadow-sm border-0 p-4 mb-5">
-                <h4 className="fw-bold text-success mb-3">
-                    c) Giới hạn về mặt địa lý cho việc giao hàng
-                </h4>
-                <p>
-                    Với khách hàng ở <strong>tỉnh xa hoặc mua số lượng lớn</strong>, Kido sẽ sử dụng dịch vụ giao nhận của các công ty vận chuyển uy tín.
-                    Cước phí sẽ được tính theo mức phí của đơn vị giao nhận hoặc theo thỏa thuận hợp đồng giữa hai bên.
-                </p>
-            </div>
-
-            {/* Lưu ý */}
+            {/* Lưu ý quan trọng */}
             <div className="bg-light p-4 rounded-3 shadow-sm">
                 <h5 className="fw-bold text-danger mb-3">
                     <FontAwesomeIcon icon={faInfoCircle} className="me-2" />

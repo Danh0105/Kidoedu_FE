@@ -272,8 +272,8 @@ function ResultsGrid({ items, loading }) {
   return (
     <div className="row g-3">
       {items?.map((it) => {
-        const id = it?.product_id ?? it?.id;
-        const name = it?.product_name ?? it?.name ?? "Sản phẩm";
+        const id = it?.productId ?? it?.id;
+        const name = it?.productName ?? it?.name ?? "Sản phẩm";
         const img = it?.images?.[0]?.image_url ?? it?.image_url;
         const price = toVND(it?.price || it?.sale_price || it?.min_price || 0);
 

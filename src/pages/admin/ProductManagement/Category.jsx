@@ -7,7 +7,7 @@ export default function Category({ onChange }) {
   const [categoryName, setCategoryName] = useState("");
   const [parentId, setParentId] = useState(null);
   useEffect(() => {
-    axios.get("${process.env.react_app_api_url}/categories").then((res) => {
+    axios.get(`${process.env.REACT_APP_API_URL}/categories`).then((res) => {
       const roots = res.data.filter((cat) => cat.parent === null);
       setCategories(roots);
     });
@@ -23,9 +23,9 @@ export default function Category({ onChange }) {
     }
 
     try {
-      await axios.delete(`{process.env.react_app_api_url}/categories/${id}`);
+      await axios.delete(`${process.env.REACT_APP_API_URL}/categories/${id}`);
 
-      const res = await axios.get(`{process.env.react_app_api_url}/categories`);
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/categories`);
       const roots = res.data.filter((cat) => cat.parent === null);
       setCategories(roots);
     } catch (error) {
@@ -44,10 +44,10 @@ export default function Category({ onChange }) {
 
     try {
       const dto = {
-        category_name: categoryName,
+        categoryName: categoryName,
         parent_category_id: parentId || null,
       };
-      const res = await axios.post(`{process.env.react_app_api_url}/categories`, dto);
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/categories`, dto);
       const newCat = res.data;
       if (newCat.parent) {
         setCategories((prev) =>
@@ -119,7 +119,7 @@ export default function Category({ onChange }) {
                 </option>
                 {categories.map((p) => (
                   <option key={p.category_id} value={p.category_id}>
-                    {p.category_name}
+                    {p.categoryName}
                   </option>
                 ))}
               </select>

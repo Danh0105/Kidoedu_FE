@@ -5,6 +5,7 @@ import AdminAppRoutes from "./routes/AdminAppRoutes";
 import useAutoLogout from "./hooks/useAutoLogout";
 import { CartProvider } from "./hooks/CartContext";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import LoadPage from "./hooks/LoadPage";
 function App() {
 
 
@@ -12,12 +13,14 @@ function App() {
 
     <React.StrictMode>
       {/*  <MobileBlocker /> */}
-      {useAutoLogout()}
-      <CartProvider>
-        <UserAppRoutes />
-      </CartProvider>
+      <LoadPage>
+        {useAutoLogout()}
+        <CartProvider>
+          <UserAppRoutes />
+        </CartProvider>
 
-      <AdminAppRoutes />
+        <AdminAppRoutes />
+      </LoadPage>
     </React.StrictMode>
 
 

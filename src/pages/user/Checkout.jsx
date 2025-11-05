@@ -6,6 +6,7 @@ import { CartContext } from "../../hooks/CartContext";
 import ModalInfo from "../../components/user/ModalInfo";
 import ModalPayment from "../../components/user/ModalPayment";
 
+const PLACEHOLDER_IMG = "https://placehold.co/600x600?text=No+Image";
 export default function Checkout() {
   const navigate = useNavigate();
   const { selectedProducts } = useContext(CartContext);
@@ -24,7 +25,7 @@ export default function Checkout() {
   // Lấy thông tin sản phẩm và shipping từ cookie
   useEffect(() => {
     if (selectedProducts?.length) setProducts(selectedProducts);
-
+    console.log(selectedProducts)
     const saved = Cookies.get("shippingInfo");
     if (saved) {
       try {
@@ -48,7 +49,7 @@ export default function Checkout() {
 
   // Tính tổng tiền
   const totalPrice = products.reduce(
-    (sum, p) => sum + p.data.price * p.quantity,
+    (sum, p) => sum + p.variant.price * p.quantity,
     0
   );
   const shippingFee = 0;
@@ -63,17 +64,18 @@ export default function Checkout() {
     }
 
     try {
-      const parsed = JSON.parse(saved);
-      parsed.items = selectedProducts.map((p) => ({
-        product_id: p.data.product_id,
+
+      shippingInfo.items = selectedProducts.map((p) => ({
+        variantId: p.variant.variantId,
         quantity: p.quantity,
-        price_per_unit: Number(p.data.price),
+        prices: p.variant.price
       }));
 
-      const url = parsed.API;
-      delete parsed.API;
+      const url = shippingInfo.API;
 
-      const res = await axios.post(url, parsed);
+      delete shippingInfo.API;
+      console.log(shippingInfo)
+      const res = await axios.post(url, shippingInfo);
       navigate("/invoice", { state: { order: res.data.order, items: products } });
     } catch (err) {
       console.error("❌ Lỗi gửi đơn hàng:", err);
@@ -101,12 +103,12 @@ export default function Checkout() {
         method: "momo",
       }));
 
-      const res = await axios.post(`{process.env.react_app_api_url}/momo/create-payment`, {
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/momo/create-payment`, {
         amount: finalTotal,
         orderId,
         items: products.map((p) => ({
-          id: p.data.product_id,
-          name: p.data.product_name,
+          id: p.data.productId,
+          name: p.data.productName,
           qty: p.quantity,
           price: p.data.price,
         })),
@@ -225,25 +227,26 @@ export default function Checkout() {
           <tbody>
             {products.length > 0 ? (
               products.map((prd) => (
-                <tr key={prd.data.product_id}>
+                <tr key={`${prd.data.productId}-${prd.variant?.variantId ?? 'base'}`}>
                   <td className="d-flex align-items-start align-items-md-center gap-2">
                     <img
-                      src={prd.data.images?.[0]?.image_url}
+                      onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
+                      src={prd.variant?.imageUrl || PLACEHOLDER_IMG}
                       alt="Sản phẩm"
                       width={80}
                       height={80}
                       className="rounded me-0 me-md-2 object-cover"
                     />
                     <span className="fw-semibold text-dark small text-wrap prod-title">
-                      {prd.data.product_name}
+                      {prd.data.productName}
                     </span>
                   </td>
                   <td className="text-center d-none d-md-table-cell">
-                    {Number(prd.data.price).toLocaleString()} ₫
+                    {Number(prd.variant?.price).toLocaleString()} ₫
                   </td>
                   <td className="text-center">{prd.quantity}</td>
                   <td className="text-center text-danger fw-bold">
-                    {(prd.data.price * prd.quantity).toLocaleString()} ₫
+                    {(prd.variant?.price * prd.quantity).toLocaleString()} ₫
                   </td>
                 </tr>
               ))

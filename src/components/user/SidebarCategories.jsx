@@ -16,9 +16,9 @@ export default function SidebarCategories({
     if (!q) return roots;
     return roots
       .map((p) => {
-        const parentMatch = p.category_name.toLowerCase().includes(q);
+        const parentMatch = p.categoryName.toLowerCase().includes(q);
         const kids = (p.children || []).filter((c) =>
-          c.category_name.toLowerCase().includes(q)
+          c.categoryName.toLowerCase().includes(q)
         );
         if (parentMatch && kids.length === 0) return { ...p };
         if (parentMatch || kids.length) return { ...p, children: parentMatch ? p.children : kids };
@@ -94,7 +94,7 @@ export default function SidebarCategories({
                       size={18}
                       className={`me-2 ${selectedCatId === cat.category_id ? "text-danger" : "text-primary"}`}
                     />
-                    <CategoryTitle label={cat.category_name} />
+                    <CategoryTitle label={cat.categoryName} />
                     {children.length > 0 && (
                       <span className="badge text-bg-light ms-2">{children.length}</span>
                     )}
@@ -113,7 +113,7 @@ export default function SidebarCategories({
                         <RadioCategoryItem
                           key={child.category_id}
                           id={child.category_id}
-                          name={child.category_name}
+                          name={child.categoryName}
                           selectedId={selectedCatId}
                           onChange={(val) => onSelect(val == null ? null : Number(val))} // ✅ đảm bảo number
                         />

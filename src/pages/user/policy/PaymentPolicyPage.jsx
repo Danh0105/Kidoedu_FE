@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -12,6 +12,25 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function PaymentPolicyPage() {
+    const [policies, setPolicies] = useState([]);
+
+    // 🧠 Gọi BE để lấy danh sách chính sách thanh toán
+    useEffect(() => {
+        const fetchPolicies = async () => {
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_URL}/policies`);
+                const data = await res.json();
+                console.log(data)
+                // Lọc ra các chính sách có slug === "CSTT"
+                const filtered = data.filter((p) => p.slug == "CSTT");
+                setPolicies(filtered);
+            } catch (err) {
+                console.error("Lỗi tải chính sách thanh toán:", err);
+            }
+        };
+        fetchPolicies();
+    }, []);
+
     return (
         <div className="container my-5">
             {/* Header */}
@@ -25,51 +44,47 @@ export default function PaymentPolicyPage() {
                 </p>
             </div>
 
-            {/* Giới thiệu */}
+            {/* Nội dung chính */}
             <div className="card shadow-sm border-0 p-4 mb-5">
-                <h4 className="fw-bold text-success mb-4">3 hình thức thanh toán chính</h4>
+                <h4 className="fw-bold text-success mb-4">Các hình thức thanh toán</h4>
                 <p>
                     Quý khách có thể chọn phương thức phù hợp và thuận tiện nhất khi mua hàng tại{" "}
                     <strong>www.Kido.edu.vn</strong>:
                 </p>
 
-                {/* Các phương thức thanh toán */}
                 <div className="row g-4 mt-3">
-                    <div className="col-md-4">
-                        <div className="p-4 border rounded-3 shadow-sm h-100 bg-light">
-                            <FontAwesomeIcon icon={faMoneyBillWave} className="fs-2 text-success mb-3" />
-                            <h5 className="fw-bold">Cách 1: Thanh toán tiền mặt</h5>
-                            <p>
-                                Quý khách thanh toán trực tiếp bằng tiền mặt tại địa chỉ cửa hàng của chúng tôi.
-                                Nhân viên sẽ kiểm tra và xác nhận giao dịch ngay tại chỗ.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="col-md-4">
-                        <div className="p-4 border rounded-3 shadow-sm h-100 bg-light">
-                            <FontAwesomeIcon icon={faTruck} className="fs-2 text-primary mb-3" />
-                            <h5 className="fw-bold">Cách 2: Thanh toán khi nhận hàng (COD)</h5>
-                            <p>
-                                Quý khách nhận hàng tại nhà, kiểm tra hàng hóa và thanh toán trực tiếp cho nhân viên giao hàng.
-                                Hình thức này áp dụng cho đơn hàng giao trong nước.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="col-md-4">
-                        <div className="p-4 border rounded-3 shadow-sm h-100 bg-light">
-                            <FontAwesomeIcon icon={faCreditCard} className="fs-2 text-danger mb-3" />
-                            <h5 className="fw-bold">Cách 3: Chuyển khoản trước</h5>
-                            <p>
-                                Quý khách chuyển khoản theo thỏa thuận hoặc hợp đồng.
-                                Sau khi xác nhận thanh toán, chúng tôi sẽ tiến hành giao hàng đúng cam kết.
-                            </p>
-                            <p className="text-muted small">
-                                Thông tin tài khoản sẽ được cung cấp qua <strong>email hoặc điện thoại</strong> khi xác nhận đơn hàng.
-                            </p>
-                        </div>
-                    </div>
+                    {policies.length > 0 ? (
+                        policies.map((policy, index) => (
+                            <div className="col-md-4" key={policy.id}>
+                                <div className="p-4 border rounded-3 shadow-sm h-100 bg-light">
+                                    {/* Icon khác nhau cho từng bước */}
+                                    <FontAwesomeIcon
+                                        icon={
+                                            index === 0
+                                                ? faMoneyBillWave
+                                                : index === 1
+                                                    ? faTruck
+                                                    : faCreditCard
+                                        }
+                                        className={`fs-2 mb-3 ${index === 0
+                                            ? "text-success"
+                                            : index === 1
+                                                ? "text-primary"
+                                                : "text-danger"
+                                            }`}
+                                    />
+                                    <h5 className="fw-bold">
+                                        Cách {index + 1}: {policy.title}
+                                    </h5>
+                                    <p>{policy.description}</p>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-muted text-center mt-3">
+                            Chưa có chính sách thanh toán nào (slug = 'CSTT').
+                        </p>
+                    )}
                 </div>
             </div>
 
@@ -81,20 +96,16 @@ export default function PaymentPolicyPage() {
                 </h4>
                 <ul className="list-unstyled">
                     <li className="mb-2">
-                        - Khi chuyển khoản, <strong>vui lòng ghi rõ nội dung</strong>: số điện thoại hoặc số hợp đồng/hóa đơn.
+                        - Khi chuyển khoản, <strong>vui lòng ghi rõ nội dung</strong>: số điện thoại hoặc mã hóa đơn.
                     </li>
                     <li className="mb-2">
-                        - Sau khi chuyển khoản, Kido sẽ liên hệ xác nhận và tiến hành giao hàng theo thời gian thỏa thuận.
+                        - Sau khi chuyển khoản, Kido sẽ liên hệ xác nhận và giao hàng đúng thời gian đã cam kết.
                     </li>
                     <li className="mb-2">
-                        - Nếu quá thời hạn mà không nhận được phản hồi hoặc hàng hóa, Quý khách có thể gửi <strong>khiếu nại trực tiếp</strong> đến trụ sở
-                        và yêu cầu bồi thường nếu chứng minh được thiệt hại.
+                        - Nếu có vấn đề phát sinh, Quý khách có thể gửi <strong>khiếu nại</strong> trực tiếp đến bộ phận chăm sóc khách hàng.
                     </li>
                     <li className="mb-2">
-                        - Với khách hàng <strong>mua số lượng lớn hoặc buôn sỉ</strong>, vui lòng liên hệ trực tiếp để có chính sách giá và thanh toán theo hợp đồng.
-                    </li>
-                    <li className="mb-0">
-                        - Chúng tôi cam kết <strong>kinh doanh minh bạch, hợp pháp</strong> – tất cả sản phẩm đều có nguồn gốc rõ ràng và chất lượng đảm bảo.
+                        - Với khách hàng <strong>mua sỉ hoặc hợp đồng</strong>, vui lòng liên hệ trực tiếp để có chính sách riêng.
                     </li>
                 </ul>
             </div>
@@ -113,7 +124,7 @@ export default function PaymentPolicyPage() {
                         lytran@ichiskill.edu.vn
                     </a>
                 </p>
-                <p className="mb-0">Địa chỉ: Số 1 Đường Cộng Hòa 3 - Phường Phú Thọ Hòa - TP. Hồ Chí Minh.</p>
+                <p className="mb-0">Địa chỉ: 16/17 Nguyễn Thiện Thuật, Phường Bàn Cờ, TP. Hồ Chí Minh.</p>
             </div>
         </div>
     );

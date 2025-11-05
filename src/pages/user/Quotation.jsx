@@ -4,7 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { NavLink } from "react-router-dom";
 import { CartContext } from "../../hooks/CartContext";
 
-export default function Quotation({ apiBase = `{process.env.react_app_api_url}` }) {
+export default function Quotation({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
   const [products, setProducts] = useState([]);
   const [quality, setQuality] = useState(1); // ✅ Khai báo state quality
   const { setSelectedProducts } = useContext(CartContext);
@@ -58,7 +58,7 @@ export default function Quotation({ apiBase = `{process.env.react_app_api_url}` 
           <tbody>
             {products.length > 0 ? (
               products.map((p) => (
-                <tr key={p.product_id}>
+                <tr key={p.productId}>
                   {/* Hình ảnh */}
                   <td>
                     <img
@@ -66,7 +66,7 @@ export default function Quotation({ apiBase = `{process.env.react_app_api_url}` 
                         p.images?.[0]?.image_url ||
                         "https://via.placeholder.com/100"
                       }
-                      alt={p.product_name}
+                      alt={p.productName}
                       className="img-fluid rounded"
                       style={{ maxHeight: "100px" }}
                     />
@@ -74,12 +74,12 @@ export default function Quotation({ apiBase = `{process.env.react_app_api_url}` 
 
                   {/* Tên sản phẩm */}
                   <td className="text-start">
-                    <strong>{p.product_name}</strong>
+                    <strong>{p.productName}</strong>
                     <br />
                     <button
                       className="btn btn-sm btn-outline-primary mt-2"
                       onClick={() =>
-                        window.open(`/productdetail/${p.product_id}`, "_blank")
+                        window.open(`/productdetail/${p.productId}`, "_blank")
                       }
                     >
                       Xem thêm

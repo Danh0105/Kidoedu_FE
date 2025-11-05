@@ -7,7 +7,7 @@ function CategoryItem({ category, onDelete, onSelect }) {
         className="form-check-label fw-bold"
         htmlFor={`cat-${category.category_id}`}
       >
-        {category.category_name}
+        {category.categoryName}
       </label>
       <a
         type="button"
@@ -40,7 +40,7 @@ function CategoryItem({ category, onDelete, onSelect }) {
                   className="form-check-label"
                   htmlFor={`cat-${child.category_id}`}
                 >
-                  {child.category_name}
+                  {child.categoryName}
                   <a
                     type="button"
                     className="btn-close"

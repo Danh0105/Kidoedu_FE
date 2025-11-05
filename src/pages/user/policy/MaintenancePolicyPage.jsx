@@ -1,105 +1,114 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-    faTruck,
-    faBoxOpen,
-    faClock,
-    faMapMarkedAlt,
-    faInfoCircle,
+    faScrewdriverWrench,
     faHandshake,
+    faShieldAlt,
+    faLaptop,
+    faCheckCircle,
+    faClock,
+    faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
 
-export default function MaintenancePolicyPage() {
+export default function ChinhSachBaoTri() {
+    const [policies, setPolicies] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    // Gọi API lấy chính sách theo slug
+    useEffect(() => {
+        const fetchPolicies = async () => {
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_URL}/policies`);
+                const data = await res.json();
+                const filtered = data.filter((p) => p.slug === "CSBTBH");
+                setPolicies(filtered);
+            } catch (err) {
+                console.error("Lỗi khi tải dữ liệu:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPolicies();
+    }, []);
+
+    // Biểu tượng tương ứng từng chính sách
+    const icons = {
+        0: faHandshake,
+        1: faShieldAlt,
+        2: faLaptop,
+        3: faCheckCircle,
+        4: faClock,
+    };
+
+    if (loading)
+        return <div className="text-center mt-5 text-muted">Đang tải dữ liệu...</div>;
+
+    if (policies.length === 0)
+        return <div className="text-center mt-5 text-muted">Không có dữ liệu chính sách bảo trì & bảo hành.</div>;
+
     return (
         <div className="container my-5">
             {/* Header */}
             <div className="text-center mb-5">
                 <h1 className="fw-bold text-primary mb-3">
-                    <FontAwesomeIcon icon={faTruck} className="me-2" />
-                    Chính Sách Vận Chuyển
+                    <FontAwesomeIcon icon={faScrewdriverWrench} className="me-2" />
+                    Chính Sách Bảo Trì & Bảo Hành
                 </h1>
                 <p className="text-muted fs-5">
-                    Kido luôn nỗ lực giao hàng nhanh chóng – an toàn – đúng hẹn để đảm bảo trải nghiệm tốt nhất cho khách hàng.
+                    Kido cam kết mang đến cho khách hàng dịch vụ bảo trì, bảo hành tận tâm – nhanh chóng – minh bạch, đảm bảo quyền lợi tối đa cho người mua.
                 </p>
             </div>
 
-            {/* Nội dung chính */}
-            <div className="card shadow-sm border-0 p-4 mb-5">
-                {/* a) Phương thức giao hàng */}
-                <h4 className="fw-bold text-success mb-3">
-                    a) Các phương thức giao hàng
-                </h4>
-                <p>Chúng tôi áp dụng 2 hình thức giao hàng linh hoạt để phù hợp với nhu cầu của khách hàng:</p>
-                <ul>
-                    <li>
-                        <FontAwesomeIcon icon={faBoxOpen} className="text-primary me-2" />
-                        <strong>Mua hàng trực tiếp</strong> tại công ty hoặc cửa hàng Kido.
-                    </li>
-                    <li>
-                        <FontAwesomeIcon icon={faTruck} className="text-success me-2" />
-                        <strong>Giao hàng tận nơi (Ship hàng)</strong> thông qua các đơn vị vận chuyển chuyên nghiệp.
-                    </li>
-                </ul>
-            </div>
+            {/* Danh sách chính sách */}
+            {policies.map((p, index) => (
+                <div
+                    key={p.id}
+                    className={`card shadow-sm border-0 p-4 mb-4 ${index === 3 ? "border-danger" : "border-light"
+                        }`}
+                >
+                    <h4
+                        className={`fw-bold mb-3 ${index === 0
+                            ? "text-success"
+                            : index === 1
+                                ? "text-primary"
+                                : index === 2
+                                    ? "text-success"
+                                    : index === 3
+                                        ? "text-danger"
+                                        : "text-primary"
+                            }`}
+                    >
+                        <FontAwesomeIcon icon={icons[index]} className="me-2" />
+                        {index + 1}. {p.title}
+                    </h4>
 
-            {/* b) Thời hạn giao hàng */}
-            <div className="card shadow-sm border-0 p-4 mb-5">
-                <h4 className="fw-bold text-success mb-3">
-                    b) Thời hạn ước tính cho việc giao hàng
-                </h4>
-                <p>
-                    Sau khi nhận được thông tin đặt hàng, chúng tôi sẽ <strong>xử lý đơn trong vòng 24 giờ</strong> và liên hệ xác nhận thông tin thanh toán – giao nhận với khách hàng.
-                </p>
-                <p>
-                    <FontAwesomeIcon icon={faClock} className="text-warning me-2" />
-                    Thời gian giao hàng dự kiến: <strong>3 – 5 ngày</strong> kể từ khi chốt đơn hoặc theo thỏa thuận.
-                </p>
+                    <div
+                        className="text-secondary"
+                        style={{ whiteSpace: "pre-line" }}
+                        dangerouslySetInnerHTML={{
+                            __html: p.description.replace(/\n/g, "<br/>"),
+                        }}
+                    />
+                </div>
+            ))}
 
-                <p className="fw-semibold mt-3">Một số trường hợp có thể kéo dài hơn do:</p>
-                <ul>
-                    <li>Không liên lạc được với khách hàng qua điện thoại.</li>
-                    <li>Địa chỉ giao hàng không chính xác hoặc khó tìm.</li>
-                    <li>Số lượng đơn hàng tăng đột biến làm chậm tiến độ xử lý.</li>
-                    <li>Đối tác cung cấp hoặc đơn vị vận chuyển bị chậm trễ ngoài dự kiến.</li>
-                </ul>
-
-                <p className="mt-3">
-                    <FontAwesomeIcon icon={faHandshake} className="text-info me-2" />
-                    <strong>Phí vận chuyển:</strong>
-                    Kido sử dụng dịch vụ vận chuyển ngoài, vì vậy phí giao hàng sẽ được tính theo biểu phí của đơn vị vận chuyển tùy khu vực và khối lượng hàng hóa.
-                    Chúng tôi sẽ thông báo cụ thể mức phí khi xác nhận đơn hàng.
-                </p>
-            </div>
-
-            {/* c) Giới hạn địa lý */}
-            <div className="card shadow-sm border-0 p-4 mb-5">
-                <h4 className="fw-bold text-success mb-3">
-                    c) Giới hạn về mặt địa lý cho việc giao hàng
-                </h4>
-                <p>
-                    Với khách hàng ở <strong>tỉnh xa hoặc mua số lượng lớn</strong>, Kido sẽ sử dụng dịch vụ giao nhận của các công ty vận chuyển uy tín.
-                    Cước phí sẽ được tính theo mức phí của đơn vị giao nhận hoặc theo thỏa thuận hợp đồng giữa hai bên.
-                </p>
-            </div>
-
-            {/* Lưu ý */}
-            <div className="bg-light p-4 rounded-3 shadow-sm">
-                <h5 className="fw-bold text-danger mb-3">
+            {/* Liên hệ hỗ trợ */}
+            <div className="bg-primary text-white p-4 rounded-3 shadow-sm text-center mt-5">
+                <h5 className="fw-bold mb-3">
                     <FontAwesomeIcon icon={faInfoCircle} className="me-2" />
-                    Lưu ý quan trọng
+                    Liên hệ hỗ trợ bảo hành & bảo trì
                 </h5>
-                <ul className="list-unstyled">
-                    <li className="mb-2">
-                        - Nếu có <strong>chậm trễ</strong> trong quá trình giao hàng, Kido sẽ thông báo kịp thời cho khách hàng.
-                    </li>
-                    <li className="mb-2">
-                        - Khách hàng có thể lựa chọn giữa việc <strong>hủy đơn hàng</strong> hoặc <strong>tiếp tục chờ nhận hàng</strong> tùy nhu cầu.
-                    </li>
-                    <li className="mb-0">
-                        - Chúng tôi luôn nỗ lực đảm bảo giao hàng đúng cam kết và bảo vệ tối đa quyền lợi khách hàng.
-                    </li>
-                </ul>
+                <p className="fs-5 mb-1">
+                    Hotline:{" "}
+                    <a href="tel:0789636979" className="text-white text-decoration-underline">
+                        0789 636 979
+                    </a>
+                </p>
+                <p className="mb-1">Địa chỉ: Số 1 Đường Cộng Hòa 3 - Phường Phú Thọ Hòa - TP. Hồ Chí Minh.</p>
+                <p className="text-light small mb-0">
+                    Kido – Uy tín, tận tâm, bảo hành chuẩn mực 💙
+                </p>
             </div>
         </div>
     );

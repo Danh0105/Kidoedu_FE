@@ -29,10 +29,18 @@ import PaymentPolicy from "../pages/user/customerSupport/PaymentPolicy";
 import ContactFeedbackPage from "../pages/user/customerSupport/ContactFeedbackPage";
 import ComplaintHandlingPolicyPage from "../pages/user/policy/ComplaintHandlingPolicyPage";
 import MaintenancePolicyPage from "../pages/user/policy/MaintenancePolicyPage";
-import PaymentPolicyPage from "../pages/user/policy/PaymentPolicyPage";
-import PrivacyPolicyPage from "../pages/user/policy/PrivacyPolicyPage";
+import PaymentPolicyPage from "../pages/user/PoliciesandRegulations/PaymentPolicyPage";
+import VTKC from "../pages/user/VTKC";
+
 import ReturnPolicyPage from "../pages/user/policy/ReturnPolicyPage";
-import ShippingPolicyPage from "../pages/user/policy/ShippingPolicyPage";
+import ShippingPolicyPage from "../pages/user/PoliciesandRegulations/ShippingPolicyPage";
+import PolicyManagerPage from "../pages/admin/policy/PolicyManagerPage";
+import PriceInfoPage from "../pages/user/PoliciesandRegulations/PriceInfoPage";
+import InspectionPolicyPage from "../pages/user/PoliciesandRegulations/InspectionPolicyPage";
+import ReturnsRefundsPolicyPage from "../pages/user/PoliciesandRegulations/ReturnsRefundsPolicyPage";
+import PrivacyPolicyPage from "../pages/user/PoliciesandRegulations/PrivacyPolicyPage";
+import PoliciesPage from "../pages/user/PoliciesandRegulations/Overview";
+
 export default function AppRoutes() {
 
     return (
@@ -127,18 +135,13 @@ export default function AppRoutes() {
                 <Route path="/MaintenancePolicyPage" element={<UserLayout />}>
                     <Route index element={<MaintenancePolicyPage />} />
                 </Route>
-                <Route path="/PaymentPolicyPage" element={<UserLayout />}>
+                {/* <Route path="/PaymentPolicyPage" element={<UserLayout />}>
                     <Route index element={<PaymentPolicyPage />} />
-                </Route>
-                <Route path="/PrivacyPolicyPage" element={<UserLayout />}>
-                    <Route index element={<PrivacyPolicyPage />} />
-                </Route>
+                </Route> */}
                 <Route path="/ReturnPolicyPage" element={<UserLayout />}>
                     <Route index element={<ReturnPolicyPage />} />
                 </Route>
-                <Route path="/ShippingPolicyPage" element={<UserLayout />}>
-                    <Route index element={<ShippingPolicyPage />} />
-                </Route>
+
                 {/*     Policy */}
                 <Route path="/search" element={<UserLayout />}>
                     <Route index element={<SearchProducts />} />
@@ -158,6 +161,33 @@ export default function AppRoutes() {
                 </Route> */}
                 <Route path="/productdetail/:id" element={<UserLayout />}>
                     <Route index element={<ProductDetail />} />
+                </Route>
+                <Route path="/PolicyManagerPage" element={<UserLayout />}>
+                    <Route index element={<PolicyManagerPage />} />
+                </Route>
+                <Route path="/PriceInfoPage" element={<UserLayout />}>
+                    <Route index element={<PriceInfoPage />} />
+                </Route>
+                <Route path="/PaymentPolicyPage" element={<UserLayout />}>
+                    <Route index element={<PaymentPolicyPage />} />
+                </Route>
+                <Route path="/ShippingPolicyPage" element={<UserLayout />}>
+                    <Route index element={<ShippingPolicyPage />} />
+                </Route>
+                <Route path="/InspectionPolicyPage" element={<UserLayout />}>
+                    <Route index element={<InspectionPolicyPage />} />
+                </Route>
+                <Route path="/ReturnsRefundsPolicyPage" element={<UserLayout />}>
+                    <Route index element={<ReturnsRefundsPolicyPage />} />
+                </Route>
+                <Route path="/PrivacyPolicyPage" element={<UserLayout />}>
+                    <Route index element={<PrivacyPolicyPage />} />
+                </Route>
+                <Route path="/overview" element={<UserLayout />}>
+                    <Route index element={<PoliciesPage />} />
+                </Route>
+                <Route path="/vtkc" element={<UserLayout />}>
+                    <Route index element={<VTKC />} />
                 </Route>
             </Routes>
         </BrowserRouter>

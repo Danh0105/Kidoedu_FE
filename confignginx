@@ -1,0 +1,58 @@
+# --- HTTP (80): ACME + ép về HTTPS non-www ---
+server {
+    listen 80;
+    listen [::]:80;
+    server_name kidoedu.vn www.kidoedu.vn;
+
+    # ACME challenge cho Let's Encrypt
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+        default_type "text/plain";
+        try_files $uri =404;
+    }
+
+    # Tất cả còn lại: ép về https://kidoedu.vn
+    location / {
+        return 301 https://kidoedu.vn$request_uri;
+    }
+}
+
+# --- HTTPS (443): www -> non-www ---
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name www.kidoedu.vn;
+
+    ssl_certificate     /etc/letsencrypt/live/kidoedu.vn/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/kidoedu.vn/privkey.pem;
+
+    # TLS khuyến nghị
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    # (tuỳ chọn) ssl_stapling on; ssl_stapling_verify on;
+
+    # HSTS (bật sau khi chắc chắn HTTPS ổn)
+       # HSTS (bật sau khi chắc chắn HTTPS ổn)
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+
+    # Reverse proxy tới NestJS
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+
+        # WebSocket + headers chuẩn
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # (tuỳ chọn) timeouts nếu request nặng
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+    }
+
+    # (tuỳ chọn) nếu cần upload lớn:
+    # client_max_body_size 20m;
+}
