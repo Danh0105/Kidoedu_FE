@@ -60,13 +60,10 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     const [showAllFeatured, setShowAllFeatured] = useState(false);
     const [showAllNew, setShowAllNew] = useState(false);
     const [selectedCatId, setSelectedCatId] = useState(null);
-    const [priceRange, setPriceRange] = useState(null);
-    const basePrice = 0;
     // Modal Buy (đặt 1 lần)
     const [showModalBuy, setShowModalBuy] = useState(false);
-    const [buyProduct, setBuyProduct] = useState(null);
-    const [buyImages, setBuyImages] = useState([]);
-
+    const [products, setProduct] = useState([]);
+    const [buyProduct, setBuyProduct] = useState([]);
     const api = useMemo(
         () =>
             axios.create({
@@ -159,6 +156,8 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
             const finalProductData = productdata.filter(Boolean);
             setFeaturedProducts(finalProductData.filter((p) => p?.status === 1 || p.status === 12));
             setNewProducts(finalProductData.filter((p) => p?.status === 2 || p.status === 12));
+            setProduct(finalProductData);
+
 
         } catch (e) {
             console.error("fetchProducts error:", e);
@@ -197,17 +196,12 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
     // ===== Actions =====
     const handleBuy = async (id) => {
-        try {
-            const res = await api.get(`/products/${id}`);
-            const data = res.data?.data || null;
 
-            setBuyImages(
-                (data?.images || []).map((img) => img?.image_url).filter(Boolean)
-            );
-            setShowModalBuy(true);
-        } catch (e) {
-            console.error("handleBuy error:", e);
-        }
+        const newProduct = products.filter((p) => p?.productId === id)
+        console.log(newProduct);
+
+        setBuyProduct(newProduct)
+        setShowModalBuy(true);
     };
 
     // ===== Placeholder UI =====
@@ -389,19 +383,19 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         const ribbons = (pickRibbonsFromStatus?.(p?.status) || []).slice(0, 3);
         const imgSrc = p?.variants[0]?.imageUrl || fallbackImage;
 
-        const handleBuy = async (id) => {
-            try {
-                const res = await api.get(`/products/${id}`);
-                const data = res.data?.data || null;
-
-                setBuyImages(
-                    (data?.variants || []).map((img) => img?.imageUrl).filter(Boolean)
-                );
-                setShowModalBuy(true);
-            } catch (e) {
-                console.error("handleBuy error:", e);
-            }
-        };
+        /*    const handleBuy = async (id) => {
+               try {
+                   const res = await api.get(`/products/${id}`);
+                   const data = res.data?.data || null;
+   
+                   setBuyImages(
+                       (data?.variants || []).map((img) => img?.imageUrl).filter(Boolean)
+                   );
+                   setShowModalBuy(true);
+               } catch (e) {
+                   console.error("handleBuy error:", e);
+               }
+           }; */
 
         // Nếu có giá khuyến mãi, tính % giảm
         const hasSale = p?.sale_price && Number(p.sale_price) < Number(p.price);
@@ -605,7 +599,6 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                 show={showModalBuy}
                 onClose={() => setShowModalBuy(false)}
                 product={buyProduct}
-                images={buyImages}
             />
         </div>
     );

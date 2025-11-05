@@ -10,7 +10,7 @@ export default function ModalBuy({ show, onClose, product, images = [] }) {
   const [navMain, setNavMain] = useState(null);
   const [navThumb, setNavThumb] = useState(null);
   const [quantity, setQuantity] = useState(1);
-
+  const [selectedVariant, setSelectedVariant] = useState();
   // Slider settings — luôn khai báo Hook theo cùng thứ tự
   const mainSettings = useMemo(
     () => ({
@@ -24,6 +24,15 @@ export default function ModalBuy({ show, onClose, product, images = [] }) {
     [navThumb]
   );
 
+  const active = selectedVariant ?? {};
+  console.log(product);
+
+  const name = `${product?.productName ?? "Sản phẩm"}${active?.variantName ? ` - ${active.variantName}` : ""
+    }`;
+  const sku = active?.sku || product?.sku || `SKU-${product?.productId}`;
+  const price = active?.price ?? 0;
+  const categoryName = product[0]?.category?.categoryName;
+  const variantId = active?.variantId
   const thumbSettings = useMemo(
     () => ({
       slidesToShow: 5,
@@ -51,6 +60,7 @@ export default function ModalBuy({ show, onClose, product, images = [] }) {
   // Khoá scroll + ESC khi show=true
   useEffect(() => {
     if (!show) return;
+
     const onEsc = (e) => e.key === "Escape" && onClose?.();
     document.addEventListener("keydown", onEsc);
     const prev = document.body.style.overflow;
@@ -60,6 +70,17 @@ export default function ModalBuy({ show, onClose, product, images = [] }) {
       document.body.style.overflow = prev;
     };
   }, [show, onClose]);
+  useEffect(() => {
+    if (!product || product.length === 0) return;
+
+    const firstProduct = product.find(p => Array.isArray(p.variants) && p.variants.length > 0);
+    if (firstProduct) {
+      const firstVariant = firstProduct.variants[0];
+      setSelectedVariant([firstVariant]);
+    }
+  }, [product]);
+
+
 
   const increase = () => setQuantity((n) => n + 1);
   const decrease = () => setQuantity((n) => (n > 1 ? n - 1 : 1));
@@ -141,11 +162,36 @@ export default function ModalBuy({ show, onClose, product, images = [] }) {
               {/* Right: Info */}
               <div className="col-12 col-md-6 d-flex flex-column">
                 <div>
-                  <h2 className="h5 mb-1">{product?.productName}</h2>
-                  <p className="text-muted mb-2">Mã sản phẩm: #{product?.productId}</p>
+                  <h2 className="h5 mb-1">{name}</h2>
+                  <p className="text-muted mb-2">Mã sản phẩm: #{variantId}</p>
                   <h4 className="text-danger fw-bold mb-3">
-                    {Number(product?.price || 0).toLocaleString("vi-VN")} ₫
+                    {Number(price || 0).toLocaleString("vi-VN")} ₫
                   </h4>
+                  {product.length > 0 && (
+                    <div className="mb-3">
+                      <div className="fw-semibold mb-2">Chọn phiên bản</div>
+                      <div className="d-flex flex-wrap gap-2">
+                        {product[0].variants.map((v) => (
+                          <button
+                            key={v.variantId}
+                            type="button"
+                            className={`btn ${v.variantId === active.variantId
+                              ? "btn-primary"
+                              : "btn-outline-secondary"
+                              }`}
+                            onClick={() => {
+                              setSelectedVariant(v);
+
+                            }}
+                          >
+                            {v.attributes?.color
+                              ? `${v.attributes.color}`
+                              : v.variantName}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   {product?.shortDescription && (
                     <p className="text-body">{product.shortDescription}</p>
                   )}
@@ -190,9 +236,13 @@ export default function ModalBuy({ show, onClose, product, images = [] }) {
                   </div>
 
                   <div className="d-flex flex-wrap gap-3 mt-3 small text-muted">
-                    {product?.sku && <span>SKU: {product.sku}</span>}
-                    {product?.variants.category?.categoryName && (
-                      <span>Danh mục: {product.category.categoryName}</span>
+                    {sku && (
+                      <span className="badge bg-light text-secondary border">
+                        SKU: {sku}
+                      </span>
+                    )}
+                    {categoryName && (
+                      <span>Danh mục: {categoryName}</span>
                     )}
                   </div>
                 </div>
