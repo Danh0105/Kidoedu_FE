@@ -99,7 +99,6 @@ export default function ProductDetail() {
 
     // ----------- Fetch product -------------
     useEffect(() => {
-        console.log("img", images)
         if (!id) return;
         (async () => {
             try {
@@ -125,6 +124,23 @@ export default function ProductDetail() {
 
     // ----------- Helpers -------------
 
+    /*     const safeImages = useMemo(() => {
+            // Lấy tất cả ảnh từ các biến thể
+            const variantImages = (product?.variants || [])
+                .map((v) => v.imageUrl)
+                .filter(Boolean);
+    
+            // Đưa ảnh variant đang chọn lên đầu
+            const currentImage = selectedVariant?.imageUrl;
+    
+            const allImages = [
+                ...(currentImage ? [currentImage] : []),
+                ...variantImages,
+            ];
+    
+            // Loại trùng (theo URL)
+            return allImages.filter((v, i, arr) => arr.indexOf(v) === i);
+        }, [product]); */
     const handleVariantChange = (variant) => {
         let variantImages = [];
 

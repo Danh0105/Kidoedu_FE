@@ -163,14 +163,10 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
             console.error("fetchProducts error:", e);
         }
     }, [api]);
-    ;
-    const displayedPrice = (product) => {
-
-        if (product.minPrice === product.maxPrice) {
-            return formatCurrency(product.minPrice);
-        }
-        return `${formatCurrency(product.minPrice)} - ${formatCurrency(product.maxPrice)}`;
-    };
+    const displayedPrice = ({ minPrice, maxPrice }) =>
+        minPrice === maxPrice
+            ? formatCurrency(minPrice)
+            : `${formatCurrency(minPrice)} - ${formatCurrency(maxPrice)}`;
 
     // Lần đầu chỉ fetch dữ liệu, không gọi checkCategory ở đây
     useEffect(() => {
@@ -196,11 +192,10 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
     // ===== Actions =====
     const handleBuy = async (id) => {
+        const newProduct = products.find((p) => p?.productId === id);
+        setBuyProduct(newProduct);
 
-        const newProduct = products.filter((p) => p?.productId === id)
-        console.log(newProduct);
 
-        setBuyProduct(newProduct)
         setShowModalBuy(true);
     };
 
@@ -337,7 +332,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
                 <div className="row justify-content-center">
                     {visibleProducts.length > 0 ? (
-                        visibleProducts.map((p) => <ProductCard key={p.variants.variantId} p={p} />)
+                        visibleProducts.map((p) => <ProductCard key={p.productId} p={p} />)
                     ) : (
                         <p className="text-center text-muted">Đang cập nhật sản phẩm...</p>
                     )}
@@ -502,7 +497,6 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                                         <span>Mua ngay</span>
                                     </>
                                 )}
-                                <span className="visually-hidden">Thêm sản phẩm vào giỏ</span>
                             </button>
 
                         </div>
@@ -598,8 +592,9 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
             <ModalBuy
                 show={showModalBuy}
                 onClose={() => setShowModalBuy(false)}
-                product={buyProduct}
+                product={buyProduct || {}}
             />
+
         </div>
     );
 }

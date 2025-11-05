@@ -1,4 +1,3 @@
-// src/components/user/ModalBuy.jsx
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import InnerImageZoom from "react-inner-image-zoom";
 import Slider from "react-slick";
@@ -10,8 +9,11 @@ export default function ModalBuy({ show, onClose, product, images = [] }) {
   const [navMain, setNavMain] = useState(null);
   const [navThumb, setNavThumb] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariant, setSelectedVariant] = useState();
-  // Slider settings — luôn khai báo Hook theo cùng thứ tự
+  const [selectedVariant, setSelectedVariant] = useState(null);
+
+  const variants = product?.variants || [];
+  const activeVariant = selectedVariant ?? variants[0] ?? {};
+
   const mainSettings = useMemo(
     () => ({
       arrows: true,
@@ -24,15 +26,6 @@ export default function ModalBuy({ show, onClose, product, images = [] }) {
     [navThumb]
   );
 
-  const active = selectedVariant ?? {};
-  console.log(product);
-
-  const name = `${product?.productName ?? "Sản phẩm"}${active?.variantName ? ` - ${active.variantName}` : ""
-    }`;
-  const sku = active?.sku || product?.sku || `SKU-${product?.productId}`;
-  const price = active?.price ?? 0;
-  const categoryName = product[0]?.category?.categoryName;
-  const variantId = active?.variantId
   const thumbSettings = useMemo(
     () => ({
       slidesToShow: 5,
@@ -51,36 +44,70 @@ export default function ModalBuy({ show, onClose, product, images = [] }) {
     [navMain]
   );
 
-  // Payload chọn mua
-  const transformedProduct = useMemo(
-    () => ({ data: product, quantity }),
-    [product, quantity]
-  );
+  const name = `${product?.productName || "Sản phẩm"}${activeVariant.variantName ? ` - ${activeVariant.variantName}` : ""
+    }`;
 
-  // Khoá scroll + ESC khi show=true
+  const sku = activeVariant?.sku || product?.sku || `SKU-${product?.productId}`;
+  const price = activeVariant?.price ?? 0;
+  const categoryName = product?.category?.categoryName;
+  const variantId = activeVariant?.variantId;
+
+  const safeImages = useMemo(() => {
+    // Lấy tất cả ảnh từ các biến thể
+    const variantImages = (product?.variants || [])
+      .map((v) => v.imageUrl)
+      .filter(Boolean);
+
+    // Đưa ảnh variant đang chọn lên đầu
+    const currentImage = selectedVariant?.imageUrl;
+
+    const allImages = [
+      ...(currentImage ? [currentImage] : []),
+      ...variantImages,
+    ];
+
+    // Loại trùng (theo URL)
+    return allImages.filter((v, i, arr) => arr.indexOf(v) === i);
+  }, [product, selectedVariant]);
+
+
+
+  const transformedProduct = useMemo(() => ({
+    data: product,
+    quantity,
+    selected: false,
+    variant: activeVariant,
+  }), [product, quantity, activeVariant]);
+
+
+
+  console.log("transformedProduct", transformedProduct);
+
   useEffect(() => {
-    if (!show) return;
+    if (!product || !Array.isArray(product.variants)) return;
 
-    const onEsc = (e) => e.key === "Escape" && onClose?.();
-    document.addEventListener("keydown", onEsc);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onEsc);
-      document.body.style.overflow = prev;
-    };
-  }, [show, onClose]);
-  useEffect(() => {
-    if (!product || product.length === 0) return;
-
-    const firstProduct = product.find(p => Array.isArray(p.variants) && p.variants.length > 0);
-    if (firstProduct) {
-      const firstVariant = firstProduct.variants[0];
-      setSelectedVariant([firstVariant]);
-    }
+    const defaultVariant = product.variants[0] ?? null;
+    setSelectedVariant(defaultVariant);
   }, [product]);
 
 
+  useEffect(() => {
+    if (!show) return;
+    const onEsc = (e) => e.key === "Escape" && onClose?.();
+
+    document.addEventListener("keydown", onEsc);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onEsc);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [show, onClose]);
+
+  const handleVariantSelect = (v) => {
+    setSelectedVariant(v);
+  };
 
   const increase = () => setQuantity((n) => n + 1);
   const decrease = () => setQuantity((n) => (n > 1 ? n - 1 : 1));
@@ -89,35 +116,20 @@ export default function ModalBuy({ show, onClose, product, images = [] }) {
     setQuantity(Number.isFinite(n) && n > 0 ? n : 1);
   };
 
-  const safeImages = images?.length
-    ? images
-    : [product?.images?.[0]?.image_url].filter(Boolean);
-
-  // Render có điều kiện (sau khi mọi Hook đã khai báo)
   if (!show) return null;
 
   return (
-    <div
-      className="modal d-block"
-      tabIndex="-1"
-      role="dialog"
-      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-      onClick={onClose}
-      aria-modal="true"
-    >
-      <div
-        className="modal-dialog modal-lg modal-dialog-centered"
-        role="document"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="modal d-block" tabIndex="-1" role="dialog" onClick={onClose} aria-modal="true"
+      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+      <div className="modal-dialog modal-lg modal-dialog-centered" role="document" onClick={(e) => e.stopPropagation()}>
         <div className="modal-content border-0 shadow-lg">
           <div className="modal-header border-0">
-            <button type="button" className="btn-close" onClick={onClose} aria-label="Đóng"></button>
+            <button type="button" className="btn-close" onClick={onClose} aria-label="Đóng" />
           </div>
 
           <div className="modal-body pt-0">
             <div className="row g-4">
-              {/* Left: Gallery */}
+              {/* Gallery */}
               <div className="col-12 col-md-6">
                 <div className="product-slider">
                   <Slider {...mainSettings} ref={setNavMain}>
@@ -159,7 +171,7 @@ export default function ModalBuy({ show, onClose, product, images = [] }) {
                 </div>
               </div>
 
-              {/* Right: Info */}
+              {/* Info */}
               <div className="col-12 col-md-6 d-flex flex-column">
                 <div>
                   <h2 className="h5 mb-1">{name}</h2>
@@ -167,31 +179,28 @@ export default function ModalBuy({ show, onClose, product, images = [] }) {
                   <h4 className="text-danger fw-bold mb-3">
                     {Number(price || 0).toLocaleString("vi-VN")} ₫
                   </h4>
-                  {product.length > 0 && (
+
+                  {variants.length > 0 && (
                     <div className="mb-3">
                       <div className="fw-semibold mb-2">Chọn phiên bản</div>
                       <div className="d-flex flex-wrap gap-2">
-                        {product[0].variants.map((v) => (
+                        {variants.map((v) => (
                           <button
                             key={v.variantId}
                             type="button"
-                            className={`btn ${v.variantId === active.variantId
+                            className={`btn ${v.variantId === activeVariant.variantId
                               ? "btn-primary"
                               : "btn-outline-secondary"
                               }`}
-                            onClick={() => {
-                              setSelectedVariant(v);
-
-                            }}
+                            onClick={() => handleVariantSelect(v)}
                           >
-                            {v.attributes?.color
-                              ? `${v.attributes.color}`
-                              : v.variantName}
+                            {v.attributes?.color || v.variantName}
                           </button>
                         ))}
                       </div>
                     </div>
                   )}
+
                   {product?.shortDescription && (
                     <p className="text-body">{product.shortDescription}</p>
                   )}
@@ -200,30 +209,15 @@ export default function ModalBuy({ show, onClose, product, images = [] }) {
                 <div className="mt-3 mt-md-auto">
                   <div className="d-flex flex-wrap align-items-center gap-2">
                     <div className="input-group" style={{ maxWidth: 140 }}>
-                      <button
-                        className="btn btn-outline-secondary"
-                        type="button"
-                        onClick={decrease}
-                        aria-label="Giảm số lượng"
-                      >
-                        −
-                      </button>
+                      <button className="btn btn-outline-secondary" onClick={decrease}>−</button>
                       <input
                         type="number"
                         className="form-control text-center"
                         value={quantity}
                         min="1"
                         onChange={onQtyInput}
-                        aria-label="Số lượng"
                       />
-                      <button
-                        className="btn btn-outline-secondary"
-                        type="button"
-                        onClick={increase}
-                        aria-label="Tăng số lượng"
-                      >
-                        +
-                      </button>
+                      <button className="btn btn-outline-secondary" onClick={increase}>+</button>
                     </div>
 
                     <NavLink
@@ -236,14 +230,8 @@ export default function ModalBuy({ show, onClose, product, images = [] }) {
                   </div>
 
                   <div className="d-flex flex-wrap gap-3 mt-3 small text-muted">
-                    {sku && (
-                      <span className="badge bg-light text-secondary border">
-                        SKU: {sku}
-                      </span>
-                    )}
-                    {categoryName && (
-                      <span>Danh mục: {categoryName}</span>
-                    )}
+                    {sku && <span className="badge bg-light text-secondary border">SKU: {sku}</span>}
+                    {categoryName && <span>Danh mục: {categoryName}</span>}
                   </div>
                 </div>
               </div>
