@@ -44,7 +44,7 @@ export default function Category({ onChange }) {
 
     try {
       const dto = {
-        category_name: categoryName,
+        categoryName: categoryName,
         parent_category_id: parentId || null,
       };
       const res = await axios.post(`${process.env.REACT_APP_API_URL}/categories`, dto);
@@ -119,7 +119,7 @@ export default function Category({ onChange }) {
                 </option>
                 {categories.map((p) => (
                   <option key={p.category_id} value={p.category_id}>
-                    {p.category_name}
+                    {p.categoryName}
                   </option>
                 ))}
               </select>

@@ -1,39 +1,86 @@
 import React, { useEffect, useState, useContext } from 'react';
-import promotion from '../../assets/user/promotion.png';
-import Dropdown from '../../components/user/Dropdown';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { NavLink } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { CartContext } from '../../hooks/CartContext';
-
+const PLACEHOLDER_IMG = "https://placehold.co/600x600?text=No+Image";
 export default function Cart() {
     const [products, setProducts] = useState([]);
     const { setCartCount, setSelectedProducts, removeFromCartContext } = useContext(CartContext);
 
+    // 🧭 Lấy danh sách sản phẩm trong giỏ hàng
     const fetchCountCart = async () => {
         try {
             const token = localStorage.getItem("Authorization");
+
+            // ============================================
+            // 🧳 1️⃣ KHÁCH VÃNG LAI (Không có token)
+            // ============================================
             if (!token || typeof token !== "string" || token.trim() === "") {
-                const guestCart = JSON.parse(Cookies.get('guest_cart') || '[]');
+                const guestCart = JSON.parse(Cookies.get("guest_cart") || "[]");
                 if (guestCart.length === 0) {
                     setProducts([]);
                     return;
                 }
 
+                // 🔹 Lấy thông tin sản phẩm
                 const productRequests = guestCart.map((item) =>
                     axios.get(`${process.env.REACT_APP_API_URL}/products/${item.productId}`)
                 );
-
                 const responses = await Promise.all(productRequests);
-                const productsData = responses.map((res, idx) => ({
-                    ...res.data,
-                    quantity: guestCart[idx].quantity,
-                    selected: false,
-                }));
+
+                // 🔹 Bổ sung thông tin biến thể + giá (nếu có)
+                const productsData = await Promise.all(
+                    responses.map(async (res, idx) => {
+                        const base = res.data;
+                        const item = guestCart[idx];
+                        const variant = item.selectedVariant || null;
+                        let variantData = variant;
+
+
+                        if (variant?.variantId) {
+                            try {
+                                const resPrice = await axios.get(
+                                    `${process.env.REACT_APP_API_URL}/products/${item.productId}/variants/${variant.variantId}/prices`
+                                );
+                                const resImage = await axios.get(
+                                    `${process.env.REACT_APP_API_URL}/products/${item.productId}/variants/${variant.variantId}`
+                                );
+                                const variantPrice =
+                                    Array.isArray(resPrice.data) && resPrice.data[0]
+                                        ? Number(resPrice.data[0].price)
+                                        : null;
+
+
+                                variantData = {
+                                    ...variant,
+                                    price: variantPrice,
+                                    imageUrl: resImage.data.imageUrl
+                                };
+                            } catch (error) {
+                                console.warn(
+                                    `⚠️ Không thể lấy giá cho biến thể ${variant.variantId}:`,
+                                    error.message
+                                );
+                            }
+                        }
+
+                        return {
+                            ...base,
+                            quantity: item.quantity,
+                            selected: false,
+                            variant: variantData,
+                        };
+                    })
+                );
                 setProducts(productsData);
                 return;
             }
+
+            // ============================================
+            // 🧑‍💻 2️⃣ NGƯỜI DÙNG ĐĂNG NHẬP
+            // ============================================
             let decoded;
             try {
                 decoded = jwtDecode(token);
@@ -48,51 +95,89 @@ export default function Cart() {
             );
 
             const cart = resCart.data;
-            const productIds = cart.items.map((item) => item.product.product_id);
+            if (!cart?.items?.length) {
+                setProducts([]);
+                setCartCount(0);
+                return;
+            }
 
+            // 🔹 Lấy danh sách productId trong giỏ hàng
+            const productIds = cart.items.map((item) => item.product.productId);
             const productRequests = productIds.map((id) =>
                 axios.get(`${process.env.REACT_APP_API_URL}/products/${id}`)
             );
             const responses = await Promise.all(productRequests);
-            const productsData = responses.map((res) => res.data);
 
-            const orderedProducts = productIds.map((id) =>
-                productsData.find((prd) => String(prd.data.product_id) === String(id))
-            ).filter(Boolean);
+            // 🔹 Bổ sung thông tin biến thể + giá
+            const productsData = await Promise.all(
+                responses.map(async (res, idx) => {
+                    const base = res.data;
+                    const cartItem = cart.items[idx];
+                    const variant = cartItem?.selectedVariant || null;
+                    let variantData = variant;
 
-            const mergedProducts = orderedProducts.map((prd) => {
-                const cartItem = cart.items.find(
-                    (item) => String(item.product.product_id) === String(prd.data.product_id)
-                );
-                return {
-                    ...prd,
-                    quantity: cartItem ? cartItem.quantity : 0,
-                    selected: false
-                };
-            });
+                    if (variant?.variantId) {
+                        try {
+                            const [resVariant, resPrice] = await Promise.allSettled([
+                                axios.get(
+                                    `${process.env.REACT_APP_API_URL}/products/${base.data.productId}/variants/${variant.variantId}`
+                                ),
+                                axios.get(
+                                    `${process.env.REACT_APP_API_URL}/products/${base.data.productId}/variants/${variant.variantId}/prices`
+                                ),
+                            ]);
 
-            mergedProducts.sort((a, b) => a.data.product_id - b.data.product_id);
-            setProducts(mergedProducts);
-            setCartCount(mergedProducts.length);
+                            const variantInfo =
+                                resVariant.status === "fulfilled"
+                                    ? resVariant.value.data
+                                    : variant;
+                            const variantPrice =
+                                resPrice.status === "fulfilled" &&
+                                    Array.isArray(resPrice.value.data) &&
+                                    resPrice.value.data[0]
+                                    ? Number(resPrice.value.data[0].price)
+                                    : variant?.price || null;
+
+                            variantData = { ...variantInfo, price: variantPrice };
+                        } catch (error) {
+                            console.warn(
+                                `⚠️ Không thể lấy thông tin biến thể ${variant.variantId}:`,
+                                error.message
+                            );
+                        }
+                    }
+
+                    return {
+                        ...base,
+                        quantity: cartItem.quantity,
+                        selected: false,
+                        variant: variantData,
+                    };
+                })
+            );
+
+            setProducts(productsData);
+
 
         } catch (err) {
             console.error("Lỗi khi lấy giỏ hàng:", err);
         }
     };
 
-    const updateQuantity = async (productId, newQty) => {
+    // 🧾 Cập nhật số lượng sản phẩm
+    const updateQuantity = async (variantId, newQty) => {
         const token = localStorage.getItem("Authorization");
 
         if (!token || typeof token !== "string" || token.trim() === "") {
             const guestCart = JSON.parse(Cookies.get("guest_cart") || "[]");
             const updatedCart = guestCart.map((item) =>
-                item.productId === productId ? { ...item, quantity: newQty } : item
+                item.selectedVariant.variantId === variantId ? { ...item, quantity: newQty } : item
             );
             Cookies.set("guest_cart", JSON.stringify(updatedCart), { expires: 7 });
 
             setProducts((prev) =>
                 prev.map((p) =>
-                    (p.data?.product_id || p.product_id) === productId
+                    (p.variant?.variantId || p.variantId) === variantId
                         ? { ...p, quantity: newQty }
                         : p
                 )
@@ -109,15 +194,15 @@ export default function Cart() {
         }
 
         try {
-            await axios.put(
+            /* await axios.put(
                 `${process.env.REACT_APP_API_URL}/cart/${decoded.sub}/items/${productId}`,
                 { quantity: newQty },
                 { headers: { Authorization: `Bearer ${token}` } }
-            );
+            ); */
 
             setProducts((prev) =>
                 prev.map((p) =>
-                    p.data.product_id === productId ? { ...p, quantity: newQty } : p
+                    p.variant.variantId === variantId ? { ...p, quantity: newQty } : p
                 )
             );
         } catch (err) {
@@ -127,13 +212,17 @@ export default function Cart() {
 
     useEffect(() => {
         fetchCountCart();
+
     }, []);
 
+    // 🧮 Tính tổng
     const selectedProducts = products.filter(p => p.selected);
     const totalQuantity = selectedProducts.reduce((sum, p) => sum + p.quantity, 0);
-    const totalPrice = selectedProducts.reduce((sum, p) => sum + p.quantity * p.data.price, 0);
+    const totalPrice = selectedProducts.reduce((sum, p) =>
+        sum + p.quantity * (p.variant?.price || p.variant.price), 0);
 
-    const handleDelete = async (product_id) => {
+    // 🗑️ Xóa sản phẩm
+    const handleDelete = async (variantId) => {
         if (!window.confirm("Bạn có chắc muốn xóa sản phẩm này?")) return;
 
         try {
@@ -141,76 +230,70 @@ export default function Cart() {
 
             if (!token || typeof token !== "string" || token.trim() === "") {
                 let guestCart = JSON.parse(Cookies.get("guest_cart") || "[]");
-                guestCart = guestCart.filter((item) => item.productId !== product_id);
-                removeFromCartContext(product_id);
+
+                guestCart = guestCart.filter((item) => item.selectedVariant.variantId !== variantId);
+                removeFromCartContext(variantId);
                 Cookies.set("guest_cart", JSON.stringify(guestCart), { expires: 7 });
-                fetchCountCart();
+                setCartCount(guestCart.length);
+                setProducts((prev) => prev.filter((p) => p.variant?.variantId !== variantId));
                 alert("Đã xóa sản phẩm khỏi giỏ hàng!");
                 return;
             }
 
-            let decoded;
-            try {
-                decoded = jwtDecode(token);
-            } catch (err) {
-                console.error("Token không hợp lệ:", err);
-                alert("Xác thực thất bại. Vui lòng đăng nhập lại.");
-                return;
-            }
-
+            let decoded = jwtDecode(token);
             const userId = decoded.sub;
-            if (!userId) {
-                console.error("Không tìm thấy user ID trong token.");
-                alert("Không thể xác định người dùng.");
-                return;
-            }
 
-            await axios.delete(
-                `${process.env.react_app_api_url}/cart/${userId}/items/${product_id}`,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            /*  await axios.delete(
+                 `${process.env.REACT_APP_API_URL}/cart/${userId}/items/${productId}`,
+                 { headers: { Authorization: `Bearer ${token}` } }
+             ); */
 
             alert("Xóa sản phẩm thành công!");
-            fetchCountCart();
+
         } catch (err) {
             alert("Lỗi khi xóa sản phẩm. Vui lòng thử lại sau.");
             console.error("Chi tiết lỗi:", err);
         }
     };
 
+    // 🧱 Render giao diện
     return (
         <div className='container cart-page'>
             <div className="container text-center overflow-auto cart-scroll" style={{ maxHeight: "710px" }}>
                 <div style={{ height: "590px" }}>
-                    <table className="table cart-table">
-                        <thead>
+                    <table className="table align-middle cart-table">
+                        <thead className="bg-light text-secondary small text-uppercase">
                             <tr>
-                                <th style={{ width: "18px" }}>
+                                <th className="text-center" style={{ width: 40 }}>
                                     <input
                                         className="form-check-input"
                                         type="checkbox"
                                         checked={products.length > 0 && products.every(p => p.selected)}
                                         onChange={(e) => {
                                             const checked = e.target.checked;
-                                            setProducts(prev =>
-                                                prev.map(p => ({ ...p, selected: checked }))
-                                            );
+                                            setProducts(prev => prev.map(p => ({ ...p, selected: checked })));
                                         }}
                                     />
                                 </th>
-                                <th>Sản phẩm</th>
-                                <th className='text-center d-none d-sm-table-cell'>Đơn giá</th>
-                                <th className='text-center'>Số lượng</th>
-                                <th className='text-center' style={{ width: "145px" }}>Số tiền</th>
-                                <th className='text-center d-sm-table-cell' >Thao tác</th>
-
+                                <th >Hình ảnh</th>
+                                <th style={{ minWidth: 200 }}>Sản phẩm</th>
+                                <th className="text-center d-none d-sm-table-cell" style={{ width: 140 }}>Đơn giá</th>
+                                <th className="text-center" style={{ width: 150 }}>Số lượng</th>
+                                <th className="text-center" style={{ width: 140 }}>Tổng tiền</th>
+                                <th className="text-center d-none d-sm-table-cell" style={{ width: 100 }}>Thao tác</th>
                             </tr>
                         </thead>
-                        <tbody>
+
+                        <tbody className="align-middle">
                             {products.length > 0 ? (
                                 products.map((prd) => (
-                                    <tr key={prd.data.product_id}>
-                                        <td className='align-middle text-center'>
+                                    <tr
+                                        key={`${prd.data.productId}-${prd.variant?.variantId ?? 'base'}`}
+                                        className="border-bottom hover-row"
+                                    >
+
+                                        {/* Checkbox */}
+                                        <td className="text-center">
                                             <input
                                                 className="form-check-input"
                                                 type="checkbox"
@@ -218,7 +301,7 @@ export default function Cart() {
                                                 onChange={() =>
                                                     setProducts((prev) =>
                                                         prev.map((p) =>
-                                                            p.data.product_id === prd.data.product_id
+                                                            p.variant.variantId === prd.variant.variantId
                                                                 ? { ...p, selected: !p.selected }
                                                                 : p
                                                         )
@@ -226,98 +309,123 @@ export default function Cart() {
                                                 }
                                             />
                                         </td>
-
-
-                                        <td className='d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3'>
+                                        <td>
                                             <img
-                                                src={prd.data.images[0].image_url}
-                                                alt="Sản phẩm"
+                                                src={prd.variant.imageUrl || "/no-image.png"}
+                                                alt={prd?.data?.productName || "Sản phẩm"}
                                                 width={80}
                                                 height={80}
-                                                className='rounded border cart-thumb'
+                                                className="rounded border cart-thumb shadow-sm"
+                                                onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
                                             />
-                                            <div className="d-flex flex-column bd-highlight flex-grow-1">
-                                                <a
-                                                    style={{
-                                                        textDecoration: "none",
-                                                        width: "208px",
-                                                        fontSize: "14px",
-                                                        color: "rgba(0,0,0,.87)",
-                                                        lineHeight: "16px",
-                                                    }}
-                                                    href="/"
-                                                    title={prd.data.product_name}
-                                                    className="link-dark p-0 bd-highlight cart-title"
-                                                >
-                                                    {prd.data.product_name}
-                                                </a>
-                                                <div className="bd-highlight mt-1 d-none d-sm-block">
-                                                    <img src={promotion} alt="Deal" width={208} height={18} />
-                                                </div>
-                                            </div>
-                                            <div className='d-flex align-items-center ms-sm-3 mt-2 mt-sm-0'>
-                                                <div>
-                                                    <Dropdown />
-                                                    <p className="mb-0 text-muted small ps-2">Một bộ 1</p>
+                                        </td>
+                                        {/* Sản phẩm */}
+                                        <td>
+                                            <div className="d-flex align-items-start gap-3">
+
+                                                <div className="d-flex flex-column justify-content-between flex-grow-1">
+                                                    <div
+                                                        className="fw-semibold text-center"
+                                                        title={prd.data.productName}
+
+                                                    >
+                                                        {prd.data.productName}
+                                                    </div>
+                                                    {prd.variant && (
+                                                        <div className="text-muted small mt-1">
+                                                            {prd.variant.variantName
+                                                                ? `Phiên bản: ${prd.variant.variantName}`
+                                                                : prd.variant.attributes?.color
+                                                                    ? `Màu: ${prd.variant.attributes.color}`
+                                                                    : ""}
+                                                        </div>
+                                                    )}
+                                                    <div className="d-sm-none mt-2">
+                                                        <span className="fw-bold text-danger small">
+                                                            {Number(prd.variant?.price || prd.data.price).toLocaleString()} ₫
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
 
-                                        <td className='align-middle text-center d-none d-sm-table-cell'>
-                                            <p className='mb-0'>{Number(prd.data.price).toLocaleString()} ₫</p>
+                                        {/* Đơn giá */}
+                                        <td className="text-center d-none d-sm-table-cell">
+                                            <span className="fw-semibold text-dark">
+                                                {Number(prd.variant?.price || prd.data.price).toLocaleString()} ₫
+                                            </span>
                                         </td>
 
-                                        <td className="align-middle text-center">
-                                            <div className='d-flex align-items-center justify-content-center'>
+                                        {/* Số lượng */}
+                                        <td className="text-center">
+                                            <div
+                                                className="d-inline-flex align-items-center bg-white rounded border"
+                                                style={{ overflow: "hidden" }}
+                                            >
                                                 <button
-                                                    style={{ width: '50px', height: "32px" }}
-                                                    className="btn border-end-0 btn-outline-secondary border-secondary rounded-0 d-flex align-items-center justify-content-center"
-                                                    onClick={() => updateQuantity(prd.data.product_id, prd.quantity > 1 ? prd.quantity - 1 : 1)}
-                                                >-</button>
+                                                    className="btn btn-sm btn-light text-secondary border-0 px-2"
+                                                    onClick={() =>
+                                                        updateQuantity(prd.variant.variantId, Math.max(1, prd.quantity - 1))
+                                                    }
+                                                    disabled={prd.quantity <= 1}
+                                                >
+                                                    <i className="bi bi-dash-lg"></i>
+                                                </button>
                                                 <input
                                                     type="number"
-                                                    className="form-control text-center rounded-0 border-secondary"
+                                                    className="form-control form-control-sm text-center border-0 shadow-none"
+                                                    style={{ width: 48 }}
                                                     value={prd.quantity}
                                                     min={1}
-                                                    style={{ width: '50px', height: "32px" }}
-                                                    onChange={(e) => {
-                                                        const value = Math.max(1, parseInt(e.target.value) || 1);
-                                                        updateQuantity(prd.data.product_id, value);
-                                                    }}
+                                                    onChange={(e) =>
+                                                        updateQuantity(
+                                                            prd.variant.variantId,
+                                                            Math.max(1, parseInt(e.target.value) || 1)
+                                                        )
+                                                    }
                                                 />
                                                 <button
-                                                    style={{ width: '50px', height: "32px" }}
-                                                    className="btn border-start-0 btn-outline-secondary rounded-0 d-flex align-items-center justify-content-center"
-                                                    onClick={() => updateQuantity(prd.data.product_id, prd.quantity + 1)}
-                                                >+</button>
+                                                    className="btn btn-sm btn-light text-secondary border-0 px-2"
+                                                    onClick={() =>
+                                                        updateQuantity(prd.variant.variantId, prd.quantity + 1)
+                                                    }
+                                                >
+                                                    <i className="bi bi-plus-lg"></i>
+                                                </button>
                                             </div>
                                         </td>
 
-                                        <td className='align-middle text-center' style={{ color: '#ee4d2d' }}>
-                                            <p className='mb-0' style={{ width: "145px" }}>
-                                                {Number(prd.data.price * prd.quantity).toLocaleString()} ₫
-                                            </p>
+                                        {/* Tổng tiền */}
+                                        <td className="text-center text-danger fw-semibold">
+                                            {(prd.quantity * (prd.variant?.price || prd.data.price)).toLocaleString()} ₫
                                         </td>
 
-                                        <td className='align-middle text-center d-sm-table-cell'>
-                                            <a className='btn btn-outline-danger' onClick={() => handleDelete(prd.data.product_id)} style={{ width: "70px" }}> Xóa</a>
+                                        {/* Thao tác */}
+                                        <td className="text-center d-none d-sm-table-cell">
+                                            <button
+                                                className="btn btn-sm btn-outline-danger px-3"
+                                                onClick={() => handleDelete(prd.variant.variantId)}
+                                            >
+                                                <i className="bi bi-trash me-1"></i>Xóa
+                                            </button>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="6" className="text-center">
-                                        Giỏ hàng rỗng
+                                    <td colSpan="7" className="text-center py-4 text-muted">
+                                        Giỏ hàng của bạn đang trống 🛒
                                     </td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
+
                 </div>
             </div>
 
-            {/* Footer: sticky trên mobile */}
-            <div className='bg-white p-2 border-top border-2 border-danger cart-footer' style={{ borderRadius: "0 0 8px 8px" }}>
+            {/* Footer */}
+            <div className='bg-white p-2 border-top border-2 border-danger cart-footer'>
                 <div className="d-flex justify-content-between flex-column flex-sm-row gap-2">
                     <div className='d-flex align-items-center'>
                         <div className='me-2'>
@@ -327,15 +435,12 @@ export default function Cart() {
                                 checked={products.length > 0 && products.every(p => p.selected)}
                                 onChange={(e) => {
                                     const checked = e.target.checked;
-                                    setProducts(prev =>
-                                        prev.map(p => ({ ...p, selected: checked }))
-                                    );
+                                    setProducts(prev => prev.map(p => ({ ...p, selected: checked })));
                                 }}
                             />
                         </div>
                         <div className='fw-semibold'>Chọn tất cả</div>
                     </div>
-
                     <div className='d-flex align-items-center gap-3 justify-content-between'>
                         <div className='fw-semibold' style={{ color: '#ee4d2d' }}>
                             Tổng cộng ({totalQuantity} sản phẩm): ₫{totalPrice.toLocaleString()}

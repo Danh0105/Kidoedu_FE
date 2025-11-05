@@ -180,27 +180,27 @@ ${url}`);
     };
 
     // EXPORT PNG using html-to-image (requires CORS-safe images or same-origin assets)
-    const exportPNG = async () => {
-        if (!cardRef.current) return;
-        try {
-            const { toPng } = await import("html-to-image");
-            const dataUrl = await toPng(cardRef.current, {
-                cacheBust: true,
-                pixelRatio: 2,
-                quality: 1,
-                filter: (node) => !(node.tagName === 'AUDIO'),
-            });
-            const a = document.createElement("a");
-            a.href = dataUrl;
-            a.download = `HappyBirthday_VuThiKimChi_${Date.now()}.png`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        } catch (err) {
-            console.error("Export PNG error:", err);
-            alert("Xuất PNG chưa thành công. Kiểm tra lại nguồn ảnh (CORS) hoặc dùng ảnh nội bộ /cake.jpg rồi thử lại!");
-        }
-    };
+    /*  const exportPNG = async () => {
+         if (!cardRef.current) return;
+         try {
+             const { toPng } = await import("html-to-image");
+             const dataUrl = await toPng(cardRef.current, {
+                 cacheBust: true,
+                 pixelRatio: 2,
+                 quality: 1,
+                 filter: (node) => !(node.tagName === 'AUDIO'),
+             });
+             const a = document.createElement("a");
+             a.href = dataUrl;
+             a.download = `HappyBirthday_VuThiKimChi_${Date.now()}.png`;
+             document.body.appendChild(a);
+             a.click();
+             a.remove();
+         } catch (err) {
+             console.error("Export PNG error:", err);
+             alert("Xuất PNG chưa thành công. Kiểm tra lại nguồn ảnh (CORS) hoặc dùng ảnh nội bộ /cake.jpg rồi thử lại!");
+         }
+     }; */
 
     // CONFETTI pieces (static)
     const confettiPieces = useMemo(() => {

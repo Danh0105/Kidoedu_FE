@@ -1,6 +1,6 @@
 // components/CautionList.jsx
 import React, { useMemo, useState } from "react";
-import { CAUTION_NOTES } from "../data/caution-notes";
+import { cautionNotes } from "../data/caution-notes";
 
 const sevStyles = {
     danger: { alert: "alert-danger", badge: "bg-danger-subtle text-danger-emphasis" },
@@ -13,8 +13,8 @@ export default function CautionList({ limit = 8, tagFilter = null }) {
 
     const items = useMemo(() => {
         const base = tagFilter
-            ? CAUTION_NOTES.filter(n => n.tags?.includes(tagFilter))
-            : CAUTION_NOTES;
+            ? cautionNotes.filter(n => n.tags?.includes(tagFilter))
+            : cautionNotes;
         // sort: danger > warning > info, sau đó theo id
         const rank = { danger: 0, warning: 1, info: 2 };
         return [...base].sort((a, b) => (rank[a.severity] - rank[b.severity]) || a.id.localeCompare(b.id));

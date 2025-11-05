@@ -79,7 +79,7 @@ export default function Slick1() {
                                 <Button
                                     detail={`${c.childCount} mục con`}
                                     key={c.cat}
-                                    name={`${c.category_name}`}
+                                    name={`${c.categoryName}`}
                                     classname={`btn btn-${color}`}
                                 />
                             </div>

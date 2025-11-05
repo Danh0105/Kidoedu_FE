@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import ModalCart from "../ModalCart";
 import ModalBuy from "../ModalBuy";
 import { pickRibbonFromStatus } from "../../../hooks/useUiUtils";
 
-const PLACEHOLDER_IMG = "https://via.placeholder.com/600x600?text=No+Image";
+const PLACEHOLDER_IMG = "https://placehold.co/600x600?text=No+Image";
 
 const formatCurrency = (value) =>
     new Intl.NumberFormat("vi-VN", {
@@ -22,8 +22,85 @@ export default function Product({ prod }) {
     const [showModalCart, setShowModalCart] = useState(false);
     const [showModalBuy, setShowModalBuy] = useState(false);
     const [hovered, setHovered] = useState(false);
+    const [priceRange, setPriceRange] = useState(null);
 
-    // 🩶 Khi chưa có sản phẩm (đang loading) → skeleton giả
+    const id = prod?.productId;
+    const name = prod?.productName ?? "";
+    const desc = prod?.shortDescription ?? "";
+    const basePrice = prod?.price ?? 0;
+    const status = prod?.status ?? prod?.data?.status;
+    const ribbon = pickRibbonFromStatus(status);
+
+    const firstImage =
+        prod?.variants?.[0]?.imageUrl || PLACEHOLDER_IMG;
+
+    // 🧮 Fetch giá theo biến thể
+    useEffect(() => {
+        const fetchVariantPrices = async () => {
+            try {
+                const res = await axios.get(
+                    `${process.env.REACT_APP_API_URL}/products/${id}/variants`
+                );
+
+                const variants = res.data?.items || [];
+                if (variants.length === 0) return; // không có biến thể thì thôi
+
+                const pricePromises = variants.map((v) =>
+                    axios
+                        .get(
+                            `${process.env.REACT_APP_API_URL}/products/${id}/variants/${v.variantId}/prices`
+                        )
+                        .then((res) => res.data?.[0]?.price || null)
+                        .catch(() => null)
+                );
+
+                const prices = (await Promise.all(pricePromises))
+                    .filter((p) => p !== null)
+                    .map((p) => Number(p));
+
+                if (prices.length === 0) return;
+
+                const minPrice = Math.min(...prices);
+                const maxPrice = Math.max(...prices);
+
+                setPriceRange({ min: minPrice, max: maxPrice });
+            } catch (err) {
+                console.warn("Không thể lấy giá biến thể:", err.message);
+            }
+        };
+
+        if (id) fetchVariantPrices();
+    }, [id]);
+
+    const fetchProductAndOpen = async (pid, openType) => {
+        try {
+            const res = await axios.get(
+                `${process.env.REACT_APP_API_URL}/products/${pid}`
+            );
+            const data = res.data?.data || null;
+            setProduct(data);
+            setImages(
+                (data?.images || []).map((img) => img?.image_url).filter(Boolean)
+            );
+
+            if (openType === "cart") setShowModalCart(true);
+            if (openType === "buy") setShowModalBuy(true);
+        } catch (err) {
+            console.error("Lỗi khi lấy sản phẩm:", err);
+        }
+    };
+
+    const handleAddToCart = () => fetchProductAndOpen(id, "cart");
+    const handleBuy = () => fetchProductAndOpen(id, "buy");
+
+    // 🧾 Chọn hiển thị giá
+    const displayedPrice = priceRange
+        ? priceRange.min === priceRange.max
+            ? formatCurrency(priceRange.min)
+            : `${formatCurrency(priceRange.min)} - ${formatCurrency(priceRange.max)}`
+        : formatCurrency(basePrice);
+
+    // 🩶 Loading skeleton
     if (!prod) {
         return (
             <div
@@ -53,43 +130,13 @@ export default function Product({ prod }) {
         );
     }
 
-    // === Dữ liệu thật ===
-    const id = prod.product_id;
-    const name = prod.product_name ?? "";
-    const desc = prod.short_description ?? "";
-    const price = prod.price ?? 0;
-    const status = prod?.status ?? prod?.data?.status;
-    const ribbon = pickRibbonFromStatus(status);
-
-    const firstImage =
-        prod?.images?.[0]?.image_url || prod?.image_url || PLACEHOLDER_IMG;
-
-    const fetchProductAndOpen = async (pid, openType) => {
-        try {
-            const res = await axios.get(
-                `${process.env.REACT_APP_API_URL}/products/${pid}`
-            );
-            const data = res.data?.data || null;
-            setProduct(data);
-            setImages((data?.images || []).map((img) => img?.image_url).filter(Boolean));
-
-            if (openType === "cart") setShowModalCart(true);
-            if (openType === "buy") setShowModalBuy(true);
-        } catch (err) {
-            console.error("Lỗi khi lấy sản phẩm:", err);
-        }
-    };
-
-    const handleAddToCart = () => fetchProductAndOpen(id, "cart");
-    const handleBuy = () => fetchProductAndOpen(id, "buy");
-
     return (
         <div
             className="card nav-link p-2 position-relative shadow-sm border-0 rounded-4"
             style={{ width: 268, overflow: "hidden" }}
             onMouseLeave={() => setHovered(false)}
         >
-            {/* Ribbon góc trái/phải */}
+            {/* Ribbon góc */}
             {ribbon.map((rb, i) => (
                 <span
                     key={i}
@@ -121,7 +168,7 @@ export default function Product({ prod }) {
                 />
             </Link>
 
-            {/* Dải nút hover nổi */}
+            {/* Hover actions */}
             <div
                 onMouseEnter={() => setHovered(true)}
                 className="d-flex gap-2 justify-content-center"
@@ -162,11 +209,9 @@ export default function Product({ prod }) {
                     </Link>
                 </div>
 
-                <p className="card-text text-danger mb-2">
-                    {formatCurrency(price)}
-                </p>
+                <p className="card-text text-danger mb-2 fw-bold">{displayedPrice}</p>
 
-                {/* Promo strip */}
+                {/* Promo badges */}
                 <div
                     className="rounded-3 px-2 py-1 mb-3 d-flex gap-2 align-items-center"
                     style={{ background: "rgba(13,110,253,.08)" }}
@@ -183,22 +228,14 @@ export default function Product({ prod }) {
                 </div>
 
                 <div className="d-flex justify-content-between gap-2">
-                    <button
-                        onClick={handleAddToCart}
-                        className="btn btn-danger"
-                        style={{ fontSize: 15 }}
-                    >
+                    <button onClick={handleAddToCart} className="btn btn-danger">
                         Thêm vào giỏ
                     </button>
-                    <button
-                        onClick={handleBuy}
-                        className="btn btn-primary"
-                        style={{ fontSize: 15 }}
-                    >
+                    <button onClick={handleBuy} className="btn btn-primary">
                         Mua ngay
                     </button>
 
-                    {/* Dải hiệu ứng gradient dưới card */}
+                    {/* Hiệu ứng gradient */}
                     <div
                         style={{
                             position: "absolute",

@@ -216,7 +216,7 @@ body.app-loaded {
 
 .hotline-bubble {
   position: fixed;
-  bottom: 0px;
+  bottom: 20px;
   right: 25px;
   background: linear-gradient(45deg, #ff0000, #ff9100);
   color: #fff;
@@ -271,7 +271,7 @@ body.app-loaded {
 /* ---- Base (như trước) ---- */
 .hotline-banner {
   position: fixed;
-  bottom: 20px;
+  bottom: 5px;
   left: 20px;
   background: linear-gradient(90deg, #e60000, #ff4b2b);
   color: #fff;
@@ -715,4 +715,25 @@ body.app-loaded {
   .btn-cta {
     box-shadow: 0 8px 18px rgba(0, 0, 0, .35), 0 2px 6px rgba(0, 0, 0, .25);
   }
+}
+
+.cart-table {
+  border-collapse: separate;
+  border-spacing: 0 6px;
+}
+
+.cart-table tr.hover-row:hover {
+  background-color: #f9fafc;
+  transition: background-color 0.2s ease;
+}
+
+.cart-thumb {
+  object-fit: cover;
+  background-color: #fff;
+}
+
+.quantity-control input::-webkit-outer-spin-button,
+.quantity-control input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }

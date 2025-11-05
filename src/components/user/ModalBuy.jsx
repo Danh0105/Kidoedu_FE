@@ -141,13 +141,13 @@ export default function ModalBuy({ show, onClose, product, images = [] }) {
               {/* Right: Info */}
               <div className="col-12 col-md-6 d-flex flex-column">
                 <div>
-                  <h2 className="h5 mb-1">{product?.product_name}</h2>
-                  <p className="text-muted mb-2">Mã sản phẩm: #{product?.product_id}</p>
+                  <h2 className="h5 mb-1">{product?.productName}</h2>
+                  <p className="text-muted mb-2">Mã sản phẩm: #{product?.productId}</p>
                   <h4 className="text-danger fw-bold mb-3">
                     {Number(product?.price || 0).toLocaleString("vi-VN")} ₫
                   </h4>
-                  {product?.short_description && (
-                    <p className="text-body">{product.short_description}</p>
+                  {product?.shortDescription && (
+                    <p className="text-body">{product.shortDescription}</p>
                   )}
                 </div>
 
@@ -191,8 +191,8 @@ export default function ModalBuy({ show, onClose, product, images = [] }) {
 
                   <div className="d-flex flex-wrap gap-3 mt-3 small text-muted">
                     {product?.sku && <span>SKU: {product.sku}</span>}
-                    {product?.category?.category_name && (
-                      <span>Danh mục: {product.category.category_name}</span>
+                    {product?.variants.category?.categoryName && (
+                      <span>Danh mục: {product.category.categoryName}</span>
                     )}
                   </div>
                 </div>

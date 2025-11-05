@@ -30,9 +30,9 @@ export default function ProductHome({ prod }) {
     );
   }
 
-  const id = prod.product_id;
-  const name = prod.product_name ?? "";
-  const desc = prod.short_description ?? "";
+  const id = prod.productId;
+  const name = prod.productName ?? "";
+  const desc = prod.shortDescription ?? "";
   const price = prod.price ?? 0;
   const firstImage =
     prod?.images?.[0]?.image_url      // trường hợp API detail trả mảng images

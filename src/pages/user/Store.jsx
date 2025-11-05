@@ -276,7 +276,7 @@ export default function Store({
                         <div className="d-flex flex-wrap" style={{ width: "1120px", gap: "10px" }}>
                             {sortedItems.length ? (
                                 sortedItems.map((prod) => (
-                                    <div className="col" key={prod.product_id} style={{ flex: "0 0 10%" }}>
+                                    <div className="col" key={prod.productId} style={{ flex: "0 0 10%" }}>
                                         <Product prod={prod} status={prod?.status} />
                                     </div>
                                 ))
@@ -424,7 +424,7 @@ export default function Store({
                         )}
 
                         {!loading && sortedItems.length > 0 && sortedItems.map((prod) => (
-                            <div key={prod.product_id} className="col">
+                            <div key={prod.productId} className="col">
                                 <div className="product-card">
                                     <Product prod={prod} status={prod?.status} />
                                 </div>

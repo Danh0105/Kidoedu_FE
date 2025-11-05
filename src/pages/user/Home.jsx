@@ -60,7 +60,8 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     const [showAllFeatured, setShowAllFeatured] = useState(false);
     const [showAllNew, setShowAllNew] = useState(false);
     const [selectedCatId, setSelectedCatId] = useState(null);
-
+    const [priceRange, setPriceRange] = useState(null);
+    const basePrice = 0;
     // Modal Buy (đặt 1 lần)
     const [showModalBuy, setShowModalBuy] = useState(false);
     const [buyProduct, setBuyProduct] = useState(null);
@@ -74,7 +75,11 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
             }),
         [apiBase]
     );
-
+    const formatCurrency = (value) =>
+        new Intl.NumberFormat("vi-VN", {
+            style: "currency",
+            currency: "VND",
+        }).format(Number(value || 0))
     // ===== APIs =====
     const fetchCategories = useCallback(async () => {
         try {
@@ -109,14 +114,64 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
     const fetchProducts = useCallback(async () => {
         try {
-            const res = await api.get("/products");
-            const data = res.data?.data || [];
-            setFeaturedProducts(data.filter((p) => p.status === 1 || p.status === 12));
-            setNewProducts(data.filter((p) => p.status === 2 || p.status === 12));
+            const resprd = await api.get("/products");
+            const data = resprd.data?.data || [];
+
+            const productdata = await Promise.all(
+                data.map(async (v) => {
+                    const resVariants = await axios.get(
+                        `${process.env.REACT_APP_API_URL}/products/${v.productId}/variants`
+                    );
+
+                    const variants = resVariants.data?.items || [];
+                    if (variants.length === 0) return null;
+
+                    const pricePromises = variants.map((variant) =>
+                        axios
+                            .get(
+                                `${process.env.REACT_APP_API_URL}/products/${v.productId}/variants/${variant.variantId}/prices`
+                            )
+                            .then((res) => res.data?.[0]?.price || null)
+                            .catch(() => null)
+                    );
+
+                    const prices = await Promise.all(pricePromises);
+                    const validPrices = prices.filter((p) => p !== null).map(Number);
+
+                    if (validPrices.length === 0) return null;
+
+                    const minPrice = Math.min(...validPrices);
+                    const maxPrice = Math.max(...validPrices);
+
+                    const enrichedVariants = variants.map((variant, i) => ({
+                        ...variant,
+                        price: prices[i] !== null ? Number(prices[i]) : null,
+                    }));
+
+                    return {
+                        ...v,
+                        variants: enrichedVariants,
+                        minPrice,
+                        maxPrice,
+                    };
+                })
+            );
+            const finalProductData = productdata.filter(Boolean);
+            setFeaturedProducts(finalProductData.filter((p) => p?.status === 1 || p.status === 12));
+            setNewProducts(finalProductData.filter((p) => p?.status === 2 || p.status === 12));
+
         } catch (e) {
             console.error("fetchProducts error:", e);
         }
     }, [api]);
+    ;
+    const displayedPrice = (product) => {
+
+        if (product.minPrice === product.maxPrice) {
+            return formatCurrency(product.minPrice);
+        }
+        return `${formatCurrency(product.minPrice)} - ${formatCurrency(product.maxPrice)}`;
+    };
 
     // Lần đầu chỉ fetch dữ liệu, không gọi checkCategory ở đây
     useEffect(() => {
@@ -145,7 +200,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         try {
             const res = await api.get(`/products/${id}`);
             const data = res.data?.data || null;
-            setBuyProduct(data);
+
             setBuyImages(
                 (data?.images || []).map((img) => img?.image_url).filter(Boolean)
             );
@@ -209,7 +264,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                                         : "text-primary"
                                         }`}
                                 />
-                                <span>{cat.category_name}</span>
+                                <span>{cat.categoryName}</span>
                             </div>
                             <span
                                 className={`badge ${selectedCatId === cat.category_id
@@ -244,7 +299,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                     ? items.map((prod) => {
                         const ribbons = pickRibbonsFromStatus(prod?.status);
                         return (
-                            <div className="col position-relative" key={prod.product_id}>
+                            <div className="col position-relative" key={prod.productId}>
                                 {ribbons.map((rb, i) => (
                                     <Ribbon
                                         key={i}
@@ -255,7 +310,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                                 ))}
                                 <ProductHome
                                     prod={prod}
-                                    onBuy={() => handleBuy(prod.product_id)}
+                                    onBuy={() => handleBuy(prod.productId)}
                                 />
                             </div>
                         );
@@ -288,7 +343,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
                 <div className="row justify-content-center">
                     {visibleProducts.length > 0 ? (
-                        visibleProducts.map((p) => <ProductCard key={p.product_id} p={p} />)
+                        visibleProducts.map((p) => <ProductCard key={p.variants.variantId} p={p} />)
                     ) : (
                         <p className="text-center text-muted">Đang cập nhật sản phẩm...</p>
                     )}
@@ -332,15 +387,15 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     }) {
         const [buying, setBuying] = useState(false);
         const ribbons = (pickRibbonsFromStatus?.(p?.status) || []).slice(0, 3);
-        const imgSrc = p?.images?.[0]?.image_url || fallbackImage;
+        const imgSrc = p?.variants[0]?.imageUrl || fallbackImage;
 
         const handleBuy = async (id) => {
             try {
                 const res = await api.get(`/products/${id}`);
                 const data = res.data?.data || null;
-                setBuyProduct(data);
+
                 setBuyImages(
-                    (data?.images || []).map((img) => img?.image_url).filter(Boolean)
+                    (data?.variants || []).map((img) => img?.imageUrl).filter(Boolean)
                 );
                 setShowModalBuy(true);
             } catch (e) {
@@ -380,13 +435,13 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
                         {/* Khung ảnh tỉ lệ cố định để tránh layout shift */}
                         <a
-                            href={`/productdetail/${p.product_id}`}
+                            href={`/productdetail/${p.productId}`}
                             className="d-block ratio ratio-4x3 bg-light-subtle"
-                            aria-label={p?.product_name}
+                            aria-label={p?.productName}
                         >
                             <img
                                 src={imgSrc}
-                                alt={p?.product_name}
+                                alt={p?.productName}
                                 loading="lazy"
                                 decoding="async"
                                 className="w-100 h-100"
@@ -404,10 +459,10 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                     <div className="card-body d-flex flex-column text-center">
                         <h3
                             className="product-title fw-semibold text-body-emphasis mb-2 two-line-clamp"
-                            title={p?.product_name}
+                            title={p?.productName}
                             itemProp="name"
                         >
-                            {p?.product_name}
+                            {p?.productName}
                         </h3>
 
                         {/* Giá */}
@@ -415,17 +470,16 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                             {hasSale ? (
                                 <>
                                     <div className="d-flex justify-content-center align-items-baseline gap-2">
-                                        <span className="fs-5 fw-bold text-danger" itemProp="price">
-                                            {formatVND(p.sale_price)} ₫
-                                        </span>
-                                        <s className="text-secondary small">{formatVND(p.price)} ₫</s>
+                                        <p className="card-text text-danger mb-2 fw-bold">{displayedPrice(p)}</p>
+
                                     </div>
                                     <meta itemProp="priceCurrency" content="VND" />
                                 </>
                             ) : (
                                 <>
                                     <span className="fs-5 fw-bold text-danger" itemProp="price">
-                                        {formatVND(p.price)} ₫
+                                        <span>{displayedPrice(p)}  ₫</span>
+
                                     </span>
                                     <meta itemProp="priceCurrency" content="VND" />
                                 </>
@@ -437,7 +491,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                         <div className="mt-auto">
                             <button
                                 type="button"
-                                onClick={() => handleBuy(p.product_id)}
+                                onClick={() => handleBuy(p.productId)}
                                 className="btn btn-cta w-50 d-inline-flex align-items-center justify-content-center gap-2"
                                 disabled={buying}
                                 aria-pressed={buying}

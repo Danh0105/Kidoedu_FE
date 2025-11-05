@@ -11,20 +11,29 @@ export const CartProvider = ({ children }) => {
   // thêm sản phẩm vào giỏ
   const addToCartContext = (newItem) => {
     setCartContext((prev) => {
-      const existing = prev.find(p => p.productId === newItem.productId);
-      if (existing) {
-        // Nếu sản phẩm đã có → cộng dồn quantity
-        return prev.map(p =>
-          p.productId === newItem.productId
-            ? { ...p, quantity: p.quantity }
-            : p
-        );
-      } else {
-        // Nếu chưa có → thêm mới
-        return [...prev, newItem];
+      // Kiểm tra xem đã có sản phẩm này (product + variant) trong giỏ chưa
+      const existingIndex = prev.findIndex(
+        (p) =>
+          p.productId === newItem.productId &&
+          (p.selectedVariant?.variantId || null) ===
+          (newItem.selectedVariant?.variantId || null)
+      );
+
+      if (existingIndex !== -1) {
+        // ✅ Nếu cùng product + variant → tăng số lượng
+        const updated = [...prev];
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          quantity: updated[existingIndex].quantity + (newItem.quantity || 1),
+        };
+        return updated;
       }
+
+      // ✅ Nếu khác variant hoặc khác product → thêm sản phẩm mới riêng
+      return [...prev, newItem];
     });
   };
+
   const removeFromCartContext = (productId) => {
     setCartContext((prev) => prev.filter(p => p.productId !== productId));
   };

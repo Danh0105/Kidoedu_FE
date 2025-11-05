@@ -86,12 +86,12 @@ export default function Invoice() {
                   </thead>
                   <tbody>
                     {items.map((item, index) => {
-                      const price = Number(item.data.price) || 0;
+                      const price = Number(item.variant.price) || 0;
                       const total = price * item.quantity;
                       return (
                         <tr key={index}>
                           <td className="text-center">{index + 1}</td>
-                          <td>{item.data.product_name || `SP-${item.data.product_id}`}</td>
+                          <td>{item.data.productName || `SP-${item.variant.variantId}`}</td>
                           <td className="text-center">{item.quantity}</td>
                           <td className="text-end">{price.toLocaleString()} ₫</td>
                           <td className="text-end">{total.toLocaleString()} ₫</td>

@@ -9,8 +9,8 @@ export default function ModalLG({ onProductAdded }) {
     const [categoryId, setCategoryId] = useState(null);
     const [count, setCount] = useState(1);
     const [shortDesc, setShortDesc] = useState("");
-    const [user_manual, setUser_manual] = useState("");
-    const [caution_notes, setCaution_notes] = useState("");
+    const [userManual, setuserManual] = useState("");
+    const [cautionNotes, setcautionNotes] = useState("");
     const [origin, setOrigin] = useState("");
     const [specs, setSpecs] = useState("");
     const [longDesc, setLongDesc] = useState("");
@@ -79,13 +79,13 @@ export default function ModalLG({ onProductAdded }) {
 
 
             const dto = {
-                product_name: nameproduct?.trim() || "",
+                productName: nameproduct?.trim() || "",
                 sku: `SKU-${Date.now()}`,
-                short_description: stripHtml(shortDesc) || null,
-                long_description: longDesc || null,
+                shortDescription: stripHtml(shortDesc) || null,
+                longDescription: longDesc || null,
                 specs: specs || null,
-                user_manual: user_manual || null,
-                caution_notes: caution_notes || null,
+                userManual: userManual || null,
+                cautionNotes: cautionNotes || null,
                 origin: origin || null,
                 status: status ? Number(status) : 4,
                 price: Number(price) || 0,
@@ -165,7 +165,7 @@ export default function ModalLG({ onProductAdded }) {
                                         <RichTextEditor
                                             placeholder="Thông số kĩ thuật"
                                             value={specs}
-                                            onChange={(val) => setUser_manual(val)}
+                                            onChange={(val) => setuserManual(val)}
                                         />
                                     </div>
                                     <div className="text-start">
@@ -173,7 +173,7 @@ export default function ModalLG({ onProductAdded }) {
                                         <RichTextEditor
                                             placeholder="Thông số kĩ thuật"
                                             value={specs}
-                                            onChange={(val) => setCaution_notes(val)}
+                                            onChange={(val) => setcautionNotes(val)}
                                         />
                                     </div>
                                     <div className="text-start">

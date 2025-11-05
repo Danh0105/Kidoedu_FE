@@ -29,7 +29,7 @@ export default function ProductManagement() {
             await axios.delete(`${process.env.REACT_APP_API_URL}/products/${id}`);
 
             // ✅ Xóa khỏi state mà không cần reload
-            setProducts((prev) => prev.filter((p) => p.product_id !== id));
+            setProducts((prev) => prev.filter((p) => p.productId !== id));
 
             // ✅ Giảm total trong meta
             setMeta((prev) => ({
@@ -121,28 +121,28 @@ export default function ProductManagement() {
                         <tbody>
                             {products.length > 0 ? (
                                 products.map((p) => (
-                                    <tr key={p.product_id} className="align-middle">
+                                    <tr key={p.productId} className="align-middle">
                                         <td><input type="checkbox" /></td>
                                         <td>
                                             {p.images?.length > 0 ? (
-                                                <img src={p.images[0].image_url} alt={p.product_name} width={85} height={85} />
+                                                <img src={p.images[0].image_url} alt={p.productName} width={85} height={85} />
                                             ) : <span>—</span>}
                                         </td>
                                         <td>
-                                            {p.product_name.length > 20
-                                                ? p.product_name.substring(0, 20) + "..."
-                                                : p.product_name}
+                                            {p.productName.length > 20
+                                                ? p.productName.substring(0, 20) + "..."
+                                                : p.productName}
                                         </td>
                                         <td>{p.sku}</td>
                                         <td>{p.stock_quantity}</td>
                                         <td>{Number(p.price).toLocaleString()} ₫</td>
-                                        <td>{p.category?.category_name || p.category_id}</td>
+                                        <td>{p.category?.categoryName || p.category_id}</td>
                                         <td>{new Date(p.created_at).toLocaleDateString("vi-VN")}</td>
                                         <td className="text-center">
                                             <button className="btn btn-primary me-2">Edit</button>
                                             <button
                                                 className="btn btn-danger"
-                                                onClick={() => handleDelete(p.product_id)}
+                                                onClick={() => handleDelete(p.productId)}
                                             >
                                                 Delete
                                             </button>

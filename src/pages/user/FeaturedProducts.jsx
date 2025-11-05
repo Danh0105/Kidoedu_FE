@@ -70,7 +70,7 @@ export default function FeaturedProducts({ apiBase = `${process.env.REACT_APP_AP
         {products.length > 0 ? (
           products.map((p) => (
             <div
-              key={p.product_id}
+              key={p.productId}
               className="col-xl-3 col-lg-4 col-md-6 col-sm-12 d-flex justify-content-center"
             >
               <div
@@ -89,7 +89,7 @@ export default function FeaturedProducts({ apiBase = `${process.env.REACT_APP_AP
                   {/* Ảnh sản phẩm */}
                   <img
                     src={p.images?.[0]?.image_url || ROBOT}
-                    alt={p.product_name}
+                    alt={p.productName}
                     className="card-img-top"
                     style={{
 
@@ -102,16 +102,16 @@ export default function FeaturedProducts({ apiBase = `${process.env.REACT_APP_AP
                 <div className="card-body text-center">
                   <h6
                     className="fw-semibold text-truncate mb-2"
-                    title={p.product_name}
+                    title={p.productName}
                   >
-                    {p.product_name}
+                    {p.productName}
                   </h6>
                   <p className="text-danger fw-bold mb-3">
                     {Number(p.price).toLocaleString()} ₫
                   </p>
                   <button
                     onClick={() =>
-                      window.open(`/productdetail/${p.product_id}`
+                      window.open(`/productdetail/${p.productId}`
 
 
                       )
