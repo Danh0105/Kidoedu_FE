@@ -7,7 +7,7 @@ import ModalInfo from "../../components/user/ModalInfo";
 import ModalPayment from "../../components/user/ModalPayment";
 
 const PLACEHOLDER_IMG = "https://placehold.co/600x600?text=No+Image";
-export default function Checkout() {
+export default function CheckoutRental() {
   const navigate = useNavigate();
   const { selectedProducts } = useContext(CartContext);
 
@@ -24,19 +24,16 @@ export default function Checkout() {
 
   // Lấy thông tin sản phẩm và shipping từ cookie
   useEffect(() => {
+    console.log("selectedProducts", selectedProducts)
     if (selectedProducts?.length) setProducts(selectedProducts);
-    console.log(selectedProducts)
     const saved = Cookies.get("shippingInfo");
     if (saved) {
       try {
         let data = JSON.parse(saved);
-
-        // ✅ Nếu không phải mảng, ép thành mảng
         if (!Array.isArray(data)) {
           data = [data];
         }
 
-        // ✅ Lấy địa chỉ mặc định
         const defaultAddress = data.find(item => item.address?.is_default === true);
 
         setShippingInfo(defaultAddress || data[0]); // fallback: nếu chưa có mặc định
@@ -44,6 +41,7 @@ export default function Checkout() {
         console.error("Không thể parse shippingInfo từ cookie:", err);
       }
     }
+
   }, [selectedProducts]);
 
 
@@ -71,10 +69,11 @@ export default function Checkout() {
         prices: p.variant.price
       }));
 
+
       const url = shippingInfo.API;
 
       delete shippingInfo.API;
-      console.log(shippingInfo)
+
       const res = await axios.post(url, shippingInfo);
       navigate("/invoice", { state: { order: res.data.order, items: products } });
     } catch (err) {

@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useDebounce, buildPager } from "../../hooks/useUiUtils";
 import axios from "axios";
 import "../../components/user/css/Store.css";
-import Product from "../../components/user/category/Product";
+import ProductRental from "../../components/user/category/ProductRental";
 import SidebarCategories from "../../components/user/SidebarCategories";
 
 /* --------- Hook breakpoint để phân nhánh Desktop/Mobile ---------- */
@@ -39,7 +39,7 @@ function ProductSkeleton() {
     );
 }
 
-export default function Store({
+export default function Rental({
     apiBase = process.env.REACT_APP_API_URL,
     pageSizeOptions = [6, 12, 24, 48],
 }) {
@@ -123,47 +123,8 @@ export default function Store({
                 } else {
                     res = await api.get("/products", { params: baseParams, signal: abortSignal });
                     const data = res.data?.data || [];
-                    const productdata = await Promise.all(
-                        data.map(async (v) => {
-                            const resVariants = await axios.get(
-                                `${process.env.REACT_APP_API_URL}/products/${v.productId}/variants`
-                            );
-
-                            const variants = resVariants.data?.items || [];
-                            if (variants.length === 0) return null;
-
-                            const pricePromises = variants.map((variant) =>
-                                axios
-                                    .get(
-                                        `${process.env.REACT_APP_API_URL}/products/${v.productId}/variants/${variant.variantId}/prices`
-                                    )
-                                    .then((res) => res.data?.[0]?.price || null)
-                                    .catch(() => null)
-                            );
-
-                            const prices = await Promise.all(pricePromises);
-                            const validPrices = prices.filter((p) => p !== null).map(Number);
-
-                            if (validPrices.length === 0) return null;
-
-                            const minPrice = Math.min(...validPrices);
-                            const maxPrice = Math.max(...validPrices);
-
-                            const enrichedVariants = variants.map((variant, i) => ({
-                                ...variant,
-                                price: prices[i] !== null ? Number(prices[i]) : null,
-                            }));
-
-                            return {
-                                ...v,
-                                variants: enrichedVariants,
-                                minPrice,
-                                maxPrice,
-                            };
-                        })
-                    );
-                    setItems(productdata ?? []);
-                    setMeta(productdata ?? { page, last_page: 0, total: 0, limit });
+                    setItems(data ?? []);
+                    setMeta(data ?? { page, last_page: 0, total: 0, limit });
 
                     if (selectedCatId) {
                         res = await api.get("/search/products", {
@@ -317,7 +278,7 @@ export default function Store({
                             {sortedItems.length ? (
                                 sortedItems.map((prod) => (
                                     <div className="col" key={prod.productId} style={{ flex: "0 0 10%" }}>
-                                        <Product prod={prod} status={prod?.status} />
+                                        <ProductRental prod={prod} status={prod?.status} />
                                     </div>
                                 ))
                             ) : (
@@ -466,7 +427,7 @@ export default function Store({
                         {!loading && sortedItems.length > 0 && sortedItems.map((prod) => (
                             <div key={prod.productId} className="col">
                                 <div className="product-card">
-                                    <Product prod={prod} status={prod?.status} />
+                                    <ProductRental prod={prod} status={prod?.status} />
                                 </div>
                             </div>
                         ))}

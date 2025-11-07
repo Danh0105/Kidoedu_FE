@@ -83,6 +83,7 @@ export default function MenuCompactFixed() {
       <ul ref={menuRef} className="dropdown-menu shadow menu-fixed-escape">
         <li><NavLink to="/" className="dropdown-item" data-bs-dismiss="dropdown">Trang chủ</NavLink></li>
         <li><NavLink to="/store" className="dropdown-item" data-bs-dismiss="dropdown">Cửa hàng</NavLink></li>
+        <li><NavLink to="/rental" className="dropdown-item" data-bs-dismiss="dropdown">Cửa hàng</NavLink></li>
         <li><NavLink to="/quotation" className="dropdown-item" data-bs-dismiss="dropdown">Báo giá</NavLink></li>
         <li><NavLink to="/newproduct" className="dropdown-item" data-bs-dismiss="dropdown">Sản phẩm mới</NavLink></li>
         <li><NavLink to="/featuredproducts" className="dropdown-item" data-bs-dismiss="dropdown">Sản phẩm nổi bật</NavLink></li>

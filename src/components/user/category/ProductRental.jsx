@@ -4,6 +4,7 @@ import axios from "axios";
 import ModalCart from "../ModalCart";
 import ModalBuy from "../ModalBuy";
 import { pickRibbonFromStatus } from "../../../hooks/useUiUtils";
+import ModalRental from "../ModalRental";
 
 const PLACEHOLDER_IMG = "https://placehold.co/600x600?text=No+Image";
 
@@ -16,9 +17,7 @@ const formatCurrency = (value) =>
 const trimText = (s = "", max = 50) =>
     s.length > max ? s.slice(0, max) + "..." : s;
 
-export default function Product({ prod }) {
-    const [product, setProduct] = useState(null);
-    const [images, setImages] = useState([]);
+export default function ProductRental({ prod }) {
     const [showModalCart, setShowModalCart] = useState(false);
     const [showModalBuy, setShowModalBuy] = useState(false);
     const [hovered, setHovered] = useState(false);
@@ -29,12 +28,13 @@ export default function Product({ prod }) {
     const basePrice = prod?.price ?? 0;
     const status = prod?.status ?? prod?.data?.status;
     const ribbon = pickRibbonFromStatus(status);
-
+    const [variantsWithPrices, setVariantsWithPrices] = useState([]);
     const firstImage =
         prod?.variants?.[0]?.imageUrl || PLACEHOLDER_IMG;
 
     // 🧮 Fetch giá theo biến thể
     useEffect(() => {
+
         const fetchVariantPrices = async () => {
             try {
                 const res = await axios.get(
@@ -44,23 +44,57 @@ export default function Product({ prod }) {
                 const variants = res.data?.items || [];
                 if (variants.length === 0) return; // không có biến thể thì thôi
 
-                const pricePromises = variants.map((v) =>
+                const pricePromises = variants.map((variant) =>
                     axios
                         .get(
-                            `${process.env.REACT_APP_API_URL}/products/${id}/variants/${v.variantId}/prices`
+                            `${process.env.REACT_APP_API_URL}/products/${variant.productId}/variants/${variant.variantId}/rentals/prices`
                         )
-                        .then((res) => res.data?.[0]?.price || null)
-                        .catch(() => null)
+                        .then((res) => res.data || [])
+                        .catch(() => [])
                 );
 
-                const prices = (await Promise.all(pricePromises))
-                    .filter((p) => p !== null)
-                    .map((p) => Number(p));
+                const rentalPricesList = await Promise.all(pricePromises); // Array of arrays
 
-                if (prices.length === 0) return;
+                // Bước 2: Lấy tất cả giá trị `price` (convert về số)
+                const allPrices = rentalPricesList
+                    .flat() // làm phẳng mảng 2 chiều
+                    .map((item) => Number(item.price)) // ép kiểu sang number
+                    .filter((price) => !isNaN(price)); // loại bỏ NaN
 
-                const minPrice = Math.min(...prices);
-                const maxPrice = Math.max(...prices);
+                // Bước 3: Tính min/max
+                console.log("allPrices", allPrices);
+
+                const minPrice = Math.min(...allPrices);
+                const maxPrice = Math.max(...allPrices);
+
+                const enrichedVariants = variants.map((variant) => {
+                    const rentalPrices = rentalPricesList.find(
+                        (list) => list?.[0]?.variantId === variant.variantId
+                    );
+
+                    const rentalOptions = rentalPrices?.map((r) => ({
+                        rentalType: r.rentalType,
+                        price: Number(r.price),
+                        deposit: Number(r.deposit),
+                        currencyCode: r.currencyCode,
+                    })) || [];
+
+                    const minVariantPrice = rentalOptions.length
+                        ? Math.min(...rentalOptions.map((r) => r.price))
+                        : null;
+
+                    return {
+                        ...variant,
+                        rentalOptions, // chứa nhiều { rentalType, price }
+                        price: minVariantPrice, // giữ cho tiện lọc/sắp xếp
+                    };
+                });
+                console.log("enrichedVariants", enrichedVariants);
+
+                setVariantsWithPrices(enrichedVariants);
+                /*       if (variants.length > 0) {
+                          setSelectedVariantId(variants[0].variantId);
+                      } */
 
                 setPriceRange({ min: minPrice, max: maxPrice });
             } catch (err) {
@@ -201,6 +235,7 @@ export default function Product({ prod }) {
 
                 <p className="card-text text-danger mb-2 fw-bold">{displayedPrice}</p>
 
+
                 {/* Promo badges */}
                 <div
                     className="rounded-3 px-2 py-1 mb-3 d-flex gap-2 align-items-center"
@@ -221,8 +256,8 @@ export default function Product({ prod }) {
                     <button onClick={handleAddToCart} className="btn btn-danger">
                         Thêm vào giỏ
                     </button>
-                    <button onClick={handleBuy} className="btn btn-primary">
-                        Mua ngay
+                    <button onClick={handleBuy} className="btn btn-warning">
+                        Thuê ngay
                     </button>
 
                     {/* Hiệu ứng gradient */}
@@ -252,11 +287,11 @@ export default function Product({ prod }) {
                     onClose={() => setShowModalCart(false)}
                     product={prod}
                 />
-                <ModalBuy
+                <ModalRental
                     show={showModalBuy}
                     onClose={() => setShowModalBuy(false)}
                     product={prod}
-
+                    variantsWithPrices={variantsWithPrices}
                 />
 
             </div>

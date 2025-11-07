@@ -91,7 +91,31 @@ export default function Invoice() {
                       return (
                         <tr key={index}>
                           <td className="text-center">{index + 1}</td>
-                          <td>{item.data.productName || `SP-${item.variant.variantId}`}</td>
+                          <td>
+                            <div className="d-flex flex-column justify-content-between flex-grow-1">
+                              <div
+                                className="fw-semibold"
+                                title={item.data.productName}
+
+                              >
+                                {item.data.productName}
+                              </div>
+                              {item.variant && (
+                                <div className="text-muted small mt-1">
+                                  {item.variant.variantName
+                                    ? `Phiên bản: ${item.variant.variantName}`
+                                    : item.variant.attributes?.color
+                                      ? `Màu: ${item.variant.attributes.color}`
+                                      : ""}
+                                </div>
+                              )}
+                              <div className="d-sm-none mt-2">
+                                <span className="fw-bold text-danger small">
+                                  {Number(item.variant?.price || item.data.price).toLocaleString()} ₫
+                                </span>
+                              </div>
+                            </div>
+                          </td>
                           <td className="text-center">{item.quantity}</td>
                           <td className="text-end">{price.toLocaleString()} ₫</td>
                           <td className="text-end">{total.toLocaleString()} ₫</td>

@@ -40,6 +40,8 @@ import InspectionPolicyPage from "../pages/user/PoliciesandRegulations/Inspectio
 import ReturnsRefundsPolicyPage from "../pages/user/PoliciesandRegulations/ReturnsRefundsPolicyPage";
 import PrivacyPolicyPage from "../pages/user/PoliciesandRegulations/PrivacyPolicyPage";
 import PoliciesPage from "../pages/user/PoliciesandRegulations/Overview";
+import Rental from "../pages/user/Rental";
+import CheckoutRental from "../pages/user/CheckoutRental";
 
 export default function AppRoutes() {
 
@@ -106,6 +108,9 @@ export default function AppRoutes() {
                 </Route>
                 <Route path="/checkout" element={<UserLayout />}>
                     <Route index element={<Checkout />} />
+                </Route>
+                <Route path="/checkoutrental" element={<UserLayout />}>
+                    <Route index element={<CheckoutRental />} />
                 </Route>
                 <Route path="/order" element={<UserLayout />}>
                     <Route index element={<Order />} />
@@ -185,6 +190,9 @@ export default function AppRoutes() {
                 </Route>
                 <Route path="/overview" element={<UserLayout />}>
                     <Route index element={<PoliciesPage />} />
+                </Route>
+                <Route path="/rental" element={<UserLayout />}>
+                    <Route index element={<Rental />} />
                 </Route>
                 <Route path="/vtkc" element={<UserLayout />}>
                     <Route index element={<VTKC />} />
