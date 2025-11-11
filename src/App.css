@@ -737,3 +737,52 @@ body.app-loaded {
   -webkit-appearance: none;
   margin: 0;
 }
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
+/* hiệu ứng fade-in ảnh sau khi load để mượt hơn */
+.fade-in {
+  animation: fadeIn .25s ease-out both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0.3;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
+.fade-in {
+  animation: fadeIn .25s ease-out both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: .2
+  }
+
+  to {
+    opacity: 1
+  }
+}

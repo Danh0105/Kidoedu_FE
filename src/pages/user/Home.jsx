@@ -2,16 +2,16 @@ import "../../App.css";
 import Carousel from "../../components/user/Carousel";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { Menu, Cpu } from "lucide-react";
+import { Menu, Cpu, ChevronRight, Layers } from "lucide-react";
 import ProductHome from "../../components/user/ProductHome";
 import ModalBuy from "../../components/user/ModalBuy";
+import PromoRow from "../../components/user/PromoRow";
 
 // ======================= Helpers =======================
 const pickRibbonsFromStatus = (raw) => {
     const s = Number(raw ?? 0);
     if (s === 2) return [{ text: "Mới", className: "bg-danger", position: "left" }];
-    if (s === 1)
-        return [{ text: "Nổi bật", className: "bg-warning text-dark", position: "left" }];
+    if (s === 1) return [{ text: "Nổi bật", className: "bg-warning text-dark", position: "left" }];
     if (s === 12)
         return [
             { text: "Mới", className: "bg-danger", position: "left" },
@@ -38,22 +38,15 @@ const Ribbon = ({ text, position, className }) => (
     </span>
 );
 
-const formatCurrency = (value) =>
-    new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
-        Number(value || 0)
-    );
-
-// Single place to render a price range or single price
-const displayedPrice = ({ minPrice, maxPrice }) =>
-    Number(minPrice) === Number(maxPrice)
-        ? formatCurrency(minPrice)
-        : `${formatCurrency(minPrice)} - ${formatCurrency(maxPrice)}`;
-
 // ======================= Component =======================
 export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     // ---- State
-    const [categories, setCategories] = useState([]);
-    const [selectedCatId, setSelectedCatId] = useState(null);
+    const [allCats, setAllCats] = useState([]);     // tất cả danh mục (chuẩn hoá id/parent)
+    const [rootCats, setRootCats] = useState([]);   // danh mục gốc
+    const [hoverCatId, setHoverCatId] = useState(null);      // id danh mục gốc đang hover
+    const [showHoverPanel, setShowHoverPanel] = useState(false); // đang hiển thị panel danh mục con
+    const [selectedCatId, setSelectedCatId] = useState(null);    // danh mục (thường là con) đã chọn để hiển thị sản phẩm
+
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -82,70 +75,36 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         try {
             const res = await api.get("/categories");
             const all = res?.data || [];
-            // keep only roots where parent is null (support both parent and parentId)
-            const roots = all.filter((c) => c.parent === null || c.parentId === null);
-            setCategories(roots);
-            // choose first category if none selected
-            if (!selectedCatId && roots.length) {
-                const firstId = roots[0].categoryId ?? roots[0].category_id ?? roots[0].id;
-                setSelectedCatId(firstId ?? null);
-            }
+            // Chuẩn hoá
+            const norm = all.map((c) => ({
+                ...c,
+                _id: c.categoryId ?? c.category_id ?? c.id,
+                _parentId:
+                    c.parentId ??
+                    (typeof c.parent === "object" && c.parent
+                        ? (c.parent.categoryId ?? c.parent.id ?? c.parent.category_id)
+                        : c.parent ?? null),
+                _name: c.categoryName ?? c.name,
+            }));
+            setAllCats(norm);
+            setRootCats(norm.filter((c) => c._parentId === null));
+            // Không auto chọn → mặc định hiển thị Carousel
         } catch (e) {
             console.error("fetchCategories error:", e);
         }
-    }, [api, selectedCatId]);
+    }, [api]);
 
     const fetchProducts = useCallback(async () => {
         try {
             const res = await api.get("/products");
             const list = res?.data?.data || [];
 
-            // Enrich each product with variants + price range
-            const enriched = await Promise.all(
-                list.map(async (p) => {
-                    try {
-                        const rVar = await api.get(`/products/${p.productId}/variants`);
-                        const variants = rVar?.data?.items || [];
-                        if (!variants.length) return null;
 
-                        const pricePromises = variants.map((v) =>
-                            api
-                                .get(`/products/${p.productId}/variants/${v.variantId}/prices`)
-                                .then((r) => {
-                                    const arr = Array.isArray(r.data) ? r.data : r.data?.items || [];
-                                    // pick latest by start_at if exists, else first
-                                    const latest = [...arr].sort((a, b) => {
-                                        const ta = new Date(a.start_at || a.startAt || 0).getTime();
-                                        const tb = new Date(b.start_at || b.startAt || 0).getTime();
-                                        return tb - ta;
-                                    })[0];
-                                    return latest?.price ?? null;
-                                })
-                                .catch(() => null)
-                        );
+            console.log("list", list)
+            setAllProducts(list);
+            setFeaturedProducts(list.filter((p) => p?.status === 1 || p?.status === 12));
+            setNewProducts(list.filter((p) => p?.status === 2 || p?.status === 12));
 
-                        const prices = (await Promise.all(pricePromises)).filter((x) => x != null).map(Number);
-                        if (!prices.length) return null;
-
-                        const minPrice = Math.min(...prices);
-                        const maxPrice = Math.max(...prices);
-
-                        const variantsWithPrice = variants.map((v, i) => ({
-                            ...v,
-                            price: Number.isFinite(prices[i]) ? Number(prices[i]) : null,
-                        }));
-
-                        return { ...p, variants: variantsWithPrice, minPrice, maxPrice };
-                    } catch {
-                        return null;
-                    }
-                })
-            );
-
-            const finalList = enriched.filter(Boolean);
-            setAllProducts(finalList);
-            setFeaturedProducts(finalList.filter((p) => p?.status === 1 || p?.status === 12));
-            setNewProducts(finalList.filter((p) => p?.status === 2 || p?.status === 12));
         } catch (e) {
             console.error("fetchProducts error:", e);
         }
@@ -175,10 +134,16 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         fetchProducts();
     }, [fetchCategories, fetchProducts]);
 
-    // When selected category changes → fetch category products
+    // Khi click chọn danh mục (con) → tải sản phẩm
     useEffect(() => {
         if (selectedCatId != null) fetchProductsByCategory(selectedCatId);
     }, [selectedCatId, fetchProductsByCategory]);
+
+    // ========== Derived: children by hovered root ==========
+    const childrenOfHover = useMemo(() => {
+        if (!hoverCatId) return [];
+        return allCats.filter((c) => String(c._parentId) === String(hoverCatId));
+    }, [allCats, hoverCatId]);
 
     // ======================= Actions =======================
     const handleBuy = useCallback(
@@ -192,7 +157,10 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
     // ======================= UI bits =======================
     const SkeletonCard = () => (
-        <div className="card border-0 shadow-sm rounded-4 overflow-hidden p-2 placeholder-glow" style={{ maxWidth: 300 }}>
+        <div
+            className="card border-0 shadow-sm rounded-4 overflow-hidden p-2 placeholder-glow"
+            style={{ maxWidth: 300 }}
+        >
             <div className="bg-light placeholder rounded w-100 mb-3" style={{ height: 200 }} />
             <div className="card-body text-center">
                 <p className="placeholder-glow mb-2"><span className="placeholder col-8" /></p>
@@ -204,29 +172,44 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         </div>
     );
 
+    // ===== Sidebar (hover để mở panel, UI gọn gàng) =====
     const CategorySidebar = () => (
-        <div className="bg-white border rounded shadow-sm" style={{ minWidth: 260 }}>
+        <div
+            className="bg-white border rounded shadow-sm position-relative"
+            style={{ minWidth: 260 }}
+            onMouseLeave={() => {
+                // rời sidebar → đóng panel & trả Carousel
+                setHoverCatId(null);
+                setShowHoverPanel(false);
+                setSelectedCatId(null);
+            }}
+        >
             <div className="bg-danger text-white fw-bold d-flex align-items-center px-3 py-2">
                 <Menu size={20} className="me-2" /> MENU
             </div>
 
             <ul className="list-group list-group-flush">
-                {categories.length > 0 ? (
-                    categories.map((cat) => {
-                        const id = cat.categoryId ?? cat.category_id ?? cat.id;
-                        const isActive = String(selectedCatId) === String(id);
+                {rootCats.length > 0 ? (
+                    rootCats.map((cat) => {
+                        const id = cat._id;
+                        const isHover = String(hoverCatId) === String(id);
                         return (
                             <li
                                 key={id}
-                                className={`list-group-item list-group-item-action d-flex align-items-center justify-content-between ${isActive ? "active border-danger bg-danger-subtle text-danger fw-semibold" : ""
+                                className={`list-group-item list-group-item-action d-flex align-items-center justify-content-between ${isHover ? "bg-danger-subtle text-danger fw-semibold" : ""
                                     }`}
                                 style={{ cursor: "pointer" }}
-                                onClick={() => setSelectedCatId(id)}
+                                onMouseEnter={() => {
+                                    setHoverCatId(id);
+                                    setShowHoverPanel(true);   // Ẩn Carousel, hiện panel danh mục con
+                                    setSelectedCatId(null);    // đảm bảo chưa vào chế độ sản phẩm
+                                }}
                             >
                                 <div className="d-flex align-items-center">
-                                    <Cpu size={18} className={`me-2 ${isActive ? "text-danger" : "text-primary"}`} />
-                                    <span>{cat.categoryName || cat.name}</span>
+                                    <Cpu size={18} className={`me-2 ${isHover ? "text-danger" : "text-primary"}`} />
+                                    <span>{cat._name}</span>
                                 </div>
+                                <ChevronRight size={16} className="text-muted" />
                             </li>
                         );
                     })
@@ -241,159 +224,259 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         </div>
     );
 
-    const ProductGrid = () => (
-        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 flex-grow-1 ps-3">
-            {loading
-                ? Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="col d-flex justify-content-center"><SkeletonCard /></div>
-                ))
-                : items.length > 0
-                    ? items.map((prod) => {
-                        const ribbons = pickRibbonsFromStatus(prod?.status);
-                        return (
-                            <div className="col position-relative" key={prod.productId}>
-                                {ribbons.map((rb, i) => (
-                                    <Ribbon key={i} text={rb.text} position={rb.position} className={rb.className} />
-                                ))}
-                                <ProductHome prod={prod} onBuy={() => handleBuy(prod.productId)} />
+    // ===== Panel danh mục con trong khu vực nội dung (thay thế Carousel khi hover) =====
+    const SubcategoryPanel = () => {
+        const title =
+            (rootCats.find((r) => String(r._id) === String(hoverCatId))?._name) || "Danh mục";
+        return (
+            <div
+                className="ps-3 w-100"
+                onMouseLeave={() => {
+                    // rời cả panel → tắt panel và trả lại Carousel
+                    setHoverCatId(null);
+                    setShowHoverPanel(false);
+                    setSelectedCatId(null);
+                }}
+            >
+                <div
+                    className="card border-0 shadow-sm rounded-4"
+                    style={{
+                        minHeight: 260,
+                        transition: "opacity 160ms ease, transform 160ms ease",
+                        opacity: 1,
+                        transform: "translateY(0)",
+                    }}
+                >
+                    <div className="card-body">
+                        <div className="d-flex align-items-center mb-3">
+                            <div className="me-2 d-flex align-items-center justify-content-center rounded-circle bg-danger-subtle" style={{ width: 36, height: 36 }}>
+                                <Layers size={18} className="text-danger" />
                             </div>
-                        );
-                    })
-                    : <p className="text-center text-muted">Không có sản phẩm nào</p>}
-        </div>
-    );
-
-    const ProductSection = ({ title, products, showAll, toggleShow }) => {
-        const visible = showAll ? products : products.slice(0, 4);
-        return (
-            <section className="my-5">
-                <div className="text-center mb-4">
-                    <h2 className="fw-bold" style={{ fontSize: "2rem" }}>{title}</h2>
-                    <div style={{ height: 3, width: 80, backgroundColor: "hsl(0,75%,60%)", margin: "10px auto", borderRadius: 3 }} />
-                </div>
-
-                <div className="row justify-content-center">
-                    {visible.length > 0 ? (
-                        visible.map((p) => <ProductCard key={p.productId} p={p} />)
-                    ) : (
-                        <p className="text-center text-muted">Đang cập nhật sản phẩm...</p>
-                    )}
-                </div>
-
-                {products.length > 4 && (
-                    <div className="text-center mt-3">
-                        <button onClick={toggleShow} className="btn btn-outline-danger rounded-pill px-4">
-                            {showAll ? "Thu gọn" : "Xem thêm"}
-                        </button>
-                    </div>
-                )}
-            </section>
-        );
-    };
-
-    const ProductCard = ({ p }) => {
-        const ribbons = (pickRibbonsFromStatus?.(p?.status) || []).slice(0, 3);
-        const imgSrc = p?.variants?.[0]?.imageUrl || p?.imageUrl || "/placeholder.png";
-
-        // sale price (if you later add p.price & p.sale_price on top-level)
-        const hasSale = p?.sale_price && Number(p.sale_price) < Number(p.price);
-        const discountPercent = hasSale
-            ? Math.round(((Number(p.price) - Number(p.sale_price)) / Number(p.price)) * 100)
-            : 0;
-
-        return (
-            <div className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 d-flex">
-                <article className="card product-card shadow-sm border-0 rounded-4 overflow-hidden w-100 h-100" itemScope itemType="https://schema.org/Product">
-                    <div className="position-relative">
-                        {ribbons.map((rb, i) => (
-                            <span key={i} className={`badge position-absolute ribbon ${rb.className || "text-bg-warning"}`} data-pos={rb.position || "tl"}>
-                                {rb.text}
-                            </span>
-                        ))}
-                        {hasSale && (
-                            <span className="badge position-absolute ribbon text-bg-danger" data-pos="tr" aria-label={`Giảm ${discountPercent}%`}>
-                                -{discountPercent}%
-                            </span>
-                        )}
-
-                        <a href={`/productdetail/${p.productId}`} className="d-block ratio ratio-4x3 bg-light-subtle" aria-label={p?.productName}>
-                            <img
-                                src={imgSrc}
-                                alt={p?.productName}
-                                loading="lazy"
-                                decoding="async"
-                                className="w-100 h-100"
-                                style={{ objectFit: "scale-down", objectPosition: "center", padding: 8 }}
-                                onError={(e) => {
-                                    if (e.currentTarget.src.endsWith("/placeholder.png")) return;
-                                    e.currentTarget.src = "/placeholder.png";
-                                }}
-                            />
-                        </a>
-                    </div>
-
-                    <div className="card-body d-flex flex-column text-center">
-                        <h3 className="product-title fw-semibold text-body-emphasis mb-2 two-line-clamp" title={p?.productName} itemProp="name">
-                            {p?.productName}
-                        </h3>
-
-                        <div className="mb-3" itemProp="offers" itemScope itemType="https://schema.org/Offer">
-                            <span className="fs-5 fw-bold text-danger" itemProp="price">
-                                {displayedPrice(p)}
-                            </span>
-                            <meta itemProp="priceCurrency" content="VND" />
-                            <link itemProp="availability" href="https://schema.org/InStock" />
+                            <div>
+                                <h5 className="mb-0">{title}</h5>
+                                <small className="text-muted">Chọn danh mục con để xem sản phẩm</small>
+                            </div>
                         </div>
 
-                        <div className="mt-auto">
-                            <button type="button" onClick={() => handleBuy(p.productId)} className="btn btn-cta w-50 d-inline-flex align-items-center justify-content-center gap-2">
-                                <CartIcon />
-                                <span>Mua ngay</span>
-                            </button>
+                        {/* Grid danh mục con: 2–3 cột tự co giãn */}
+                        <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+                            {childrenOfHover.length > 0 ? (
+                                childrenOfHover.map((child) => (
+                                    <div key={child._id} className="col">
+                                        <button
+                                            className="w-100 btn btn-light border d-flex align-items-center justify-content-between rounded-4 py-3 px-3 shadow-sm"
+                                            onClick={() => {
+                                                setSelectedCatId(child._id);   // chuyển sang chế độ sản phẩm
+                                                setShowHoverPanel(false);
+                                                setHoverCatId(null);
+                                            }}
+                                        >
+                                            <span className="d-flex align-items-center">
+                                                <Cpu size={18} className="me-2 text-primary" />
+                                                <span className="fw-semibold">{child._name}</span>
+                                            </span>
+                                            <ChevronRight size={16} className="text-muted" />
+                                        </button>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="col">
+                                    <div className="alert alert-light border rounded-4 mb-0">
+                                        Chưa có danh mục con.
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
-                </article>
+                </div>
             </div>
         );
     };
 
-    function CartIcon(props) {
+    // ===== Vùng nội dung bên phải: Carousel / Panel / Grid sản phẩm =====
+    const ContentArea = () => {
+        // 1) Đã chọn danh mục → hiển thị sản phẩm
+        if (selectedCatId != null) {
+            return (
+                <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 flex-grow-1 ps-3">
+                    {loading
+                        ? Array.from({ length: 6 }).map((_, i) => (
+                            <div key={i} className="col d-flex justify-content-center">
+                                <SkeletonCard />
+                            </div>
+                        ))
+                        : items.length > 0
+                            ? items.map((prod) => {
+                                const ribbons = pickRibbonsFromStatus(prod?.status);
+                                return (
+                                    <div className="col position-relative" key={prod.productId}>
+                                        {ribbons.map((rb, i) => (
+                                            <Ribbon key={i} text={rb.text} position={rb.position} className={rb.className} />
+                                        ))}
+                                        <ProductHome prod={prod} onBuy={() => handleBuy(prod.productId)} />
+                                    </div>
+                                );
+                            })
+                            : <p className="text-center text-muted">Chưa có sản phẩm trong danh mục này.</p>}
+                </div>
+            );
+        }
+
+        // 2) Đang hover menu → hiển thị panel danh mục con (ẩn Carousel)
+        if (showHoverPanel && hoverCatId) {
+            return <SubcategoryPanel />;
+        }
+
+        // 3) Mặc định → Carousel
         return (
-            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" {...props}>
-                <path d="M7 4h-2l-1 2h2l3.6 7.59-1.35 2.44A2 2 0 0 0 10 19h9v-2h-9l1.1-2h6.45a2 2 0 0 0 1.8-1.1l3.58-7.16A1 1 0 0 0 22 4H7zM7 20a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
-            </svg>
+            <div className="flex-grow-1 ps-3 w-100">
+                <Carousel />
+            </div>
         );
-    }
+    };
 
     // ======================= Render =======================
     return (
         <div style={{ backgroundColor: "#fff" }}>
-            <Carousel />
             <div className="container py-4">
-                <div className="d-none d-md-flex" style={{ height: "calc(80vh - 100px)" }}>
+                {/* Desktop layout: Sidebar + Content */}
+                <div className="d-none d-md-flex" style={{ minHeight: "calc(80vh - 100px)" }}>
                     <CategorySidebar />
                     <div style={{ overflowY: "auto", flex: 1 }}>
-                        <ProductGrid />
+                        <ContentArea />
                     </div>
                 </div>
+                <PromoRow
+                    items={[
+                        {
+                            src: "https://cdn.tgdd.vn/Files/2021/12/27/1406967/tivi-samsung-giam-cuc-soc-den-28-mua-cuoi-nam.jpg",
+                            href: "https://cdn.tgdd.vn/Files/2021/12/27/1406967/tivi-samsung-giam-cuc-soc-den-28-mua-cuoi-nam.jpg",
+                            alt: "Duy nhất 11.11 - Nồi cơm PHILIPS",
 
-                <ProductSection
-                    title="🆕 Sản phẩm mới"
-                    products={newProducts}
-                    showAll={showAllNew}
-                    toggleShow={() => setShowAllNew((v) => !v)}
-                />
+                        },
+                        {
+                            src: "https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/Picture//Tm/Tm_picture_3053/1111_244_800.png.webp",
+                            href: "https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/Picture//Tm/Tm_picture_3053/1111_244_800.png.webp",
+                            alt: "Thách đấu online - Giảm đến 50%",
 
-                <ProductSection
-                    title="⭐ Sản phẩm nổi bật"
-                    products={featuredProducts}
-                    showAll={showAllFeatured}
-                    toggleShow={() => setShowAllFeatured((v) => !v)}
+                        },
+                        {
+                            src: "https://mediamart.vn/images/uploads/2023/6e6eff39-2dc5-4a93-809b-fff5eab21d4f.png",
+                            href: "https://mediamart.vn/images/uploads/2023/6e6eff39-2dc5-4a93-809b-fff5eab21d4f.png",
+                            alt: "Lễ hội máy sấy - Giá từ 3.990 triệu",
+
+                        },
+                    ]}
+                // có thể tinh chỉnh chiều cao dải banner tại đây:
+                // height="clamp(76px, 11vw, 124px)"
                 />
+                {/* Các section dưới luôn hiển thị */}
+                <section className="my-5">
+                    <div className="text-center mb-4">
+                        <h2 className="fw-bold" style={{ fontSize: "2rem" }}>🆕 Sản phẩm mới</h2>
+                        <div style={{ height: 3, width: 80, backgroundColor: "hsl(0,75%,60%)", margin: "10px auto", borderRadius: 3 }} />
+                    </div>
+                    <div className="row justify-content-center">
+                        {(showAllNew ? newProducts : newProducts.slice(0, 4)).map((p) => (
+                            <ProductCard key={p.productId} p={p} />
+                        ))}
+                        {!newProducts.length && <p className="text-center text-muted">Đang cập nhật sản phẩm...</p>}
+                    </div>
+                    {newProducts.length > 4 && (
+                        <div className="text-center mt-3">
+                            <button onClick={() => setShowAllNew((v) => !v)} className="btn btn-outline-danger rounded-pill px-4">
+                                {showAllNew ? "Thu gọn" : "Xem thêm"}
+                            </button>
+                        </div>
+                    )}
+                </section>
+
+                <section className="my-5">
+                    <div className="text-center mb-4">
+                        <h2 className="fw-bold" style={{ fontSize: "2rem" }}>⭐ Sản phẩm nổi bật</h2>
+                        <div style={{ height: 3, width: 80, backgroundColor: "hsl(0,75%,60%)", margin: "10px auto", borderRadius: 3 }} />
+                    </div>
+                    <div className="row justify-content-center">
+                        {(showAllFeatured ? featuredProducts : featuredProducts.slice(0, 4)).map((p) => (
+                            <ProductCard key={p.productId} p={p} />
+                        ))}
+                        {!featuredProducts.length && <p className="text-center text-muted">Đang cập nhật sản phẩm...</p>}
+                    </div>
+                    {featuredProducts.length > 4 && (
+                        <div className="text-center mt-3">
+                            <button onClick={() => setShowAllFeatured((v) => !v)} className="btn btn-outline-danger rounded-pill px-4">
+                                {showAllFeatured ? "Thu gọn" : "Xem thêm"}
+                            </button>
+                        </div>
+                    )}
+                </section>
             </div>
 
             {/* Modal Buy (global) */}
             <ModalBuy show={showModalBuy} onClose={() => setShowModalBuy(false)} product={buyProduct || {}} />
+        </div>
+    );
+}
+
+// ===== Product card (reused in sections) =====
+function ProductCard({ p }) {
+    const ribbons = (pickRibbonsFromStatus?.(p?.status) || []).slice(0, 3);
+    const imgSrc = p?.variants?.[0]?.imageUrl || p?.imageUrl || "/placeholder.png";
+
+    const hasSale = p?.sale_price && Number(p.sale_price) < Number(p.price);
+    const discountPercent = hasSale
+        ? Math.round(((Number(p.price) - Number(p.sale_price)) / Number(p.price)) * 100)
+        : 0;
+
+    return (
+        <div className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 d-flex">
+            <article className="card product-card shadow-sm border-0 rounded-4 overflow-hidden w-100 h-100" itemScope itemType="https://schema.org/Product">
+                <div className="position-relative">
+                    {ribbons.map((rb, i) => (
+                        <span key={i} className={`badge position-absolute ribbon ${rb.className || "text-bg-warning"}`} data-pos={rb.position || "tl"}>
+                            {rb.text}
+                        </span>
+                    ))}
+                    {hasSale && (
+                        <span className="badge position-absolute ribbon text-bg-danger" data-pos="tr" aria-label={`Giảm ${discountPercent}%`}>
+                            -{discountPercent}%
+                        </span>
+                    )}
+
+                    <a href={`/productdetail/${p.productId}`} className="d-block ratio ratio-4x3 bg-light-subtle" aria-label={p?.productName}>
+                        <img
+                            src={imgSrc}
+                            alt={p?.productName}
+                            loading="lazy"
+                            decoding="async"
+                            className="w-100 h-100"
+                            style={{ objectFit: "scale-down", objectPosition: "center", padding: 8 }}
+                            onError={(e) => {
+                                if (e.currentTarget.src.endsWith("/placeholder.png")) return;
+                                e.currentTarget.src = "/placeholder.png";
+                            }}
+                        />
+                    </a>
+                </div>
+
+                <div className="card-body d-flex flex-column text-center">
+                    <h3 className="product-title fw-semibold text-body-emphasis mb-2 two-line-clamp" title={p?.productName} itemProp="name">
+                        {p?.productName}
+                    </h3>
+
+                    <div className="mb-3" itemProp="offers" itemScope itemType="https://schema.org/Offer">
+                        <span className="fs-5 fw-bold text-danger" itemProp="price">
+                            {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
+                                Number(p?.priceRange?.min || 0)
+                            )}
+                            {Number(p?.priceRange?.min) !== Number(p?.priceRange?.max) &&
+                                ` - ${new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(p?.priceRange?.max || 0))}`}
+                        </span>
+                        <meta itemProp="priceCurrency" content="VND" />
+                        <link itemProp="availability" href="https://schema.org/InStock" />
+                    </div>
+                </div>
+            </article>
         </div>
     );
 }
