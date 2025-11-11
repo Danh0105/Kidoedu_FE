@@ -1,37 +1,84 @@
-import React, { useMemo, useState } from "react";
-import { Cpu } from 'lucide-react';
+import React, { useMemo, useState, useEffect, useCallback } from "react";
+import { Cpu } from "lucide-react";
 import CategoryTitle from "../../components/user/category/Category";
 import RadioCategoryItem from "../../components/user/category/CheckboxProduct";
+
+/**
+ * SidebarCategories (cleaned)
+ * - Robustly supports either snake_case (category_id) or camelCase (categoryId)
+ * - Keeps panel open when there's an active query or a selected category
+ * - Safe Number() casts and null guards
+ * - Keyboard accessible section headers (Enter/Space)
+ */
 export default function SidebarCategories({
   roots = [],
   selectedCatId,
-  onSelect,
-  onClear,
+  onSelect = () => { },
+  onClear = () => { },
 }) {
   const [query, setQuery] = useState("");
-  const [open, setOpen] = useState(() => new Set());
+  const [openId, setOpenId] = useState(null);
 
+  // Normalize incoming tree nodes to a consistent shape
+  const normalized = useMemo(() => {
+    const norm = (node) => ({
+      id: node.categoryId ?? node.category_id ?? node.id,
+      name: node.categoryName ?? node.name,
+      children: Array.isArray(node.children)
+        ? node.children.map(norm)
+        : [],
+    });
+    return Array.isArray(roots) ? roots.map(norm) : [];
+  }, [roots]);
+
+  // Filter with query (case-insensitive). If parent matches, keep all its children
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return roots;
-    return roots
-      .map((p) => {
-        const parentMatch = p.categoryName.toLowerCase().includes(q);
-        const kids = (p.children || []).filter((c) =>
-          c.categoryName.toLowerCase().includes(q)
-        );
-        if (parentMatch && kids.length === 0) return { ...p };
-        if (parentMatch || kids.length) return { ...p, children: parentMatch ? p.children : kids };
-        return null;
-      })
-      .filter(Boolean);
-  }, [roots, query]);
+    if (!q) return normalized;
 
-  const toggle = (id) => {
-    const next = new Set(open);
-    next.has(id) ? next.delete(id) : next.add(id);
-    setOpen(next);
-  };
+    const walk = (node) => {
+      const parentMatch = (node.name || "").toLowerCase().includes(q);
+      const kids = node.children.map(walk).filter(Boolean);
+      if (parentMatch) return { ...node, children: node.children };
+      if (kids.length) return { ...node, children: kids };
+      return null;
+    };
+
+    return normalized.map(walk).filter(Boolean);
+  }, [normalized, query]);
+
+  // Auto-open section that has selectedCatId or when user is searching
+  useEffect(() => {
+    if (!filtered.length) return;
+
+    if (query) {
+      // open the first matching section on search
+      setOpenId((cur) => cur ?? filtered[0]?.id ?? null);
+      return;
+    }
+
+    if (selectedCatId != null) {
+      // Find parent containing the selected child
+      const parent = filtered.find((p) =>
+        (p.children || []).some((c) => String(c.id) === String(selectedCatId))
+      );
+      if (parent) setOpenId(parent.id);
+    }
+  }, [filtered, query, selectedCatId]);
+
+  const toggle = useCallback((id) => {
+    setOpenId((cur) => (cur === id ? null : id));
+  }, []);
+
+  const handleKeyToggle = useCallback(
+    (e, id) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggle(id);
+      }
+    },
+    [toggle]
+  );
 
   return (
     <aside
@@ -40,12 +87,11 @@ export default function SidebarCategories({
         width: 330,
         position: "sticky",
         top: 16,
-        maxHeight: "calc(100vh - 32px)",
+        maxHeight: "calc(70vh - 32px)",
         overflow: "auto",
       }}
-      aria-label="Bộ lọc danh mục"
     >
-      {/* Tìm danh mục + Clear filter */}
+      {/* Search */}
       <div className="d-flex gap-2 mb-3">
         <input
           type="search"
@@ -56,77 +102,65 @@ export default function SidebarCategories({
         />
         <button
           className="btn btn-outline-secondary"
-          title="Xóa ô tìm"
           onClick={() => setQuery("")}
           disabled={!query}
+          aria-label="Xóa tìm kiếm"
         >
           ✕
         </button>
       </div>
 
-      {selectedCatId && (
-        <div className="d-flex justify-content-between align-items-center mb-2">
+      {selectedCatId != null && (
+        <div className="d-flex justify-content-between mb-2">
           <span className="badge text-bg-primary">Đang chọn: #{selectedCatId}</span>
-          <button className="btn btn-link p-0" onClick={onClear}>Xóa bộ lọc</button>
+          <button className="btn btn-link p-0" onClick={onClear}>
+            Xóa bộ lọc
+          </button>
         </div>
       )}
 
       {!filtered.length ? (
         <p className="text-center text-muted mb-0">Không có danh mục</p>
       ) : (
-        <div className="accordion" id="cat-accordion">
-          {filtered.map((cat) => {
-            const isOpen = open.has(cat.category_id);
-            const headerId = `h-${cat.category_id}`;
-            const panelId = `p-${cat.category_id}`;
-            const children = cat.children || [];
-            return (
-              <div className="accordion-item" key={cat.category_id}>
-                <h2 className="accordion-header" id={headerId}>
-                  <button
-                    className={`accordion-button ${!isOpen ? "collapsed" : ""}`}
-                    type="button"
-                    aria-expanded={isOpen}
-                    aria-controls={panelId}
-                    onClick={() => toggle(cat.category_id)}
-                  >
-                    <Cpu
-                      size={18}
-                      className={`me-2 ${selectedCatId === cat.category_id ? "text-danger" : "text-primary"}`}
-                    />
-                    <CategoryTitle label={cat.categoryName} />
-                    {children.length > 0 && (
-                      <span className="badge text-bg-light ms-2">{children.length}</span>
-                    )}
-                  </button>
-                </h2>
-                <div
-                  id={panelId}
-                  className={`accordion-collapse collapse ${isOpen ? "show" : ""}`}
-                  aria-labelledby={headerId}
-                  data-bs-parent="#cat-accordion"
-                >
-                  {children.length ? (
-                    <div className="list-group list-group-flush">
-                      {children.map((child) => (
+        filtered.map((cat) => {
+          const id = cat.id;
+          const isOpen = openId === id;
+          const children = cat.children || [];
 
-                        <RadioCategoryItem
-                          key={child.category_id}
-                          id={child.category_id}
-                          name={child.categoryName}
-                          selectedId={selectedCatId}
-                          onChange={(val) => onSelect(val == null ? null : Number(val))} // ✅ đảm bảo number
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="list-group-item text-muted">Không có mục con</div>
-                  )}
+          return (
+            <div key={id ?? Math.random()} className="mb-1 border rounded">
+              <div
+                role="button"
+                tabIndex={0}
+                className="w-100 d-flex align-items-center justify-content-between px-3 py-2 bg-light"
+                onClick={() => toggle(id)}
+                onKeyDown={(e) => handleKeyToggle(e, id)}
+              >
+                <div className="d-flex align-items-center">
+                  <Cpu size={18} className="me-2 text-primary" />
+                  <CategoryTitle label={cat.name} />
                 </div>
+                {children.length > 0 && (
+                  <span className="badge text-bg-secondary">{children.length}</span>
+                )}
               </div>
-            );
-          })}
-        </div>
+
+              {isOpen && children.length > 0 && (
+                <div className="list-group list-group-flush">
+                  {children.map((child) => (
+                    <RadioCategoryItem
+                      key={child.id}
+                      id={child.id}
+                      name={child.name}
+                      selectedId={selectedCatId}
+                      onChange={(val) => onSelect(val ? Number(val) : null)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })
       )}
     </aside>
   );

@@ -134,10 +134,8 @@ export function ProductInfoPanel({ product, images, onVariantChange, onVariantsL
 
   const status = product?.status ?? 0;
   const tags = [];
-  if (status === 1 || status === 12)
-    tags.push({ text: "Nổi bật", className: "bg-warning text-dark" });
-  if (status === 2 || status === 12)
-    tags.push({ text: "Mới", className: "bg-danger" });
+  if (status === 1 || status === 12) tags.push({ text: "Nổi bật", className: "bg-warning text-dark" });
+  if (status === 2 || status === 12) tags.push({ text: "Mới", className: "bg-danger" });
 
   // 🛒 Thêm vào giỏ hàng
   const addToCart = async (productId, quantity) => {
