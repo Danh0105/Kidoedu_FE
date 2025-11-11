@@ -17,8 +17,6 @@ const trimText = (s = "", max = 50) =>
     s.length > max ? s.slice(0, max) + "..." : s;
 
 export default function Product({ prod }) {
-    const [product, setProduct] = useState(null);
-    const [images, setImages] = useState([]);
     const [showModalCart, setShowModalCart] = useState(false);
     const [showModalBuy, setShowModalBuy] = useState(false);
     const [hovered, setHovered] = useState(false);
@@ -34,42 +32,51 @@ export default function Product({ prod }) {
         prod?.variants?.[0]?.imageUrl || PLACEHOLDER_IMG;
 
     // 🧮 Fetch giá theo biến thể
+    // 🧮 Fetch dải giá theo biến thể (min - max)
     useEffect(() => {
-        const fetchVariantPrices = async () => {
+        if (!id) {
+            setPriceRange(null);
+            return;
+        }
+
+        let alive = true; // tránh setState khi unmount
+
+        (async () => {
             try {
                 const res = await axios.get(
-                    `${process.env.REACT_APP_API_URL}/products/${id}/variants`
+                    `${process.env.REACT_APP_API_URL}/products/${id}`
                 );
+                const product = res?.data?.data ?? res?.data;
 
-                const variants = res.data?.items || [];
-                if (variants.length === 0) return; // không có biến thể thì thôi
+                // Ưu tiên currentPrice; fallback price/sale_price nếu API có
+                const prices = (product?.variants ?? [])
+                    .map((v) => {
+                        const raw = v.currentPrice ?? v.price ?? v.sale_price ?? null;
+                        const n = Number(raw);
+                        return Number.isFinite(n) ? n : null;
+                    })
+                    .filter((n) => n != null);
 
-                const pricePromises = variants.map((v) =>
-                    axios
-                        .get(
-                            `${process.env.REACT_APP_API_URL}/products/${id}/variants/${v.variantId}/prices`
-                        )
-                        .then((res) => res.data?.[0]?.price || null)
-                        .catch(() => null)
-                );
+                if (!alive) return;
 
-                const prices = (await Promise.all(pricePromises))
-                    .filter((p) => p !== null)
-                    .map((p) => Number(p));
-
-                if (prices.length === 0) return;
-
-                const minPrice = Math.min(...prices);
-                const maxPrice = Math.max(...prices);
-
-                setPriceRange({ min: minPrice, max: maxPrice });
+                if (prices.length) {
+                    const minPrice = Math.min(...prices);
+                    const maxPrice = Math.max(...prices);
+                    setPriceRange({ min: minPrice, max: maxPrice });
+                } else {
+                    setPriceRange(null);
+                }
             } catch (err) {
-                console.warn("Không thể lấy giá biến thể:", err.message);
+                console.error("Lỗi lấy dải giá:", err);
+                if (alive) setPriceRange(null);
             }
-        };
+        })();
 
-        if (id) fetchVariantPrices();
+        return () => {
+            alive = false;
+        };
     }, [id]);
+
 
     const fetchProductAndOpen = async (pid, openType) => {
         try {
@@ -85,10 +92,11 @@ export default function Product({ prod }) {
 
     // 🧾 Chọn hiển thị giá
     const displayedPrice = priceRange
-        ? priceRange.min === priceRange.max
+        ? (priceRange.min === priceRange.max
             ? formatCurrency(priceRange.min)
-            : `${formatCurrency(priceRange.min)} - ${formatCurrency(priceRange.max)}`
+            : `${formatCurrency(priceRange.min)} - ${formatCurrency(priceRange.max)}`)
         : formatCurrency(basePrice);
+
 
     // 🩶 Loading skeleton
     if (!prod) {

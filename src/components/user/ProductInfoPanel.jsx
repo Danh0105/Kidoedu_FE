@@ -91,9 +91,7 @@ export function ProductInfoPanel({ product, images, onVariantChange, onVariantsL
         setVariants(variantsWithImages);
 
         // ✅ Gửi toàn bộ danh sách ảnh về ProductDetail
-        const variantImages = variantsWithImages
-          .map((v) => v.imageUrl)
-          .filter(Boolean);
+        const variantImages = variantsWithImages.flatMap((v) => v.imageUrls || []);
         onVariantsLoaded?.(variantImages);
       } catch (err) {
         console.error("❌ Lỗi khi tải danh sách biến thể:", err);
