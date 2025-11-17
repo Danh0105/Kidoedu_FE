@@ -24,7 +24,6 @@ export default function CheckoutRental() {
 
   // Lấy thông tin sản phẩm và shipping từ cookie
   useEffect(() => {
-    console.log("selectedProducts", selectedProducts)
     if (selectedProducts?.length) setProducts(selectedProducts);
     const saved = Cookies.get("shippingInfo");
     if (saved) {

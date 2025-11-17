@@ -1,119 +1,184 @@
-import React, { Component } from 'react'
-import product from '../../../assets/admin/product1.png'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-export default class OrderManagement extends Component {
-    render() {
-        const formatCurrency = (amount) => {
-            return new Intl.NumberFormat('vi-VN', {
-                style: 'currency',
-                currency: 'VND'
-            }).format(amount);
-        };
+const API_BASE = process.env.REACT_APP_API_URL;
+
+export default function OrderManager() {
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [q, setQ] = useState(""); // search local
+
+    // ===== Helpers =====
+    const formatCurrency = (v) =>
+        new Intl.NumberFormat("vi-VN").format(Number(v)) + " đ";
+
+    const formatDate = (v) =>
+        v ? new Date(v).toLocaleString("vi-VN") : "";
+
+    const buildOrderCode = (o) =>
+        `DH${String(o.orderId).padStart(4, "0")}`;
+
+    const getCustomerName = (o) =>
+        o.user?.fullName || o.user?.username || "Khách lẻ";
+
+    // =========================== LOAD ORDERS ===========================
+    const fetchOrders = async () => {
+        try {
+            setLoading(true);
+
+            const res = await axios.get(`${API_BASE}/orders`);
+
+            if (Array.isArray(res.data)) {
+                setOrders(res.data);
+            } else if (Array.isArray(res.data.data)) {
+                setOrders(res.data.data);
+            } else {
+                setOrders([]);
+            }
+        } catch (err) {
+            console.error("Lỗi tải đơn hàng:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchOrders();
+    }, []);
+
+    // =========================== DELETE ===========================
+    const deleteOrder = async (id) => {
+        if (!window.confirm("Bạn chắc chắn muốn xóa đơn hàng này?")) return;
+
+        try {
+            await axios.delete(`${API_BASE}/orders/${id}`);
+            setOrders((prev) => prev.filter((o) => o.orderId !== id));
+        } catch (err) {
+            console.error("Lỗi xoá đơn:", err);
+            alert("Không thể xoá đơn hàng!");
+        }
+    };
+
+    // =========================== UPDATE STATUS ===========================
+    const updateStatus = async (id, status) => {
+        try {
+            await axios.put(`${API_BASE}/orders/${id}/status`, { status });
+
+            setOrders((prev) =>
+                prev.map((o) =>
+                    o.orderId === id ? { ...o, status } : o
+                )
+            );
+        } catch (err) {
+            console.error("Lỗi cập nhật trạng thái:", err);
+            alert("Không cập nhật được trạng thái đơn hàng!");
+        }
+    };
+
+    // =========================== SEARCH FILTER ===========================
+    const filteredOrders = orders.filter((o) => {
+        const key = q.trim().toLowerCase();
+        if (!key) return true;
+
         return (
-            <div className="container-fluid mt-2">
-                <div class="card mb-4">
-                    <div class="p-2 d-flex justify-content-between align-items-center ">
-                        <div className='flex-fill'>
-                            <h3 class="card-title ">Danh sách đơn hàng</h3>
-                        </div>
-                        <div className='p-2 w-50 flex-fill d-flex justify-content-center'>
-                            <input type="search" class="form-control w-50" placeholder="Search..." aria-label="Search"></input>
-                        </div>
-                        <div class=" p-2 flex-fill card-tools">
-                            <ol class="breadcrumb float-sm-end">
-                                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">ProductManagement</li>
-                            </ol>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <table class="table" role="table">
-                            <thead>
-                                <tr>
-                                    <th style={{ width: "10px" }} scope="col"><div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="checkDefault" />
-                                    </div>
-                                    </th>
-                                    <th className='align-middle' scope="col" style={{ width: "120px" }}>Mã đơn hàng </th>
-                                    <th className='align-middle'>Tên khách hàng</th>
-                                    <th className='align-middle'>Số điện thoại</th>
-                                    <th className='align-middle' scope="col">Ngày đặt hàng</th>
-                                    <th className='align-middle'>Trạng thái</th>
-                                    <th className='align-middle'>Phhương thức thanh toán</th>
-                                    <th className='align-middle'>Tổng tiền</th>
-                                    <th className='align-middle text-center' scope="col">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="align-middle">
-                                    <td><input class="form-check-input" type="checkbox" value="" id="checkDefault" /></td>
-                                    <td><Link to="/order-detail">DH0001</Link></td>
-                                    <td>Khách 1</td>
-                                    <td className='align-middle'>
-                                        0950061089
-                                    </td>
-                                    <td>2025-07-25</td>
-                                    <td className='align-middle'>Đã xác nhận</td>
-                                    <td className='text-center'>Ví điện tử</td>
-                                    <td><span>{formatCurrency(1250000)}</span> </td>
-                                    <td style={{ width: "165px" }} >
-                                        <button className='btn btn-primary me-2'>
-                                            Edit
-                                        </button>
-                                        <button className='btn btn-danger'>
-                                            Delete
-                                        </button>
-                                    </td>
+            buildOrderCode(o).toLowerCase().includes(key) ||
+            getCustomerName(o).toLowerCase().includes(key)
+        );
+    });
 
-                                </tr>
+    return (
+        <div className="card shadow-sm">
+            <div className="card-body">
+                {/* Header */}
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h4 className="fw-bold">Quản lý đơn hàng</h4>
 
-                            </tbody>
-                            <thead>
-                                <tr>
-                                    <th style={{ width: "10px" }} scope="col"><div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="checkDefault" />
-                                    </div>
-                                    </th>
-                                    <th className='align-middle' scope="col" style={{ width: "120px" }}>Mã đơn hàng </th>
-                                    <th className='align-middle'>Tên khách hàng</th>
-                                    <th className='align-middle'>Số điện thoại</th>
-                                    <th className='align-middle' scope="col">Ngày đặt hàng</th>
-                                    <th className='align-middle'>Trạng thái</th>
-                                    <th className='align-middle'>Phhương thức thanh toán</th>
-                                    <th className='align-middle'>Tổng tiền</th>
-                                    <th className='align-middle text-center' scope="col">Actions</th>
-                                </tr>
-                            </thead>
-                        </table>
-                        <div className='d-flex mx-4 mt-2 mb-2 align-items-center justify-content-between gap-2'>
-
-                            <div class="dropdown d-flex  mb-2 align-items-center">
-                                <input class="form-check-input me-2 " type="checkbox" value="" id="checkDefault" />
-                                <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Hành động hàng loạt
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#">Action</a></li>
-                                    <li><a class="dropdown-item" href="#">Another action</a></li>
-                                    <li><a class="dropdown-item" href="#">Something else here</a></li>
-                                </ul>
-                            </div>
-                            <div >
-                                <ul class="pagination pagination-sm float-end">
-                                    <li class="page-item"><a class="page-link" href="#">«</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">»</a></li>
-                                </ul>
-                            </div>
-
-                        </div>
-
+                    <div style={{ width: 260 }}>
+                        <input
+                            className="form-control"
+                            placeholder="Tìm kiếm đơn hàng"
+                            value={q}
+                            onChange={(e) => setQ(e.target.value)}
+                        />
                     </div>
                 </div>
+
+                {/* Table */}
+                <div className="table-responsive">
+                    <table className="table align-middle table-hover">
+                        <thead className="table-light">
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Email</th>
+                                <th>SĐT</th>
+                                <th>Ngày đặt</th>
+                                <th>Trạng thái</th>
+                                <th className="text-end">Tổng tiền</th>
+                                <th className="text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {loading && (
+                                <tr>
+                                    <td colSpan={8} className="text-center py-4">
+                                        Đang tải...
+                                    </td>
+                                </tr>
+                            )}
+
+                            {!loading && filteredOrders.length === 0 && (
+                                <tr>
+                                    <td colSpan={8} className="text-center py-4">
+                                        Không có đơn hàng nào.
+                                    </td>
+                                </tr>
+                            )}
+
+                            {!loading &&
+                                filteredOrders.map((o) => (
+                                    <tr key={o.orderId}>
+                                        <td className="fw-semibold">{buildOrderCode(o)}</td>
+                                        <td>{getCustomerName(o)}</td>
+                                        <td>{o.user?.email || ""}</td>
+                                        <td>{o.user?.address?.phone_number || ""}</td>
+                                        <td>{formatDate(o.orderDate)}</td>
+
+                                        <td>
+                                            <select
+                                                value={o.status}
+                                                className="form-select form-select-sm"
+                                                onChange={(e) =>
+                                                    updateStatus(o.orderId, e.target.value)
+                                                }
+                                            >
+                                                <option value="Pending">Pending</option>
+                                                <option value="Confirmed">Confirmed</option>
+                                                <option value="Shipping">Shipping</option>
+                                                <option value="Completed">Completed</option>
+                                                <option value="Cancelled">Cancelled</option>
+                                            </select>
+                                        </td>
+
+                                        <td className="text-end fw-semibold">
+                                            {formatCurrency(o.totalAmount)}
+                                        </td>
+
+                                        <td className="text-center">
+                                            <button
+                                                className="btn btn-sm btn-outline-danger"
+                                                onClick={() => deleteOrder(o.orderId)}
+                                            >
+                                                Xoá
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        )
-    }
+        </div>
+    );
 }

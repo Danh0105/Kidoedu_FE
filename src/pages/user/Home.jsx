@@ -38,14 +38,59 @@ const Ribbon = ({ text, position, className }) => (
     </span>
 );
 
+const fmtVND = (n) =>
+    Number(n || 0).toLocaleString("vi-VN", {
+        style: "currency",
+        currency: "VND",
+    });
+
+/** Helper: lấy basePrice/promoPrice/finalPrice từ 1 variant (dùng cho ProductCard) */
+function pickPricesFromVariant(variant) {
+    if (!variant) {
+        return {
+            basePrice: null,
+            promoPrice: null,
+            finalPrice: 0,
+            hasPromo: false,
+        };
+    }
+
+    const prices = Array.isArray(variant.prices) ? variant.prices : [];
+    let baseRecord = null;
+    let promoRecord = null;
+
+    prices.forEach((p) => {
+        if (!p) return;
+        if (p.priceType === "base") {
+            if (!baseRecord || new Date(p.startAt) > new Date(baseRecord.startAt)) {
+                baseRecord = p;
+            }
+        }
+        if (p.priceType === "promo") {
+            if (!promoRecord || new Date(p.startAt) > new Date(promoRecord.startAt)) {
+                promoRecord = p;
+            }
+        }
+    });
+
+    const basePrice = baseRecord ? Number(baseRecord.price) : null;
+    const promoPrice = promoRecord ? Number(promoRecord.price) : null;
+    const finalPrice = promoPrice ?? basePrice ?? 0;
+    const hasPromo =
+        promoPrice != null && (basePrice ?? promoPrice) > promoPrice;
+
+    return { basePrice, promoPrice, finalPrice, hasPromo };
+}
+
 // ======================= Component =======================
 export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     // ---- State
-    const [allCats, setAllCats] = useState([]);     // tất cả danh mục (chuẩn hoá id/parent)
-    const [rootCats, setRootCats] = useState([]);   // danh mục gốc
-    const [hoverCatId, setHoverCatId] = useState(null);      // id danh mục gốc đang hover
+    const [allCats, setAllCats] = useState([]); // tất cả danh mục (chuẩn hoá id/parent)
+    const [rootCats, setRootCats] = useState([]); // danh mục gốc
+    const [hoverCatId, setHoverCatId] = useState(null); // id danh mục gốc đang hover
+    const [hoverPanel, setHoverPanel] = useState(null);
     const [showHoverPanel, setShowHoverPanel] = useState(false); // đang hiển thị panel danh mục con
-    const [selectedCatId, setSelectedCatId] = useState(null);    // danh mục (thường là con) đã chọn để hiển thị sản phẩm
+    const [selectedCatId, setSelectedCatId] = useState(null); // danh mục (thường là con) đã chọn để hiển thị sản phẩm
 
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -82,7 +127,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                 _parentId:
                     c.parentId ??
                     (typeof c.parent === "object" && c.parent
-                        ? (c.parent.categoryId ?? c.parent.id ?? c.parent.category_id)
+                        ? c.parent.categoryId ?? c.parent.id ?? c.parent.category_id
                         : c.parent ?? null),
                 _name: c.categoryName ?? c.name,
             }));
@@ -99,16 +144,20 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
             const res = await api.get("/products");
             const list = res?.data?.data || [];
 
-
-            console.log("list", list)
             setAllProducts(list);
             setFeaturedProducts(list.filter((p) => p?.status === 1 || p?.status === 12));
             setNewProducts(list.filter((p) => p?.status === 2 || p?.status === 12));
-
         } catch (e) {
             console.error("fetchProducts error:", e);
         }
     }, [api]);
+
+    // ==== Actions chung khi rời toàn bộ khu vực menu + panel
+    const handleLeaveAll = useCallback(() => {
+        setHoverCatId(null);
+        setShowHoverPanel(false);
+        setSelectedCatId(null);
+    }, []);
 
     const fetchProductsByCategory = useCallback(
         async (categoryId) => {
@@ -116,7 +165,9 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                 const catId = categoryId ?? selectedCatId;
                 if (!catId) return;
                 setLoading(true);
-                const res = await api.get("/search/products", { params: { category_id: catId } });
+                const res = await api.get("/search/products", {
+                    params: { category_id: catId },
+                });
                 const data = res?.data ?? {};
                 setItems(Array.isArray(data.items) ? data.items : []);
             } catch (e) {
@@ -161,10 +212,17 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
             className="card border-0 shadow-sm rounded-4 overflow-hidden p-2 placeholder-glow"
             style={{ maxWidth: 300 }}
         >
-            <div className="bg-light placeholder rounded w-100 mb-3" style={{ height: 200 }} />
+            <div
+                className="bg-light placeholder rounded w-100 mb-3"
+                style={{ height: 200 }}
+            />
             <div className="card-body text-center">
-                <p className="placeholder-glow mb-2"><span className="placeholder col-8" /></p>
-                <p className="placeholder-glow mb-3"><span className="placeholder col-5" /></p>
+                <p className="placeholder-glow mb-2">
+                    <span className="placeholder col-8" />
+                </p>
+                <p className="placeholder-glow mb-3">
+                    <span className="placeholder col-5" />
+                </p>
                 <div className="d-flex justify-content-center">
                     <span className="placeholder btn btn-primary col-6" />
                 </div>
@@ -177,12 +235,6 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         <div
             className="bg-white border rounded shadow-sm position-relative"
             style={{ minWidth: 260 }}
-            onMouseLeave={() => {
-                // rời sidebar → đóng panel & trả Carousel
-                setHoverCatId(null);
-                setShowHoverPanel(false);
-                setSelectedCatId(null);
-            }}
         >
             <div className="bg-danger text-white fw-bold d-flex align-items-center px-3 py-2">
                 <Menu size={20} className="me-2" /> MENU
@@ -201,12 +253,16 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                                 style={{ cursor: "pointer" }}
                                 onMouseEnter={() => {
                                     setHoverCatId(id);
-                                    setShowHoverPanel(true);   // Ẩn Carousel, hiện panel danh mục con
-                                    setSelectedCatId(null);    // đảm bảo chưa vào chế độ sản phẩm
+                                    setShowHoverPanel(true); // Ẩn Carousel, hiện panel danh mục con
+                                    setSelectedCatId(null); // đảm bảo chưa vào chế độ sản phẩm
                                 }}
                             >
                                 <div className="d-flex align-items-center">
-                                    <Cpu size={18} className={`me-2 ${isHover ? "text-danger" : "text-primary"}`} />
+                                    <Cpu
+                                        size={18}
+                                        className={`me-2 ${isHover ? "text-danger" : "text-primary"
+                                            }`}
+                                    />
                                     <span>{cat._name}</span>
                                 </div>
                                 <ChevronRight size={16} className="text-muted" />
@@ -224,20 +280,13 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         </div>
     );
 
-    // ===== Panel danh mục con trong khu vực nội dung (thay thế Carousel khi hover) =====
+    // ===== Panel danh mục con trong khu vực nội dung =====
     const SubcategoryPanel = () => {
         const title =
-            (rootCats.find((r) => String(r._id) === String(hoverCatId))?._name) || "Danh mục";
+            rootCats.find((r) => String(r._id) === String(hoverCatId))?._name ||
+            "Danh mục";
         return (
-            <div
-                className="ps-3 w-100"
-                onMouseLeave={() => {
-                    // rời cả panel → tắt panel và trả lại Carousel
-                    setHoverCatId(null);
-                    setShowHoverPanel(false);
-                    setSelectedCatId(null);
-                }}
-            >
+            <div className="ps-3 w-100">
                 <div
                     className="card border-0 shadow-sm rounded-4"
                     style={{
@@ -249,12 +298,17 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                 >
                     <div className="card-body">
                         <div className="d-flex align-items-center mb-3">
-                            <div className="me-2 d-flex align-items-center justify-content-center rounded-circle bg-danger-subtle" style={{ width: 36, height: 36 }}>
+                            <div
+                                className="me-2 d-flex align-items-center justify-content-center rounded-circle bg-danger-subtle"
+                                style={{ width: 36, height: 36 }}
+                            >
                                 <Layers size={18} className="text-danger" />
                             </div>
                             <div>
                                 <h5 className="mb-0">{title}</h5>
-                                <small className="text-muted">Chọn danh mục con để xem sản phẩm</small>
+                                <small className="text-muted">
+                                    Chọn danh mục con để xem sản phẩm
+                                </small>
                             </div>
                         </div>
 
@@ -266,7 +320,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                                         <button
                                             className="w-100 btn btn-light border d-flex align-items-center justify-content-between rounded-4 py-3 px-3 shadow-sm"
                                             onClick={() => {
-                                                setSelectedCatId(child._id);   // chuyển sang chế độ sản phẩm
+                                                setSelectedCatId(child._id); // chuyển sang chế độ sản phẩm
                                                 setShowHoverPanel(false);
                                                 setHoverCatId(null);
                                             }}
@@ -293,7 +347,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         );
     };
 
-    // ===== Vùng nội dung bên phải: Carousel / Panel / Grid sản phẩm =====
+    // ===== Vùng nội dung bên phải =====
     const ContentArea = () => {
         // 1) Đã chọn danh mục → hiển thị sản phẩm
         if (selectedCatId != null) {
@@ -311,19 +365,31 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                                 return (
                                     <div className="col position-relative" key={prod.productId}>
                                         {ribbons.map((rb, i) => (
-                                            <Ribbon key={i} text={rb.text} position={rb.position} className={rb.className} />
+                                            <Ribbon
+                                                key={i}
+                                                text={rb.text}
+                                                position={rb.position}
+                                                className={rb.className}
+                                            />
                                         ))}
-                                        <ProductHome prod={prod} onBuy={() => handleBuy(prod.productId)} />
+                                        <ProductHome
+                                            prod={prod}
+                                            onBuy={() => handleBuy(prod.productId)}
+                                        />
                                     </div>
                                 );
                             })
-                            : <p className="text-center text-muted">Chưa có sản phẩm trong danh mục này.</p>}
+                            : (
+                                <p className="text-center text-muted">
+                                    Chưa có sản phẩm trong danh mục này.
+                                </p>
+                            )}
                 </div>
             );
         }
 
         // 2) Đang hover menu → hiển thị panel danh mục con (ẩn Carousel)
-        if (showHoverPanel && hoverCatId) {
+        if ((showHoverPanel || hoverPanel) && hoverCatId) {
             return <SubcategoryPanel />;
         }
 
@@ -340,71 +406,109 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         <div style={{ backgroundColor: "#fff" }}>
             <div className="container py-4">
                 {/* Desktop layout: Sidebar + Content */}
-                <div className="d-none d-md-flex" style={{ minHeight: "calc(80vh - 100px)" }}>
+                <div
+                    className="d-none d-md-flex"
+                    style={{ minHeight: "calc(80vh - 100px)" }}
+                    onMouseLeave={handleLeaveAll}
+                >
                     <CategorySidebar />
                     <div style={{ overflowY: "auto", flex: 1 }}>
                         <ContentArea />
                     </div>
                 </div>
+
                 <PromoRow
                     items={[
                         {
                             src: "https://cdn.tgdd.vn/Files/2021/12/27/1406967/tivi-samsung-giam-cuc-soc-den-28-mua-cuoi-nam.jpg",
                             href: "https://cdn.tgdd.vn/Files/2021/12/27/1406967/tivi-samsung-giam-cuc-soc-den-28-mua-cuoi-nam.jpg",
                             alt: "Duy nhất 11.11 - Nồi cơm PHILIPS",
-
                         },
                         {
                             src: "https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/Picture//Tm/Tm_picture_3053/1111_244_800.png.webp",
                             href: "https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/Picture//Tm/Tm_picture_3053/1111_244_800.png.webp",
                             alt: "Thách đấu online - Giảm đến 50%",
-
                         },
                         {
                             src: "https://mediamart.vn/images/uploads/2023/6e6eff39-2dc5-4a93-809b-fff5eab21d4f.png",
                             href: "https://mediamart.vn/images/uploads/2023/6e6eff39-2dc5-4a93-809b-fff5eab21d4f.png",
                             alt: "Lễ hội máy sấy - Giá từ 3.990 triệu",
-
                         },
                     ]}
-                // có thể tinh chỉnh chiều cao dải banner tại đây:
-                // height="clamp(76px, 11vw, 124px)"
                 />
-                {/* Các section dưới luôn hiển thị */}
+
+                {/* Sản phẩm mới */}
                 <section className="my-5">
                     <div className="text-center mb-4">
-                        <h2 className="fw-bold" style={{ fontSize: "2rem" }}>🆕 Sản phẩm mới</h2>
-                        <div style={{ height: 3, width: 80, backgroundColor: "hsl(0,75%,60%)", margin: "10px auto", borderRadius: 3 }} />
+                        <h2 className="fw-bold" style={{ fontSize: "2rem" }}>
+                            🆕 Sản phẩm mới
+                        </h2>
+                        <div
+                            style={{
+                                height: 3,
+                                width: 80,
+                                backgroundColor: "hsl(0,75%,60%)",
+                                margin: "10px auto",
+                                borderRadius: 3,
+                            }}
+                        />
                     </div>
                     <div className="row justify-content-center">
                         {(showAllNew ? newProducts : newProducts.slice(0, 4)).map((p) => (
                             <ProductCard key={p.productId} p={p} />
                         ))}
-                        {!newProducts.length && <p className="text-center text-muted">Đang cập nhật sản phẩm...</p>}
+                        {!newProducts.length && (
+                            <p className="text-center text-muted">
+                                Đang cập nhật sản phẩm...
+                            </p>
+                        )}
                     </div>
                     {newProducts.length > 4 && (
                         <div className="text-center mt-3">
-                            <button onClick={() => setShowAllNew((v) => !v)} className="btn btn-outline-danger rounded-pill px-4">
+                            <button
+                                onClick={() => setShowAllNew((v) => !v)}
+                                className="btn btn-outline-danger rounded-pill px-4"
+                            >
                                 {showAllNew ? "Thu gọn" : "Xem thêm"}
                             </button>
                         </div>
                     )}
                 </section>
 
+                {/* Sản phẩm nổi bật */}
                 <section className="my-5">
                     <div className="text-center mb-4">
-                        <h2 className="fw-bold" style={{ fontSize: "2rem" }}>⭐ Sản phẩm nổi bật</h2>
-                        <div style={{ height: 3, width: 80, backgroundColor: "hsl(0,75%,60%)", margin: "10px auto", borderRadius: 3 }} />
+                        <h2 className="fw-bold" style={{ fontSize: "2rem" }}>
+                            ⭐ Sản phẩm nổi bật
+                        </h2>
+                        <div
+                            style={{
+                                height: 3,
+                                width: 80,
+                                backgroundColor: "hsl(0,75%,60%)",
+                                margin: "10px auto",
+                                borderRadius: 3,
+                            }}
+                        />
                     </div>
                     <div className="row justify-content-center">
-                        {(showAllFeatured ? featuredProducts : featuredProducts.slice(0, 4)).map((p) => (
-                            <ProductCard key={p.productId} p={p} />
-                        ))}
-                        {!featuredProducts.length && <p className="text-center text-muted">Đang cập nhật sản phẩm...</p>}
+                        {(showAllFeatured ? featuredProducts : featuredProducts.slice(0, 4)).map(
+                            (p) => (
+                                <ProductCard key={p.productId} p={p} />
+                            )
+                        )}
+                        {!featuredProducts.length && (
+                            <p className="text-center text-muted">
+                                Đang cập nhật sản phẩm...
+                            </p>
+                        )}
                     </div>
                     {featuredProducts.length > 4 && (
                         <div className="text-center mt-3">
-                            <button onClick={() => setShowAllFeatured((v) => !v)} className="btn btn-outline-danger rounded-pill px-4">
+                            <button
+                                onClick={() => setShowAllFeatured((v) => !v)}
+                                className="btn btn-outline-danger rounded-pill px-4"
+                            >
                                 {showAllFeatured ? "Thu gọn" : "Xem thêm"}
                             </button>
                         </div>
@@ -413,7 +517,11 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
             </div>
 
             {/* Modal Buy (global) */}
-            <ModalBuy show={showModalBuy} onClose={() => setShowModalBuy(false)} product={buyProduct || {}} />
+            <ModalBuy
+                show={showModalBuy}
+                onClose={() => setShowModalBuy(false)}
+                product={buyProduct || {}}
+            />
         </div>
     );
 }
@@ -421,36 +529,131 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 // ===== Product card (reused in sections) =====
 function ProductCard({ p }) {
     const ribbons = (pickRibbonsFromStatus?.(p?.status) || []).slice(0, 3);
-    const imgSrc = p?.variants?.[0]?.imageUrl || p?.imageUrl || "/placeholder.png";
+    const imgSrc =
+        p?.variants?.[0]?.imageUrl || p?.imageUrl || "/placeholder.png";
 
-    const hasSale = p?.sale_price && Number(p.sale_price) < Number(p.price);
-    const discountPercent = hasSale
-        ? Math.round(((Number(p.price) - Number(p.sale_price)) / Number(p.price)) * 100)
-        : 0;
+    // Tóm tắt giá từ variants nếu có
+    const {
+        minFinal,
+        maxFinal,
+        minBase,
+        maxBase,
+        anyPromo,
+        discountPercent,
+    } = useMemo(() => {
+        const variants = Array.isArray(p?.variants) ? p.variants : [];
+        if (!variants.length) {
+            // fallback về priceRange cũ
+            const min = Number(p?.priceRange?.min || 0);
+            const max = Number(p?.priceRange?.max || min || 0);
+            return {
+                minFinal: min,
+                maxFinal: max,
+                minBase: null,
+                maxBase: null,
+                anyPromo: false,
+                discountPercent: 0,
+            };
+        }
+
+        const finalPrices = [];
+        const basePrices = [];
+        let maxDiscount = 0;
+        let hasPromo = false;
+
+        variants.forEach((v) => {
+            const { basePrice, promoPrice, finalPrice, hasPromo: vPromo } =
+                pickPricesFromVariant(v);
+
+            if (finalPrice > 0) finalPrices.push(finalPrice);
+            if (basePrice != null) basePrices.push(basePrice);
+
+            if (vPromo && basePrice && promoPrice && basePrice > promoPrice) {
+                hasPromo = true;
+                const pct = Math.round(((basePrice - promoPrice) / basePrice) * 100);
+                if (pct > maxDiscount) maxDiscount = pct;
+            }
+        });
+
+        if (!finalPrices.length) {
+            const min = Number(p?.priceRange?.min || 0);
+            const max = Number(p?.priceRange?.max || min || 0);
+            return {
+                minFinal: min,
+                maxFinal: max,
+                minBase: null,
+                maxBase: null,
+                anyPromo: false,
+                discountPercent: 0,
+            };
+        }
+
+        const minFinal = Math.min(...finalPrices);
+        const maxFinal = Math.max(...finalPrices);
+        const minBase = basePrices.length ? Math.min(...basePrices) : null;
+        const maxBase = basePrices.length ? Math.max(...basePrices) : null;
+
+        return {
+            minFinal,
+            maxFinal,
+            minBase,
+            maxBase,
+            anyPromo: hasPromo,
+            discountPercent: hasPromo ? maxDiscount : 0,
+        };
+    }, [p]);
+
+    const hasRangeFinal = minFinal !== maxFinal;
+    const hasBaseRange = minBase != null && maxBase != null && minBase !== maxBase;
+
+    const hasSale = anyPromo;
+    const showDiscountBadge =
+        hasSale && discountPercent && discountPercent > 0;
 
     return (
         <div className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 d-flex">
-            <article className="card product-card shadow-sm border-0 rounded-4 overflow-hidden w-100 h-100" itemScope itemType="https://schema.org/Product">
+            <article
+                className="card product-card shadow-sm border-0 rounded-4 overflow-hidden w-100 h-100"
+                itemScope
+                itemType="https://schema.org/Product"
+            >
                 <div className="position-relative">
                     {ribbons.map((rb, i) => (
-                        <span key={i} className={`badge position-absolute ribbon ${rb.className || "text-bg-warning"}`} data-pos={rb.position || "tl"}>
+                        <span
+                            key={i}
+                            className={`badge position-absolute ribbon ${rb.className || "text-bg-warning"
+                                }`}
+                            data-pos={rb.position || "tl"}
+                        >
                             {rb.text}
                         </span>
                     ))}
-                    {hasSale && (
-                        <span className="badge position-absolute ribbon text-bg-danger" data-pos="tr" aria-label={`Giảm ${discountPercent}%`}>
+                    {showDiscountBadge && (
+                        <span
+                            className="badge position-absolute ribbon text-bg-danger"
+                            data-pos="tr"
+                            aria-label={`Giảm ${discountPercent}%`}
+                        >
                             -{discountPercent}%
                         </span>
                     )}
 
-                    <a href={`/productdetail/${p.productId}`} className="d-block ratio ratio-4x3 bg-light-subtle" aria-label={p?.productName}>
+                    <a
+                        href={`/productdetail/${p.productId}`}
+                        className="d-block ratio ratio-4x3 bg-light-subtle"
+                        aria-label={p?.productName}
+                    >
                         <img
                             src={imgSrc}
                             alt={p?.productName}
                             loading="lazy"
                             decoding="async"
                             className="w-100 h-100"
-                            style={{ objectFit: "scale-down", objectPosition: "center", padding: 8 }}
+                            style={{
+                                objectFit: "scale-down",
+                                objectPosition: "center",
+                                padding: 8,
+                            }}
                             onError={(e) => {
                                 if (e.currentTarget.src.endsWith("/placeholder.png")) return;
                                 e.currentTarget.src = "/placeholder.png";
@@ -460,20 +663,41 @@ function ProductCard({ p }) {
                 </div>
 
                 <div className="card-body d-flex flex-column text-center">
-                    <h3 className="product-title fw-semibold text-body-emphasis mb-2 two-line-clamp" title={p?.productName} itemProp="name">
+                    <h3
+                        className="product-title fw-semibold text-body-emphasis mb-2 two-line-clamp"
+                        title={p?.productName}
+                        itemProp="name"
+                    >
                         {p?.productName}
                     </h3>
 
-                    <div className="mb-3" itemProp="offers" itemScope itemType="https://schema.org/Offer">
+                    <div
+                        className="mb-3"
+                        itemProp="offers"
+                        itemScope
+                        itemType="https://schema.org/Offer"
+                    >
+                        {/* Giá khuyến mãi / final */}
                         <span className="fs-5 fw-bold text-danger" itemProp="price">
-                            {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
-                                Number(p?.priceRange?.min || 0)
-                            )}
-                            {Number(p?.priceRange?.min) !== Number(p?.priceRange?.max) &&
-                                ` - ${new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(p?.priceRange?.max || 0))}`}
+                            {hasRangeFinal
+                                ? `${fmtVND(minFinal)} - ${fmtVND(maxFinal)}`
+                                : fmtVND(minFinal)}
                         </span>
+
+                        {/* Giá gốc gạch ngang nếu có promo */}
+                        {anyPromo && minBase && minBase > minFinal && (
+                            <div className="text-muted text-decoration-line-through small mt-1">
+                                {hasBaseRange
+                                    ? `${fmtVND(minBase)} - ${fmtVND(maxBase)}`
+                                    : fmtVND(minBase)}
+                            </div>
+                        )}
+
                         <meta itemProp="priceCurrency" content="VND" />
-                        <link itemProp="availability" href="https://schema.org/InStock" />
+                        <link
+                            itemProp="availability"
+                            href="https://schema.org/InStock"
+                        />
                     </div>
                 </div>
             </article>

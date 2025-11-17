@@ -5,6 +5,34 @@ import { useNavigate } from "react-router-dom";
 import { CartContext } from "../../hooks/CartContext";
 import ModalInfo from "../../components/user/ModalInfo";
 import ModalPayment from "../../components/user/ModalPayment";
+// đặt trong Checkout.jsx (trên cùng file)
+const toAttrObj = (raw) => {
+  if (!raw) return {};
+  if (typeof raw === 'object') return raw;            // đã là object
+  if (Array.isArray(raw)) {
+    // ex: [{name:'color', value:'Đen'}] -> {color:'Đen'}
+    return raw.reduce((acc, it) => {
+      if (it && it.name) acc[String(it.name).trim()] = String(it.value ?? '').trim();
+      return acc;
+    }, {});
+  }
+  if (typeof raw === 'string') {
+    const s = raw.trim();
+    if (!s) return {};
+    // thử JSON trước
+    try { const j = JSON.parse(s); if (j && typeof j === 'object') return j; } catch { }
+    // fallback: parse k:v; k2:v2 (ngăn cách bởi ; , |)
+    const out = {};
+    s.split(/[;,\|]/).forEach(pair => {
+      if (!pair) return;
+      const [k, ...rest] = pair.split(':');
+      if (!k) return;
+      out[k.trim()] = rest.join(':').trim();
+    });
+    return out;
+  }
+  return {};
+};
 
 const PLACEHOLDER_IMG = "https://placehold.co/600x600?text=No+Image";
 export default function Checkout() {
@@ -24,8 +52,9 @@ export default function Checkout() {
 
   // Lấy thông tin sản phẩm và shipping từ cookie
   useEffect(() => {
+    console.log(selectedProducts);
+
     if (selectedProducts?.length) setProducts(selectedProducts);
-    console.log(selectedProducts)
     const saved = Cookies.get("shippingInfo");
     if (saved) {
       try {
@@ -38,7 +67,6 @@ export default function Checkout() {
 
         // ✅ Lấy địa chỉ mặc định
         const defaultAddress = data.find(item => item.address?.is_default === true);
-
         setShippingInfo(defaultAddress || data[0]); // fallback: nếu chưa có mặc định
       } catch (err) {
         console.error("Không thể parse shippingInfo từ cookie:", err);
@@ -49,7 +77,7 @@ export default function Checkout() {
 
   // Tính tổng tiền
   const totalPrice = products.reduce(
-    (sum, p) => sum + p.variant.price * p.quantity,
+    (sum, p) => sum + (p?.pricing || p?.price) * p.quantity,
     0
   );
   const shippingFee = 0;
@@ -64,24 +92,46 @@ export default function Checkout() {
     }
 
     try {
+      // shippingInfo đã lấy sẵn ở state
+      if (!shippingInfo || !shippingInfo.address) {
+        alert("⚠️ Thiếu thông tin địa chỉ nhận hàng!");
+        return;
+      }
 
-      shippingInfo.items = selectedProducts.map((p) => ({
-        variantId: p.variant.variantId,
-        quantity: p.quantity,
-        prices: p.variant.price
+      // 🔹 Map danh sách sản phẩm → items
+      const items = products.map((p) => ({
+        variantId: p?.variant?.variantId || p?.variantId,      // id biến thể
+        quantity: p.quantity,                                  // số lượng
+        pricePerUnit: Number(p.pricing ?? p.price),            // đơn giá
+        attributes: toAttrObj(p.selectedAttr)                  // thuộc tính (màu, size,...)
       }));
 
-      const url = shippingInfo.API;
+      const payload = {
+        username: shippingInfo.address.full_name,
+        email: shippingInfo.email,
+        address: shippingInfo.address,
+        items, // ✅ đưa danh sách items vào đây
+      };
 
-      delete shippingInfo.API;
-      console.log(shippingInfo)
-      const res = await axios.post(url, shippingInfo);
-      navigate("/invoice", { state: { order: res.data.order, items: products } });
+      // cookie shippingInfo có thể là 1 object hoặc mảng object (như bạn gửi mẫu)
+      let data = JSON.parse(saved);
+      if (!Array.isArray(data)) data = [data];
+
+      // lấy API từ bản ghi đang dùng (ví dụ theo địa chỉ mặc định)
+      const current = data.find(it => it.address?.is_default) || data[0];
+      const url = current.API || "http://localhost:3000/users/register-individual";
+
+      console.log("➡️ Payload gửi lên:", payload);
+
+      const res = await axios.post(url, payload);
+      navigate("/invoice", { state: { order: res.data } });
+
     } catch (err) {
-      console.error("❌ Lỗi gửi đơn hàng:", err);
+      console.error("❌ Lỗi gửi đơn hàng:", err.response?.data || err);
       alert("Đã xảy ra lỗi khi gửi đơn hàng. Vui lòng thử lại!");
     }
   };
+
 
   // 💳 Thanh toán MoMo
   const handleMomoPayment = async () => {
@@ -107,10 +157,10 @@ export default function Checkout() {
         amount: finalTotal,
         orderId,
         items: products.map((p) => ({
-          id: p.data.productId,
-          name: p.data.productName,
+          id: p.data?.productId,
+          name: p?.productName,
           qty: p.quantity,
-          price: p.data.price,
+          price: p?.pricing || p?.price,
         })),
       });
 
@@ -228,15 +278,16 @@ export default function Checkout() {
           <tbody>
             {products.length > 0 ? (
               products.map((prd) => (
-                <tr key={`${prd.data.productId}-${prd.variant?.variantId ?? 'base'}`}>
+                <tr key={`${prd.data?.productId || prd?.productId}-${(prd?.variant?.variantId || prd?.variantId) ?? 'base'}`}>
                   <td className="d-flex align-items-start align-items-md-center gap-2">
                     <img
                       onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
-                      src={prd.variant?.imageUrl || PLACEHOLDER_IMG}
+                      src={prd.variant?.imageUrl || prd?.imageUrl || PLACEHOLDER_IMG}
                       alt="Sản phẩm"
-                      width={80}
-                      height={80}
                       className="rounded me-0 me-md-2 object-cover"
+                      style={{ objectFit: "scale-down", objectPosition: "center", padding: 8 }}
+                      height={80}
+                      width={80}
                     />
 
                   </td>
@@ -246,34 +297,34 @@ export default function Checkout() {
                       <div className="d-flex flex-column justify-content-between flex-grow-1">
                         <div
                           className="fw-semibold"
-                          title={prd.data.productName}
+                          title={prd.data?.productName || prd?.productName}
 
                         >
-                          {prd.data.productName}
+                          {prd.data?.productName || prd.productName}
                         </div>
                         {prd.variant && (
                           <div className="text-muted small mt-1">
                             {prd.variant.variantName
-                              ? `Phiên bản: ${prd.variant.variantName}`
+                              ? `Phiên bản: ${prd?.variant.variantName || prd.variantName}  ${prd?.selectedAttr}`
                               : prd.variant.attributes?.color
-                                ? `Màu: ${prd.variant.attributes.color}`
+                                ? ``
                                 : ""}
                           </div>
                         )}
                         <div className="d-sm-none mt-2">
                           <span className="fw-bold text-danger small">
-                            {Number(prd.variant?.price || prd.data.price).toLocaleString()} ₫
+                            {Number(prd?.pricing || prd?.price).toLocaleString()} ₫
                           </span>
                         </div>
                       </div>
                     </div>
                   </td>
                   <td className="text-center d-none d-md-table-cell">
-                    {Number(prd.variant?.price).toLocaleString()} ₫
+                    {Number(prd?.pricing || prd.price).toLocaleString()} ₫
                   </td>
                   <td className="text-center">{prd.quantity}</td>
                   <td className="text-center text-danger fw-bold">
-                    {(prd.variant?.price * prd.quantity).toLocaleString()} ₫
+                    {((prd?.pricing || prd.price) * prd.quantity).toLocaleString()} ₫
                   </td>
                 </tr>
               ))

@@ -121,26 +121,21 @@ export default function Store({
                         limit: data.pagination?.limit ?? limit,
                     });
                 } else {
-                    res = await api.get("/products", { params: baseParams, signal: abortSignal });
-                    const data = res.data?.data || [];
+                    // Không có q => dùng /products
+                    const res = await api.get("/products", { params: baseParams, signal: abortSignal });
+                    const body = res.data ?? {};
 
-                    setItems(data ?? []);
-                    setMeta(data ?? { page, last_page: 0, total: 0, limit });
+                    // list sản phẩm nằm ở body.data
+                    setItems(body.data ?? []);
 
-                    if (selectedCatId) {
-                        res = await api.get("/search/products", {
-                            params: { ...baseParams },
-                            signal: abortSignal,
-                        });
-                        const data = res.data ?? {};
-                        setItems(data.items ?? []);
-                        setMeta({
-                            page: data.pagination?.page ?? page,
-                            last_page: data.pagination?.pages ?? 0,
-                            total: data.pagination?.total ?? 0,
-                            limit: data.pagination?.limit ?? limit,
-                        });
-                    }
+                    // meta nằm ở body.meta
+                    const m = body.meta ?? {};
+                    setMeta({
+                        page: m.page ?? page,
+                        last_page: m.last_page ?? 0,
+                        total: m.total ?? 0,
+                        limit: m.limit ?? limit,
+                    });
                 }
             } catch (e) {
                 if (e.name !== "CanceledError" && e.code !== "ERR_CANCELED") {

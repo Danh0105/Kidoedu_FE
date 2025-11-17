@@ -69,9 +69,7 @@ export default function Header() {
         };
     }, []);
 
-    useEffect(() => {
-        console.log("guestCart", CartCT);
-    }, [CartCT]);
+
 
     return (
         <>

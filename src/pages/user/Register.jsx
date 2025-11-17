@@ -14,7 +14,6 @@ export default function Register() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            console.log(process.env.REACT_APP_API_URL)
             const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

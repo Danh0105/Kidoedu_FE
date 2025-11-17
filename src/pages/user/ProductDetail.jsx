@@ -175,9 +175,58 @@ export default function ProductDetail() {
 
 
     const descHtml = product?.longDescription || "";
-    const specsData = useMemo(() => product?.specs ?? null, [product]);
+
+    const specsData = useMemo(() => product?.variants[0]?.specs ?? null, [product]);
     const notes = useMemo(() => product?.cautionNotes ?? null, [product]);
-    const manual = useMemo(() => product?.userManual ?? null, [product]);
+    const manual = useMemo(() => {
+        const raw = product?.userManual;
+        if (!raw) return null;
+
+        let pdf = raw.pdf || null;
+        let video = raw.video || null;
+        let steps = [];
+
+        // Nếu đã là mảng step "bình thường"
+        if (Array.isArray(raw.steps)) {
+            raw.steps.forEach((item) => {
+                if (typeof item === "string") {
+                    // Thử parse JSON bên trong
+                    try {
+                        const parsed = JSON.parse(item);
+
+                        if (!pdf && parsed.pdf) pdf = parsed.pdf;
+                        if (!video && parsed.video) video = parsed.video;
+
+                        if (Array.isArray(parsed.steps)) {
+                            steps.push(
+                                ...parsed.steps.filter((s) => typeof s === "string")
+                            );
+                        }
+                    } catch {
+                        // Không phải JSON → coi như 1 câu step bình thường
+                        steps.push(item);
+                    }
+                } else if (typeof item === "object" && item) {
+                    // Trường hợp lỡ lưu object step
+                    if (item.text && typeof item.text === "string") {
+                        steps.push(item.text);
+                    }
+                }
+            });
+        }
+
+        // Fallback: nếu chưa có step nào nhưng có raw.text
+        if (!steps.length && typeof raw.text === "string") {
+            steps.push(raw.text);
+        }
+
+        return {
+            pdf,
+            video,
+            steps,
+        };
+    }, [product]);
+
     const origin = product?.origin ?? null;
     const stock = typeof product?.stock_quantity === "number" ? product.stock_quantity : null;
 
@@ -325,7 +374,51 @@ export default function ProductDetail() {
                         )}
                         {activeTab === "specs" && <ProductSpecs specs={specsData} />}
                         {activeTab === "notes" && <CautionNotes notes={notes} />}
-                        {activeTab === "manual" && <p className="text-muted m-0">Hướng dẫn đang cập nhật...</p>}
+                        {activeTab === "manual" && (
+                            <div className="vstack gap-3">
+                                {/* Link PDF & Video nếu có */}
+                                <div className="d-flex flex-wrap gap-2">
+                                    {manual?.pdf && (
+                                        <a
+                                            href={manual.pdf}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="btn btn-sm btn-outline-primary"
+                                        >
+                                            <i className="bi bi-file-earmark-pdf me-1" />
+                                            Xem hướng dẫn PDF
+                                        </a>
+                                    )}
+                                    {manual?.video && (
+                                        <a
+                                            href={manual.video}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="btn btn-sm btn-outline-danger"
+                                        >
+                                            <i className="bi bi-play-circle me-1" />
+                                            Xem video hướng dẫn
+                                        </a>
+                                    )}
+                                </div>
+
+                                {/* Danh sách các bước */}
+                                {manual?.steps?.length ? (
+                                    <ol className="ps-3 mb-0">
+                                        {manual.steps.map((step, idx) => (
+                                            <li key={idx} className="mb-1">
+                                                {step}
+                                            </li>
+                                        ))}
+                                    </ol>
+                                ) : (
+                                    <p className="text-muted mb-0">
+                                        Chưa có hướng dẫn sử dụng chi tiết cho sản phẩm này.
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
                     </div>
                 </div>
             </div>

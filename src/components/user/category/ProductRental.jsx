@@ -62,7 +62,6 @@ export default function ProductRental({ prod }) {
                     .filter((price) => !isNaN(price)); // loại bỏ NaN
 
                 // Bước 3: Tính min/max
-                console.log("allPrices", allPrices);
 
                 const minPrice = Math.min(...allPrices);
                 const maxPrice = Math.max(...allPrices);
@@ -89,7 +88,6 @@ export default function ProductRental({ prod }) {
                         price: minVariantPrice, // giữ cho tiện lọc/sắp xếp
                     };
                 });
-                console.log("enrichedVariants", enrichedVariants);
 
                 setVariantsWithPrices(enrichedVariants);
                 /*       if (variants.length > 0) {

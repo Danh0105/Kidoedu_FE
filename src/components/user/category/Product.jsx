@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import ModalCart from "../ModalCart";
@@ -20,7 +20,6 @@ export default function Product({ prod }) {
     const [showModalCart, setShowModalCart] = useState(false);
     const [showModalBuy, setShowModalBuy] = useState(false);
     const [hovered, setHovered] = useState(false);
-    const [priceRange, setPriceRange] = useState(null);
     const id = prod?.productId;
     const name = prod?.productName ?? "";
     const desc = prod?.shortDescription ?? "";
@@ -33,49 +32,26 @@ export default function Product({ prod }) {
 
     // 🧮 Fetch giá theo biến thể
     // 🧮 Fetch dải giá theo biến thể (min - max)
-    useEffect(() => {
-        if (!id) {
-            setPriceRange(null);
-            return;
+    const priceRange = useMemo(() => {
+        const variants = prod?.variants ?? [];
+        const allPrices = [];
+
+        for (const v of variants) {
+            const prices = v?.prices ?? [];
+            for (const p of prices) {
+                const n = Number(p?.price);
+                if (Number.isFinite(n)) {
+                    allPrices.push(n);
+                }
+            }
         }
 
-        let alive = true; // tránh setState khi unmount
+        if (!allPrices.length) return null;
 
-        (async () => {
-            try {
-                const res = await axios.get(
-                    `${process.env.REACT_APP_API_URL}/products/${id}`
-                );
-                const product = res?.data?.data ?? res?.data;
-
-                // Ưu tiên currentPrice; fallback price/sale_price nếu API có
-                const prices = (product?.variants ?? [])
-                    .map((v) => {
-                        const raw = v.currentPrice ?? v.price ?? v.sale_price ?? null;
-                        const n = Number(raw);
-                        return Number.isFinite(n) ? n : null;
-                    })
-                    .filter((n) => n != null);
-
-                if (!alive) return;
-
-                if (prices.length) {
-                    const minPrice = Math.min(...prices);
-                    const maxPrice = Math.max(...prices);
-                    setPriceRange({ min: minPrice, max: maxPrice });
-                } else {
-                    setPriceRange(null);
-                }
-            } catch (err) {
-                console.error("Lỗi lấy dải giá:", err);
-                if (alive) setPriceRange(null);
-            }
-        })();
-
-        return () => {
-            alive = false;
-        };
-    }, [id]);
+        const min = Math.min(...allPrices);
+        const max = Math.max(...allPrices);
+        return { min, max };
+    }, [prod]);
 
 
     const fetchProductAndOpen = async (pid, openType) => {

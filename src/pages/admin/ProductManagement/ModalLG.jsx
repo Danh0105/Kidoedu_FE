@@ -1,405 +1,601 @@
-import React, { useState } from 'react';
-import Category from './Category';
-import Image from './Image';
-import RichTextEditor from '../../../components/admin/RichTextEditor';
-import axios from 'axios';
-import ReactQuill from 'react-quill-new';
+import React, { useState } from "react";
+import Category from "./Category";
+import Image from "./Image";
+import RichTextEditor from "../../../components/admin/RichTextEditor";
+import axios from "axios";
+import ReactQuill from "react-quill-new";
+import InventoryPanel from "./InventoryPanel";
+import AttributePanel from "./AttributePanel";
+import VariantForm from "./VariantForm";
 
+/**
+ * ModalLG: Tạo sản phẩm mới + biến thể + phiếu nhập kho ban đầu
+ */
 export default function ModalLG({ onProductAdded }) {
+    // Core fields
     const [categoryId, setCategoryId] = useState(null);
     const [count, setCount] = useState(1);
     const [shortDesc, setShortDesc] = useState("");
-    const [userManual, setuserManual] = useState("");
-    const [cautionNotes, setcautionNotes] = useState("");
+    const [userManual, setUserManual] = useState("");
+    const [cautionNotes, setCautionNotes] = useState("");
     const [origin, setOrigin] = useState("");
     const [specs, setSpecs] = useState("");
     const [longDesc, setLongDesc] = useState("");
     const [nameproduct, setNameproduct] = useState("");
     const [price, setPrice] = useState(0);
-    const [status, setstatus] = useState("");
-    const [files, setFiles] = useState([]);
+    const [status, setStatus] = useState(""); // 1: Mới, 2: Nổi bật, 3: Hiển thị
+    const [files, setFiles] = useState([]); // Array<File>
+
+    // Biến thể & kiểm kê
+    const [variantsFromForm, setVariantsFromForm] = useState([]); // nhận từ VariantForm
+    const [inventoryDraft, setInventoryDraft] = useState(null);   // nhận từ InventoryPanel
+
+    // UI states
+    const [errors, setErrors] = useState({});
+    const [isSaving, setIsSaving] = useState(false);
+
+    const CLOUD_NAME = "dlnkeb4dm";
+    const UPLOAD_PRESET = "kidoedu";
 
     const stripHtml = (html) => {
         const tmp = document.createElement("div");
-        tmp.innerHTML = html;
+        tmp.innerHTML = html ?? "";
         return tmp.textContent || tmp.innerText || "";
     };
-    const handlestatus = (e) => {
-        const value = e.target.value;
-        const checked = e.target.checked;
 
-        setstatus((prev) => {
-            let arr = prev.split("").filter(Boolean);
-
-            if (checked) {
-                if (!arr.includes(value)) arr.push(value);
-            } else {
-                arr = arr.filter((v) => v !== value);
-            }
-
-            return arr.sort().join("");
-        });
-    }
-
-    const handleImageChange = (fd) => {
-        setFiles(fd); // Lưu FormData
+    const handleImageChange = (fs) => {
+        // Expecting `fs` to be an array of File objects from <Image/>
+        setFiles(fs);
     };
-    const handleImageRemove = (removedFile, idx) => {
-        // bỏ file đã xóa khỏi state
-        setFiles((prev) => prev.filter((f, i) => i !== idx));
-        console.log("File đã xóa:", removedFile);
+
+    const handleImageRemove = (_removedFile, idx) => {
+        setFiles((prev) => prev.filter((_, i) => i !== idx));
     };
-    const handleSubmit = async () => {
-        try {
-            const CLOUD_NAME = "dlnkeb4dm";
-            const UPLOAD_PRESET = "kidoedu";
 
-            let uploadedUrls = [];
+    // Chuẩn hoá specs để luôn có label là string
+    const normalizeSpecs = (rawSpecs) => {
+        const arr = Array.isArray(rawSpecs) ? rawSpecs : [];
+        return arr
+            .filter((s) => s && (s.key || s.label || s.value))
+            .map((s, idx) => {
+                const key =
+                    (s.key !== undefined && s.key !== null
+                        ? String(s.key)
+                        : String(s.label || "").trim()) || `spec_${idx + 1}`;
 
-            for (let file of files) {
-                const fd = new FormData();
-                fd.append("file", file);
-                fd.append("upload_preset", UPLOAD_PRESET);
+                const label =
+                    (s.label !== undefined && s.label !== null
+                        ? String(s.label)
+                        : String(s.key || "").trim()) || `Thông số ${idx + 1}`;
 
-                const res = await fetch(
-                    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-                    {
-                        method: "POST",
-                        body: fd,
-                    }
-                );
+                return {
+                    key: key.trim(),
+                    label: label.trim(), // 👈 luôn là string
+                    value: String(s.value ?? "").trim(),
+                    unit: s.unit ?? null,
+                    type:
+                        s.type === "number" || s.type === "boolean"
+                            ? s.type
+                            : "text",
+                    group: s.group ?? null,
+                    note: s.note ?? null,
+                    order:
+                        typeof s.order === "number"
+                            ? s.order
+                            : idx + 1,
+                };
+            });
+    };
 
-                const data = await res.json();
-
-
-                if (data.secure_url) {
-                    uploadedUrls.push(data.secure_url);
+    const uploadAll = async () => {
+        if (!files?.length) return [];
+        const uploads = files.map((file) => {
+            const fd = new FormData();
+            fd.append("file", file);
+            fd.append("upload_preset", UPLOAD_PRESET);
+            return fetch(
+                `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+                {
+                    method: "POST",
+                    body: fd,
                 }
-            }
+            )
+                .then((r) => r.json())
+                .then((data) => {
+                    if (!data?.secure_url) throw new Error("Upload thất bại");
+                    return data.secure_url;
+                });
+        });
+        return Promise.all(uploads);
+    };
 
+    const onSubmit = async (evt) => {
+        evt.preventDefault();
+        /*    if (!validate()) return; */
+        try {
+            setIsSaving(true);
 
-            const dto = {
-                productName: nameproduct?.trim() || "",
-                sku: `SKU-${Date.now()}`,
-                shortDescription: stripHtml(shortDesc) || null,
-                longDescription: longDesc || null,
-                specs: specs || null,
-                userManual: userManual || null,
-                cautionNotes: cautionNotes || null,
-                origin: origin || null,
-                status: status ? Number(status) : 4,
-                price: Number(price) || 0,
-                stock_quantity: Number(count) || 1,
-                category_id: categoryId ? Number(categoryId) : null,
-                images: uploadedUrls.map((url) => ({
-                    image_url: url,
-                })),
+            const uploadedUrls = await uploadAll();
+
+            // 1) User manual dạng object
+            const userManualObj = {
+                pdf: null, // hiện chưa có UI nhập
+                video: null,
+                steps: userManual
+                    ? userManual
+                        .split("\n")
+                        .map((s) => s.trim())
+                        .filter(Boolean)
+                    : [],
             };
 
-            console.log("DTO gửi đến backend:", dto);
-            const res = await axios.post(`${process.env.REACT_APP_API_URL}/products`, dto);
-            if (onProductAdded) {
-                console.log("Sản phẩm mới:", res.data.data);
-                onProductAdded(res.data.data);
+            // 2) Caution notes thành mảng string
+            const cautionNotesArr = cautionNotes
+                ? cautionNotes
+                    .split("\n")
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                : [];
+
+            // 3) Ảnh theo đúng format images[]
+            const imagesPayload = (uploadedUrls || []).map((url, idx) => ({
+                image_url: url,
+                alt_text: `${nameproduct || "Ảnh sản phẩm"} - ${idx + 1}`,
+                is_primary: idx === 0,
+            }));
+
+            // 4) Biến thể + giá (lấy từ VariantForm)
+            console.log(variantsFromForm);
+
+            const variantsPayload = (variantsFromForm ?? []).map((v) => {
+                // basePrice & promoPrice do VariantForm trả ra
+                const base = v.basePrice ?? price; // fallback sang price sản phẩm nếu chưa set riêng
+                const promo = v.promoPrice;
+                const imageUrl = v.image_url
+                const prices = [];
+
+                if (base != null && base !== "") {
+                    prices.push({
+                        priceType: "base",
+                        price: Number(base) || 0,
+
+                        currencyCode: "VND",
+                        startAt: new Date().toISOString(),
+                        endAt: null,
+                    });
+                }
+
+                if (promo != null && promo !== "") {
+                    prices.push({
+                        priceType: "promo",
+                        price: Number(promo) || 0,
+                        currencyCode: "VND",
+                        startAt: new Date().toISOString(),
+                        endAt: null,
+                    });
+                }
+
+                return {
+                    variantName: v.variant_name || "",
+                    sku: v.sku || "",
+                    imageUrl: imageUrl,
+                    barcode: v.barcode || "",
+                    status: Number(v.status ?? 1),
+                    attributes: v.attributes || {},
+                    specs: normalizeSpecs(v.specs), // 👈 dùng hàm chuẩn hoá
+                    prices,
+                };
+            });
+
+            // 5) initialReceipt (nếu có nhập ở tab Kiểm kê)
+            let initialReceipt = undefined;
+            if (inventoryDraft) {
+                initialReceipt = {
+                    supplierName: inventoryDraft.supplierName || "",
+                    supplierPhone: inventoryDraft.supplierPhone || "",
+                    supplierEmail: inventoryDraft.supplierEmail || "",
+                    supplierAddress: inventoryDraft.supplierAddress || "",
+                    supplierNote: inventoryDraft.supplierNote || "",
+                    receiptCode: inventoryDraft.receiptCode || "",
+                    receiptDate:
+                        inventoryDraft.receiptDate ||
+                        new Date().toISOString().slice(0, 10),
+                    referenceNo: inventoryDraft.referenceNo || "",
+                    note: inventoryDraft.note || "",
+                    items: (inventoryDraft.items || []).map((it) => {
+                        // cố gắng map từ tên biến thể sang sku
+                        const matchedVariant =
+                            (variantsFromForm ?? []).find(
+                                (vv) => vv.variant_name === it.variantName
+                            ) || {};
+                        return {
+                            variantSku:
+                                it.variantSku || matchedVariant.sku || "",
+                            quantity: Number(it.qty) || 0,
+                            unitCost: Number(it.unitCost) || 0,
+                        };
+                    }),
+                };
             }
+
+            // 6) Build payload đúng format backend yêu cầu
+            const payload = {
+                product_name: nameproduct.trim(),
+                short_description: stripHtml(shortDesc) || null,
+                long_description: longDesc || null,
+                status: status ? Number(status) : 1,
+                origin: origin || null,
+                user_manual: userManualObj,
+                caution_notes: cautionNotesArr,
+                category_id: categoryId ? Number(categoryId) : null,
+                images: imagesPayload,
+                variants: variantsPayload,
+                ...(initialReceipt ? { initialReceipt } : {}),
+            };
+
+
+
+            const res = await axios.post(
+                "http://localhost:3000/products",
+                payload
+            );
+
+            if (onProductAdded) onProductAdded(res?.data?.data);
+
+            alert("Thêm sản phẩm thành công!");
+
+            setErrors({});
+            // (tuỳ bạn có muốn reset form sau khi lưu hay không)
         } catch (err) {
             console.error("Lỗi khi thêm sản phẩm:", err);
-            alert("Thêm sản phẩm thất bại!");
+            console.error("Server trả về:", err?.response?.data);
+            alert(err?.message || "Thêm sản phẩm thất bại!");
+        } finally {
+            setIsSaving(false);
         }
     };
 
-
     return (
-        <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div
+            className="modal fade"
+            id="exampleModal"
+            tabIndex={-1}
+            aria-labelledby="exampleModalLabel"
+            aria-hidden="true"
+            data-bs-backdrop="static"
+            data-bs-keyboard={!isSaving}
+        >
             <div className="modal-dialog modal-xl">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h1 className="modal-title fs-5" id="exampleModalLabel">Sản phẩm mới</h1>
-                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h1 className="modal-title fs-5" id="exampleModalLabel">
+                            Sản phẩm mới
+                        </h1>
+                        <button
+                            type="button"
+                            className="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                            disabled={isSaving}
+                        />
                     </div>
-                    <div className="modal-body">
-                        <div className="container text-center">
-                            <div className="row">
-                                <div className="col-8">
-                                    <div className="text-start">
-                                        <div className="">Tên sản phẩm</div>
-                                        <input onChange={(e) => setNameproduct(e.target.value)} type="text" className="form-control" />
-                                    </div>
-                                    <div className="text-start">
-                                        <div>Mô tả dài</div>
-                                        <ReactQuill
-                                            placeholder="Mô tả dài"
-                                            value={longDesc}
-                                            onChange={setLongDesc}
-                                        />
 
-                                        <style>
-                                            {`
-                                            .ql-editor {
-                                                line-height: 1.5em;
-                                                max-height: 20em;   /* ~4 dòng */
-                                                overflow-y: auto;  /* hiện thanh cuộn khi vượt quá */
-                                            }
-                                            `}
-                                        </style>
-                                    </div>
-
-                                    <div className="text-start">
-                                        <div>Mô tả ngắn</div>
-                                        <RichTextEditor
-                                            placeholder="Mô tả ngắn"
-                                            value={shortDesc}
-                                            onChange={(val) => setShortDesc(val)}
-                                        />
-                                    </div>
-                                    <div className="text-start">
-                                        <div>Thông số kĩ thuật</div>
-                                        <RichTextEditor
-                                            placeholder="Thông số kĩ thuật"
-                                            value={specs}
-                                            onChange={(val) => setSpecs(val)}
-                                        />
-                                    </div>
-                                    <div className="text-start">
-                                        <div>Hướng dẫn sử dụng</div>
-                                        <RichTextEditor
-                                            placeholder="Thông số kĩ thuật"
-                                            value={specs}
-                                            onChange={(val) => setuserManual(val)}
-                                        />
-                                    </div>
-                                    <div className="text-start">
-                                        <div>Lưu ý an toàn / cảnh báo khi dùng.</div>
-                                        <RichTextEditor
-                                            placeholder="Thông số kĩ thuật"
-                                            value={specs}
-                                            onChange={(val) => setcautionNotes(val)}
-                                        />
-                                    </div>
-                                    <div className="text-start">
-                                        <div className="">Dữ liệu sản phẩm</div>
-
-                                        <div className="d-flex align-items-start border border-2" >
-                                            <div style={{ fontSize: "15px" }}
-                                                class="nav flex-column nav-pills border-end w-25  border-end-2"
-                                                id="v-pills-tab" role="tablist"
-                                                aria-orientation="vertical"
+                    <form onSubmit={onSubmit}>
+                        <div className="modal-body">
+                            <div className="container text-center">
+                                <div className="row">
+                                    {/* Cột trái: thông tin chính */}
+                                    <div className="col-8">
+                                        {/* Tên sản phẩm */}
+                                        <div className="text-start mb-3">
+                                            <label
+                                                htmlFor="nameproduct"
+                                                className="form-label"
                                             >
-
-                                                <button className="text-start nav-link rounded-0 active"
-                                                    id="v-pills-home-tab"
-                                                    data-bs-toggle="pill"
-                                                    data-bs-target="#v-pills-home"
-                                                    type="button" role="tab"
-                                                    aria-controls="v-pills-home"
-                                                    aria-selected="true">
-                                                    Tổng quan
-                                                </button>
-
-                                                <button className="text-start nav-link rounded-0"
-                                                    id="v-pills-profile-tab"
-                                                    data-bs-toggle="pill"
-                                                    data-bs-target="#v-pills-profile"
-                                                    type="button" role="tab"
-                                                    aria-controls="v-pills-profile"
-                                                    aria-selected="false">
-                                                    Kiểm kê kho hàng
-                                                </button>
-
-                                                <button className="text-start nav-link rounded-0"
-                                                    id="v-pills-messages-tab"
-                                                    data-bs-toggle="pill"
-                                                    data-bs-target="#v-pills-messages"
-                                                    type="button" role="tab"
-                                                    aria-controls="v-pills-messages"
-                                                    aria-selected="false">
-                                                    Giao hàng
-                                                </button>
-
-                                                <button className="text-start nav-link rounded-0"
-                                                    id="v-pills-settings-tab"
-                                                    data-bs-toggle="pill"
-                                                    data-bs-target="#v-pills-settings"
-                                                    type="button" role="tab"
-                                                    aria-controls="v-pills-settings"
-                                                    aria-selected="false">
-                                                    Các thuộc tính
-                                                </button>
-
-                                                <button className="text-start nav-link rounded-0"
-                                                    id="v-pills-advanced-tab"
-                                                    data-bs-toggle="pill"
-                                                    data-bs-target="#v-pills-advanced"
-                                                    type="button" role="tab"
-                                                    aria-controls="v-pills-advanced"
-                                                    aria-selected="false">
-                                                    Nâng cao
-                                                </button>
-                                            </div>
-
-                                            <div className="tab-content  w-75 p-2" id="v-pills-tabContent" >
-                                                {/* Tổng quan */}
-                                                <div className="tab-pane fade active show h-100 p-2" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
-                                                    <div className="d-flex flex-column align-items-center justify-content-center h-100 gap-4">
-                                                        <div className="d-flex w-100 align-items-center mb-1">
-                                                            <span className="w-25" style={{ fontSize: "15px" }}>Giá bán(₫)</span>
-                                                            <input onChange={(e) => setPrice(e.target.value)} type="text" className="form-control w-75" placeholder="" />
-                                                        </div>
-                                                        <div className="d-flex w-100 align-items-center mb-1">
-                                                            <span className="w-25" style={{ fontSize: "15px" }}>Xuất sứ</span>
-                                                            <input onChange={(e) => setOrigin(e.target.value)} type="text" className="form-control w-75" placeholder="" />
-                                                        </div>
-                                                        <div className="d-flex w-100 align-items-center mb-2">
-                                                            <span style={{ fontSize: "15px", width: "140px" }}>Số lượng</span>
-                                                            <div className="form-check">
-                                                                <div className='d-flex align-items-center justify-content-center'>
-                                                                    <button
-                                                                        style={{ width: '50px', height: "32px" }}
-                                                                        className="btn border-0 rounded-0 btn-outline-secondary  d-flex align-items-center justify-content-center"
-                                                                        onClick={() => setCount(count > 1 ? count - 1 : 1)}
-                                                                    >
-                                                                        -
-                                                                    </button>
-
-                                                                    <input
-                                                                        type="number"
-                                                                        className="form-control text-center rounded-0 border-0 "
-                                                                        value={count}
-                                                                        min={1}
-                                                                        style={{
-                                                                            width: '50px',
-                                                                            height: "32px",
-                                                                        }}
-                                                                        onChange={(e) => setCount(Math.max(1, Number(e.target.value)))}
-                                                                    />
-                                                                    <button
-                                                                        style={{ width: '50px', height: "32px" }}
-                                                                        className="btn border-0 rounded-0 btn-outline-secondary  d-flex align-items-center justify-content-center"
-                                                                        onClick={() => setCount(count + 1)}
-                                                                    >
-                                                                        +
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div className="d-flex w-100 align-items-center mb-2">
-                                                            <span style={{ fontSize: "15px", width: "140px" }}>Tác vụ</span>
-                                                            <div className="form-check">
-                                                                <input
-                                                                    className="form-check-input"
-                                                                    type="checkbox"
-                                                                    value="1"
-                                                                    id="check1"
-                                                                    onChange={handlestatus}
-                                                                    checked={status.includes("1")}
-                                                                />
-                                                                <label className="form-check-label" htmlFor="check1">
-                                                                    Mới
-                                                                </label>
-                                                            </div>
-
-                                                            <div className="form-check ms-3">
-                                                                <input
-                                                                    className="form-check-input"
-                                                                    type="checkbox"
-                                                                    value="2"
-                                                                    id="check2"
-                                                                    onChange={handlestatus}
-                                                                    checked={status.includes("2")}
-                                                                />
-                                                                <label className="form-check-label" htmlFor="check2">
-                                                                    Nổi bật
-                                                                </label>
-                                                            </div>
-
-                                                            <div className="form-check ms-3">
-                                                                <input
-                                                                    className="form-check-input"
-                                                                    type="checkbox"
-                                                                    value="3"
-                                                                    id="check3"
-                                                                    onChange={handlestatus}
-                                                                    checked={status.includes("3")}
-                                                                />
-                                                                <label className="form-check-label" htmlFor="check3">
-                                                                    Hiển thị
-                                                                </label>
-                                                            </div>
-
-                                                        </div>
-                                                    </div>
+                                                Tên sản phẩm
+                                            </label>
+                                            <input
+                                                id="nameproduct"
+                                                onChange={(e) =>
+                                                    setNameproduct(e.target.value)
+                                                }
+                                                value={nameproduct}
+                                                type="text"
+                                                className={`form-control ${errors.nameproduct
+                                                    ? "is-invalid"
+                                                    : ""
+                                                    }`}
+                                                placeholder="VD: Quạt Mini USB để bàn"
+                                            />
+                                            {errors.nameproduct && (
+                                                <div className="invalid-feedback">
+                                                    {errors.nameproduct}
                                                 </div>
-                                                {/* Kiểm kê kho hàng */}
-                                                <div className="tab-pane fade h-100 p-2" id="v-pills-profile" role="tabpanel">
-
-
-                                                    {/* <div class="d-flex w-100 align-items-center mb-2">
-                                                        <span style={{ fontSize: "15px", width: "140px" }}>Người kiểm kê</span>
-                                                        <input type="text" class="form-control w-75 h-50" placeholder="" />
-                                                    </div>
-                                                    <div class="d-flex w-100 align-items-center">
-                                                        <span style={{ fontSize: "15px", width: "140px" }}>Ghi chú</span>
-                                                        <textarea class="form-control w-75 h-50" aria-label="With textarea"></textarea>
-
-                                                    </div> */}
-
-                                                </div>
-                                                {/* Giao hàng */}
-                                                <div className="tab-pane fade h-100" id="v-pills-messages" role="tabpanel"></div>
-                                                {/* Thuộc tính sản phẩm */}
-                                                <div className="tab-pane fade h-100" id="v-pills-settings" role="tabpanel">
-                                                    <div className='bg-light border-start border-danger border-5'>
-                                                        <p className='mx-2'>Thêm các thông tin mô tả mà khách hàng có thể sử dụng để tìm kiếm sản phẩm này trên cửa hàng của bạn, chẳng hạn như “Chất liệu” hoặc “Kích thước”.</p>
-
-                                                    </div>
-                                                    <div>
-                                                        <button className='btn btn-outline-primary mb-2 mt-2'> Thêm mới</button>
-                                                    </div>
-                                                    <div className='d-flex flex-column gap-2'>
-                                                        <div class="d-flex  align-items-center mb-2">
-                                                            <span style={{ fontSize: "15px", width: "100px" }}>Tên: </span>
-
-                                                            <input type="text" class="form-control" placeholder="Ví dụ: chiều dài hoặc trọng lượng" />
-                                                        </div>
-                                                        <div class="d-flex  align-items-center">
-                                                            <span style={{ fontSize: "15px", width: "100px" }}>Giá trị (s)</span>
-
-                                                            <textarea class="form-control " placeholder='Nhập một số văn bản mô tả. Sử dụng "|" để phân tách các giá trị khác nhau ' aria-label="With textarea"></textarea>
-
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <button className='btn btn-outline-primary mb-2 mt-2'>Lưu thuộc tính</button>
-                                                    </div>
-                                                </div>
-                                                <div className="tab-pane fade h-100" id="v-pills-advanced" role="tabpanel"></div>
-                                            </div>
+                                            )}
                                         </div>
 
+                                        {/* Mô tả dài */}
+                                        <div className="text-start mb-3">
+                                            <label className="form-label">
+                                                Mô tả dài
+                                            </label>
+                                            <ReactQuill
+                                                placeholder="Mô tả dài"
+                                                value={longDesc}
+                                                onChange={setLongDesc}
+                                            />
+                                            <style>
+                                                {`.ql-editor{line-height:1.5em;max-height:20em;overflow-y:auto;}`}
+                                            </style>
+                                        </div>
+
+                                        {/* Mô tả ngắn */}
+                                        <div className="text-start mb-3">
+                                            <label className="form-label">
+                                                Mô tả ngắn
+                                            </label>
+                                            <RichTextEditor
+                                                placeholder="Mô tả ngắn"
+                                                value={shortDesc}
+                                                onChange={(val) => setShortDesc(val)}
+                                            />
+                                        </div>
+
+                                        {/* Hướng dẫn sử dụng */}
+                                        <div className="text-start mb-3">
+                                            <label className="form-label">
+                                                Hướng dẫn sử dụng
+                                            </label>
+                                            <RichTextEditor
+                                                placeholder="Hướng dẫn sử dụng"
+                                                value={userManual}
+                                                onChange={(val) => setUserManual(val)}
+                                            />
+                                        </div>
+
+                                        {/* Lưu ý an toàn */}
+                                        <div className="text-start mb-3">
+                                            <label className="form-label">
+                                                Lưu ý an toàn / cảnh báo
+                                            </label>
+                                            <RichTextEditor
+                                                placeholder="Lưu ý an toàn / cảnh báo khi dùng"
+                                                value={cautionNotes}
+                                                onChange={(val) => setCautionNotes(val)}
+                                            />
+                                        </div>
+
+                                        {/* Trạng thái & Tabs Dữ liệu sản phẩm */}
+                                        <div className="text-start">
+                                            <div className="d-flex justify-content-between w-100">
+                                                <div className="fw-semibold mb-2">
+                                                    Dữ liệu sản phẩm
+                                                </div>
+                                                <div>
+                                                    <div className="d-flex flex-wrap gap-3 pt-1">
+                                                        {[
+                                                            {
+                                                                label: "Mới",
+                                                                val: 1,
+                                                                corlor: "primary",
+                                                            },
+                                                            {
+                                                                label: "Nổi bật",
+                                                                val: 2,
+                                                                corlor: "success",
+                                                            },
+                                                            {
+                                                                label: "Hiển thị",
+                                                                val: 3,
+                                                                corlor: "danger",
+                                                            },
+                                                        ].map((o) => (
+                                                            <div
+                                                                className="form-check"
+                                                                key={o.val}
+                                                            >
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    type="radio"
+                                                                    name="variant-status"
+                                                                    id={`st-${o.val}`}
+                                                                    checked={
+                                                                        Number(status) ===
+                                                                        o.val
+                                                                    }
+                                                                    onChange={() =>
+                                                                        setStatus(o.val)
+                                                                    }
+                                                                />
+                                                                <label
+                                                                    className={`form-check-label text-${o.corlor}`}
+                                                                    htmlFor={`st-${o.val}`}
+                                                                >
+                                                                    {o.label}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="d-flex align-items-start border border-2">
+                                                {/* Tabs nav */}
+                                                <div
+                                                    style={{ fontSize: "15px" }}
+                                                    className="nav flex-column nav-pills border-end w-25 border-end-2"
+                                                    id="v-pills-tab"
+                                                    role="tablist"
+                                                    aria-orientation="vertical"
+                                                >
+                                                    <button
+                                                        className="text-start nav-link rounded-0 active"
+                                                        id="v-pills-home-tab"
+                                                        data-bs-toggle="pill"
+                                                        data-bs-target="#v-pills-home"
+                                                        type="button"
+                                                        role="tab"
+                                                        aria-controls="v-pills-home"
+                                                        aria-selected="true"
+                                                    >
+                                                        Biến thể sản phẩm
+                                                    </button>
+                                                    <button
+                                                        className="text-start nav-link rounded-0"
+                                                        id="v-pills-profile-tab"
+                                                        data-bs-toggle="pill"
+                                                        data-bs-target="#v-pills-profile"
+                                                        type="button"
+                                                        role="tab"
+                                                        aria-controls="v-pills-profile"
+                                                        aria-selected="false"
+                                                    >
+                                                        Kiểm kê kho hàng
+                                                    </button>
+                                                    <button
+                                                        className="text-start nav-link rounded-0"
+                                                        id="v-pills-settings-tab"
+                                                        data-bs-toggle="pill"
+                                                        data-bs-target="#v-pills-settings"
+                                                        type="button"
+                                                        role="tab"
+                                                        aria-controls="v-pills-settings"
+                                                        aria-selected="false"
+                                                    >
+                                                        Các thuộc tính
+                                                    </button>
+                                                </div>
+
+                                                {/* Tabs content */}
+                                                <div
+                                                    className="tab-content w-75 p-2"
+                                                    id="v-pills-tabContent"
+                                                >
+                                                    {/* Biến thể sản phẩm */}
+                                                    <div
+                                                        className="tab-pane fade active show h-100 p-2"
+                                                        id="v-pills-home"
+                                                        role="tabpanel"
+                                                        aria-labelledby="v-pills-home-tab"
+                                                    >
+                                                        <VariantForm
+                                                            productId={0}
+                                                            onSaved={(out) => {
+                                                                // tuỳ bạn muốn làm gì khi lưu 1 biến thể
+                                                            }}
+                                                            onVariantsChange={
+                                                                setVariantsFromForm
+                                                            }
+                                                        />
+                                                    </div>
+
+                                                    {/* Kiểm kê kho hàng */}
+                                                    <div
+                                                        className="tab-pane fade h-100 p-2"
+                                                        id="v-pills-profile"
+                                                        role="tabpanel"
+                                                    >
+                                                        <InventoryPanel
+                                                            variants={variantsFromForm}
+                                                            onSaved={null}
+                                                            onChange={setInventoryDraft}
+                                                        />
+                                                    </div>
+
+                                                    {/* Thuộc tính sản phẩm */}
+                                                    <div
+                                                        className="tab-pane fade h-100 p-2"
+                                                        id="v-pills-settings"
+                                                        role="tabpanel"
+                                                    >
+                                                        <AttributePanel
+                                                            variants={variantsFromForm}
+                                                            onVariantsChange={
+                                                                setVariantsFromForm
+                                                            }
+                                                        />
+                                                    </div>
+
+                                                    <div
+                                                        className="tab-pane fade h-100 p-2"
+                                                        id="v-pills-advanced"
+                                                        role="tabpanel"
+                                                    >
+                                                        <div className="text-muted small">
+                                                            (Tuỳ chọn) Trường nâng cao
+                                                            khác…
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="col-4">
-                                    <Image onChange={handleImageChange} onRemove={handleImageRemove} />
-                                    <Category onChange={setCategoryId} />
-                                    <div className='d-flex flex-start mt-2 mb-2'> <span >Thẻ sản phẩm </span></div>
-                                    <div className='d-flex justify-content-center p-2 border-2 border gap-2 w-100'>
 
-                                        <input type="text" className="form-control " placeholder="Phân cách các thẻ bằng dấu ," />
+                                    {/* Cột phải: ảnh + danh mục */}
+                                    <div className="col-4">
+                                        {/* Images */}
+                                        <div className="mb-3 text-start">
+                                            <Image
+                                                onChange={handleImageChange}
+                                                onRemove={handleImageRemove}
+                                            />
+                                            {errors.images && (
+                                                <div className="text-danger small mt-1">
+                                                    {errors.images}
+                                                </div>
+                                            )}
+                                        </div>
 
+                                        {/* Category */}
+                                        <div className="mb-3 text-start">
+                                            <Category onChange={setCategoryId} />
+                                            {errors.categoryId && (
+                                                <div className="text-danger small mt-1">
+                                                    {errors.categoryId}
+                                                </div>
+                                            )}
+                                        </div>
 
-                                        <button className='btn btn-outline-primary w-25'>
-                                            Thêm
-                                        </button>
-
+                                        {/* Bạn có thể thêm input Giá chung sản phẩm ở đây nếu muốn */}
+                                        {/* <div className="mb-3 text-start">
+                                            <label className="form-label">Giá chung</label>
+                                            <input
+                                                type="number"
+                                                className={`form-control ${
+                                                    errors.price ? "is-invalid" : ""
+                                                }`}
+                                                value={price}
+                                                onChange={(e) => setPrice(e.target.value)}
+                                            />
+                                            {errors.price && (
+                                                <div className="invalid-feedback">
+                                                    {errors.price}
+                                                </div>
+                                            )}
+                                        </div> */}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="modal-footer">
-                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" className="btn btn-primary" onClick={handleSubmit}>Save changes</button>
-                    </div>
+
+                        <div className="modal-footer">
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                data-bs-dismiss="modal"
+                                disabled={isSaving}
+                            >
+                                Đóng
+                            </button>
+                            <button
+                                type="submit"
+                                className="btn btn-primary"
+                                disabled={isSaving}
+                            >
+                                {isSaving ? "Đang lưu…" : "Lưu sản phẩm"}
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

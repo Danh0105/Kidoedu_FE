@@ -18,7 +18,6 @@ export default function Home() {
         setUploading(true);
         try {
             const res = await axios.post("http://localhost:5000/upload", formData);
-            console.log(res);
             setPreviewUrl(res.data.url);
         } catch (err) {
             alert("Tải lên thất bại: " + err.message);

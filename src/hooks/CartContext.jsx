@@ -10,13 +10,17 @@ export const CartProvider = ({ children }) => {
   const [selectedProducts, setSelectedProducts] = useState([]);
   // thêm sản phẩm vào giỏ
   const addToCartContext = (newItem) => {
+
     setCartContext((prev) => {
       // Kiểm tra xem đã có sản phẩm này (product + variant) trong giỏ chưa
       const existingIndex = prev.findIndex(
         (p) =>
           p.productId === newItem.productId &&
-          (p.selectedVariant?.variantId || null) ===
-          (newItem.selectedVariant?.variantId || null)
+          (p.variantId || null) ===
+          (newItem.variantId || null) &&
+          (p.selectedAttr || null) ===
+          (newItem.selectedAttr || null)
+
       );
 
       if (existingIndex !== -1) {

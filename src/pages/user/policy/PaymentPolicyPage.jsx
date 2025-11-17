@@ -20,7 +20,6 @@ export default function PaymentPolicyPage() {
             try {
                 const res = await fetch(`${process.env.REACT_APP_API_URL}/policies`);
                 const data = await res.json();
-                console.log(data)
                 // Lọc ra các chính sách có slug === "CSTT"
                 const filtered = data.filter((p) => p.slug == "CSTT");
                 setPolicies(filtered);

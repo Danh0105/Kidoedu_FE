@@ -36,7 +36,6 @@ export default function Login() {
     const login = async (event) => {
         event.preventDefault();
         try {
-            console.log('Logging in with', { email, password });
             const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

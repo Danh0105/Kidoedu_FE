@@ -19,144 +19,95 @@ export default function Cart() {
             // ============================================
             if (!token || typeof token !== "string" || token.trim() === "") {
                 const guestCart = JSON.parse(Cookies.get("guest_cart") || "[]");
+
                 if (guestCart.length === 0) {
                     setProducts([]);
                     return;
                 }
 
-                // 🔹 Lấy thông tin sản phẩm
-                const productRequests = guestCart.map((item) =>
-                    axios.get(`${process.env.REACT_APP_API_URL}/products/${item.productId}`)
-                );
-                const responses = await Promise.all(productRequests);
-
-                // 🔹 Bổ sung thông tin biến thể + giá (nếu có)
-                const productsData = await Promise.all(
-                    responses.map(async (res, idx) => {
-                        const base = res.data;
-                        const item = guestCart[idx];
-                        const variant = item.selectedVariant || null;
-                        let variantData = variant;
-
-
-                        if (variant?.variantId) {
-                            try {
-                                const resPrice = await axios.get(
-                                    `${process.env.REACT_APP_API_URL}/products/${item.productId}/variants/${variant.variantId}/prices`
-                                );
-                                const resImage = await axios.get(
-                                    `${process.env.REACT_APP_API_URL}/products/${item.productId}/variants/${variant.variantId}`
-                                );
-                                const variantPrice =
-                                    Array.isArray(resPrice.data) && resPrice.data[0]
-                                        ? Number(resPrice.data[0].price)
-                                        : null;
-
-
-                                variantData = {
-                                    ...variant,
-                                    price: variantPrice,
-                                    imageUrl: resImage.data.imageUrl
-                                };
-                            } catch (error) {
-                                console.warn(
-                                    `⚠️ Không thể lấy giá cho biến thể ${variant.variantId}:`,
-                                    error.message
-                                );
-                            }
-                        }
-
-                        return {
-                            ...base,
-                            quantity: item.quantity,
-                            selected: false,
-                            variant: variantData,
-                        };
-                    })
-                );
-                setProducts(productsData);
+                setProducts(guestCart);
                 return;
             }
 
             // ============================================
             // 🧑‍💻 2️⃣ NGƯỜI DÙNG ĐĂNG NHẬP
             // ============================================
-            let decoded;
-            try {
-                decoded = jwtDecode(token);
-            } catch (err) {
-                console.error("Token không hợp lệ:", err);
-                return;
-            }
-
-            const resCart = await axios.get(
-                `${process.env.REACT_APP_API_URL}/cart/${decoded.sub}`,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-
-            const cart = resCart.data;
-            if (!cart?.items?.length) {
-                setProducts([]);
-                setCartCount(0);
-                return;
-            }
-
-            // 🔹 Lấy danh sách productId trong giỏ hàng
-            const productIds = cart.items.map((item) => item.product.productId);
-            const productRequests = productIds.map((id) =>
-                axios.get(`${process.env.REACT_APP_API_URL}/products/${id}`)
-            );
-            const responses = await Promise.all(productRequests);
-
-            // 🔹 Bổ sung thông tin biến thể + giá
-            const productsData = await Promise.all(
-                responses.map(async (res, idx) => {
-                    const base = res.data;
-                    const cartItem = cart.items[idx];
-                    const variant = cartItem?.selectedVariant || null;
-                    let variantData = variant;
-
-                    if (variant?.variantId) {
-                        try {
-                            const [resVariant, resPrice] = await Promise.allSettled([
-                                axios.get(
-                                    `${process.env.REACT_APP_API_URL}/products/${base.data.productId}/variants/${variant.variantId}`
-                                ),
-                                axios.get(
-                                    `${process.env.REACT_APP_API_URL}/products/${base.data.productId}/variants/${variant.variantId}/prices`
-                                ),
-                            ]);
-
-                            const variantInfo =
-                                resVariant.status === "fulfilled"
-                                    ? resVariant.value.data
-                                    : variant;
-                            const variantPrice =
-                                resPrice.status === "fulfilled" &&
-                                    Array.isArray(resPrice.value.data) &&
-                                    resPrice.value.data[0]
-                                    ? Number(resPrice.value.data[0].price)
-                                    : variant?.price || null;
-
-                            variantData = { ...variantInfo, price: variantPrice };
-                        } catch (error) {
-                            console.warn(
-                                `⚠️ Không thể lấy thông tin biến thể ${variant.variantId}:`,
-                                error.message
-                            );
-                        }
-                    }
-
-                    return {
-                        ...base,
-                        quantity: cartItem.quantity,
-                        selected: false,
-                        variant: variantData,
-                    };
-                })
-            );
-
-            setProducts(productsData);
+            /*    let decoded;
+               try {
+                   decoded = jwtDecode(token);
+               } catch (err) {
+                   console.error("Token không hợp lệ:", err);
+                   return;
+               }
+   
+               const resCart = await axios.get(
+                   `${process.env.REACT_APP_API_URL}/cart/${decoded.sub}`,
+                   { headers: { Authorization: `Bearer ${token}` } }
+               );
+   
+               const cart = resCart.data;
+               if (!cart?.items?.length) {
+                   setProducts([]);
+                   setCartCount(0);
+                   return;
+               }
+   
+               // 🔹 Lấy danh sách productId trong giỏ hàng
+               const productIds = cart.items.map((item) => item?.productId);
+               const productRequests = productIds.map((id) =>
+                   axios.get(`${process.env.REACT_APP_API_URL}/products/${id}`)
+               );
+               const responses = await Promise.all(productRequests);
+   
+               // 🔹 Bổ sung thông tin biến thể + giá
+               const productsData = await Promise.all(
+                   responses.map(async (res, idx) => {
+                       const base = res.data;
+                       const cartItem = cart.items[idx];
+                       const variant = cartItem?.selectedVariant || null;
+                       let variantData = variant;
+   
+                       if (variant?.variantId) {
+                           try {
+                               const [resVariant, resPrice] = await Promise.allSettled([
+                                   axios.get(
+                                       `${process.env.REACT_APP_API_URL}/products/${base.data.productId}/variants/${variant.variantId}`
+                                   ),
+                                   axios.get(
+                                       `${process.env.REACT_APP_API_URL}/products/${base.data.productId}/variants/${variant.variantId}/prices`
+                                   ),
+                               ]);
+   
+                               const variantInfo =
+                                   resVariant.status === "fulfilled"
+                                       ? resVariant.value.data
+                                       : variant;
+                               const variantPrice =
+                                   resPrice.status === "fulfilled" &&
+                                       Array.isArray(resPrice.value.data) &&
+                                       resPrice.value.data[0]
+                                       ? Number(resPrice.value.data[0].price)
+                                       : variant?.price || null;
+   
+                               variantData = { ...variantInfo, price: variantPrice };
+                           } catch (error) {
+                               console.warn(
+                                   `⚠️ Không thể lấy thông tin biến thể ${variant.variantId}:`,
+                                   error.message
+                               );
+                           }
+                       }
+   
+                       return {
+                           ...base,
+                           quantity: cartItem.quantity,
+                           selected: false,
+                           variant: variantData,
+                       };
+                   })
+               );
+   
+               setProducts(productsData); */
 
 
         } catch (err) {
@@ -171,13 +122,13 @@ export default function Cart() {
         if (!token || typeof token !== "string" || token.trim() === "") {
             const guestCart = JSON.parse(Cookies.get("guest_cart") || "[]");
             const updatedCart = guestCart.map((item) =>
-                item.selectedVariant.variantId === variantId ? { ...item, quantity: newQty } : item
+                item.variantId === variantId ? { ...item, quantity: newQty } : item
             );
             Cookies.set("guest_cart", JSON.stringify(updatedCart), { expires: 7 });
 
             setProducts((prev) =>
                 prev.map((p) =>
-                    (p.variant?.variantId || p.variantId) === variantId
+                    (p?.variantId || p.variantId) === variantId
                         ? { ...p, quantity: newQty }
                         : p
                 )
@@ -202,7 +153,7 @@ export default function Cart() {
 
             setProducts((prev) =>
                 prev.map((p) =>
-                    p.variant.variantId === variantId ? { ...p, quantity: newQty } : p
+                    p.variantId === variantId ? { ...p, quantity: newQty } : p
                 )
             );
         } catch (err) {
@@ -219,7 +170,7 @@ export default function Cart() {
     const selectedProducts = products.filter(p => p.selected);
     const totalQuantity = selectedProducts.reduce((sum, p) => sum + p.quantity, 0);
     const totalPrice = selectedProducts.reduce((sum, p) =>
-        sum + p.quantity * (p.variant?.price || p.variant.price), 0);
+        sum + p.quantity * (p?.price), 0);
 
     // 🗑️ Xóa sản phẩm
     const handleDelete = async (variantId) => {
@@ -231,11 +182,11 @@ export default function Cart() {
             if (!token || typeof token !== "string" || token.trim() === "") {
                 let guestCart = JSON.parse(Cookies.get("guest_cart") || "[]");
 
-                guestCart = guestCart.filter((item) => item.selectedVariant.variantId !== variantId);
+                guestCart = guestCart.filter((item) => item.variantId !== variantId);
                 removeFromCartContext(variantId);
                 Cookies.set("guest_cart", JSON.stringify(guestCart), { expires: 7 });
                 setCartCount(guestCart.length);
-                setProducts((prev) => prev.filter((p) => p.variant?.variantId !== variantId));
+                setProducts((prev) => prev.filter((p) => p?.variantId !== variantId));
                 alert("Đã xóa sản phẩm khỏi giỏ hàng!");
                 return;
             }
@@ -288,7 +239,7 @@ export default function Cart() {
                             {products.length > 0 ? (
                                 products.map((prd) => (
                                     <tr
-                                        key={`${prd.data.productId}-${prd.variant?.variantId ?? 'base'}`}
+                                        key={`${prd?.productId}-${prd?.selectedAttr ?? 'base'}`}
                                         className="border-bottom hover-row"
                                     >
 
@@ -301,7 +252,9 @@ export default function Cart() {
                                                 onChange={() =>
                                                     setProducts((prev) =>
                                                         prev.map((p) =>
-                                                            p.variant.variantId === prd.variant.variantId
+                                                            p.selectedAttr === prd.selectedAttr
+                                                                &&
+                                                                p.variantId === prd.variantId
                                                                 ? { ...p, selected: !p.selected }
                                                                 : p
                                                         )
@@ -311,8 +264,8 @@ export default function Cart() {
                                         </td>
                                         <td>
                                             <img
-                                                src={prd.variant.imageUrl || "/no-image.png"}
-                                                alt={prd?.data?.productName || "Sản phẩm"}
+                                                src={prd.imageUrl || "/no-image.png"}
+                                                alt={prd?.productName || "Sản phẩm"}
                                                 width={80}
                                                 height={80}
                                                 className="rounded border cart-thumb shadow-sm"
@@ -326,10 +279,10 @@ export default function Cart() {
                                                 <div className="d-flex flex-column justify-content-between flex-grow-1">
                                                     <div
                                                         className="fw-semibold text-center"
-                                                        title={prd.data.productName}
+                                                        title={prd?.productName}
 
                                                     >
-                                                        {prd.data.productName}
+                                                        {prd?.productName} | {prd.variantName} | {prd.selectedAttr}
                                                     </div>
                                                     {prd.variant && (
                                                         <div className="text-muted small mt-1">
@@ -342,7 +295,7 @@ export default function Cart() {
                                                     )}
                                                     <div className="d-sm-none mt-2">
                                                         <span className="fw-bold text-danger small">
-                                                            {Number(prd.variant?.price || prd.data.price).toLocaleString()} ₫
+                                                            {Number(prd?.price).toLocaleString()} ₫
                                                         </span>
                                                     </div>
                                                 </div>
@@ -352,7 +305,7 @@ export default function Cart() {
                                         {/* Đơn giá */}
                                         <td className="text-center d-none d-sm-table-cell">
                                             <span className="fw-semibold text-dark">
-                                                {Number(prd.variant?.price || prd.data.price).toLocaleString()} ₫
+                                                {Number(prd?.price).toLocaleString()} ₫
                                             </span>
                                         </td>
 
@@ -365,7 +318,7 @@ export default function Cart() {
                                                 <button
                                                     className="btn btn-sm btn-light text-secondary border-0 px-2"
                                                     onClick={() =>
-                                                        updateQuantity(prd.variant.variantId, Math.max(1, prd.quantity - 1))
+                                                        updateQuantity(prd.variantId, Math.max(1, prd.quantity - 1))
                                                     }
                                                     disabled={prd.quantity <= 1}
                                                 >
@@ -379,7 +332,7 @@ export default function Cart() {
                                                     min={1}
                                                     onChange={(e) =>
                                                         updateQuantity(
-                                                            prd.variant.variantId,
+                                                            prd.variantId,
                                                             Math.max(1, parseInt(e.target.value) || 1)
                                                         )
                                                     }
@@ -387,7 +340,7 @@ export default function Cart() {
                                                 <button
                                                     className="btn btn-sm btn-light text-secondary border-0 px-2"
                                                     onClick={() =>
-                                                        updateQuantity(prd.variant.variantId, prd.quantity + 1)
+                                                        updateQuantity(prd.variantId, prd.quantity + 1)
                                                     }
                                                 >
                                                     <i className="bi bi-plus-lg"></i>
@@ -397,14 +350,14 @@ export default function Cart() {
 
                                         {/* Tổng tiền */}
                                         <td className="text-center text-danger fw-semibold">
-                                            {(prd.quantity * (prd.variant?.price || prd.data.price)).toLocaleString()} ₫
+                                            {(prd.quantity * prd?.price).toLocaleString()} ₫
                                         </td>
 
                                         {/* Thao tác */}
                                         <td className="text-center d-none d-sm-table-cell">
                                             <button
                                                 className="btn btn-sm btn-outline-danger px-3"
-                                                onClick={() => handleDelete(prd.variant.variantId)}
+                                                onClick={() => handleDelete(prd.variantId)}
                                             >
                                                 <i className="bi bi-trash me-1"></i>Xóa
                                             </button>
