@@ -3,19 +3,19 @@ import Slider from "react-slick";
 import InnerImageZoom from "react-inner-image-zoom";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import "react-inner-image-zoom/lib/styles.min.css";
+import 'react-inner-image-zoom/lib/InnerImageZoom/styles.css';
 import { NavLink, useParams } from "react-router-dom";
 import axios from "axios";
 import ModalCart from "../../components/user/ModalCart";
-import { ProductInfoPanel } from "../../components/user/ProductInfoPanel";
+import ProductInfoPanel from "../../components/user/ProductInfoPanel";
 import { ProductSpecs } from "./ProductSpecs";
 import "../../components/user/css/ProductDetail.css";
 
 const PLACEHOLDER = "/placeholder-800x800.png";
 
-/* ==========================================================================
-   Helper: CautionNotes - render danh sách lưu ý (mẹo / cảnh báo / nguy hiểm)
-   ========================================================================== */
+/* ======================================================================
+   Helper: CautionNotes (không đổi)
+   ====================================================================== */
 const CautionNotes = ({ notes, maxVisible = 6, title = "Lưu ý quan trọng" }) => {
     const [expanded, setExpanded] = useState(false);
 
@@ -37,14 +37,15 @@ const CautionNotes = ({ notes, maxVisible = 6, title = "Lưu ý quan trọng" })
             .map((s) => s.trim())
             .filter(Boolean);
 
-    const list = Array.isArray(notes)
-        ? notes.flatMap((n) => splitText(n))
-        : splitText(notes);
+    const list = Array.isArray(notes) ? notes.flatMap((n) => splitText(n)) : splitText(notes);
 
     const items = list.map((text) => {
         const m = text.match(/\((info|warning|danger)\)\s*$/i);
         const level = m ? m[1].toLowerCase() : "default";
-        return { text: m ? text.replace(m[0], "").trim().replace(/[.;,]$/, "") : text, level };
+        return {
+            text: m ? text.replace(m[0], "").trim().replace(/[.;,]$/, "") : text,
+            level,
+        };
     });
 
     const visible = expanded ? items : items.slice(0, maxVisible);
@@ -84,9 +85,9 @@ const CautionNotes = ({ notes, maxVisible = 6, title = "Lưu ý quan trọng" })
     );
 };
 
-/* ==========================================================================
-   Component chính: ProductDetail
-   ========================================================================== */
+/* ======================================================================
+   Component chính: ProductDetail (phiên bản đã sửa an toàn)
+   ====================================================================== */
 export default function ProductDetail() {
     const { id } = useParams();
     const [product, setProduct] = useState(null);
@@ -96,88 +97,161 @@ export default function ProductDetail() {
     const [activeTab, setActiveTab] = useState("desc");
     const [showModalCart, setShowModalCart] = useState(false);
     const [cartPreview, setCartPreview] = useState(null);
+    const [specs, setSpecs] = useState([]);
 
-    // ----------- Fetch product -------------
+    /* ===========================================================
+       Lấy sản phẩm từ API (safe parsing)
+       =========================================================== */
+    const activeVariant = React.useMemo(() => {
+        if (!Array.isArray(product?.variants) || product.variants.length === 0) return null;
+        return product.variants.find((v) => v?.isActive) ?? product.variants[0] ?? null;
+    }, [product]);
+
     useEffect(() => {
         if (!id) return;
+
         (async () => {
             try {
-                const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/products/${id}`);
+                const { data } = await axios.get(
+                    `${process.env.REACT_APP_API_URL}/products/${id}`
+                );
+
                 const prod = data?.data ?? data;
+                console.log(prod);
 
                 setProduct(prod);
 
-                const prodImages = (prod?.imageUrl || []).map((i) => i?.image_url).filter(Boolean);
-                const variantImages = (prod?.variants || [])
-                    .flatMap((v) => v?.imageUrl || [])
-                    .map((img) => img?.imageUrl)
-                    .filter(Boolean);
+                /* =======================
+                   1) Ảnh sản phẩm
+                   ======================= */
+                const prodImages = Array.isArray(prod?.images)
+                    ? prod.images
+                        .map(i =>
+                            typeof i === "string"
+                                ? i
+                                : i?.imageUrl ||
+                                null
+                        )
+                        .filter(Boolean)
+                    : [];
 
-                const merged = [...new Set([...prodImages, ...variantImages])];
+                /* =======================
+                   2) Ảnh biến thể
+                   ======================= */
+                const variantImages = Array.isArray(prod?.variants)
+                    ? prod.variants.flatMap(v => {
+                        const img = v?.imageUrl || null;
+
+                        if (!img) return [];
+
+                        if (typeof img === "string") return [img];
+
+                        if (Array.isArray(img))
+                            return img
+                                .map(it =>
+                                    typeof it === "string"
+                                        ? it
+                                        : it?.imageUrl || null
+                                )
+                                .filter(Boolean);
+
+                        if (typeof img === "object")
+                            return [
+                                img.imageUrl ||
+                                img.image_url ||
+                                img.url ||
+                                null,
+                            ].filter(Boolean);
+
+                        return [];
+                    })
+                    : [];
+
+                /* =======================
+                   3) Gộp ảnh (unique)
+                   ======================= */
+                const merged = [...new Set([...variantImages, ...prodImages])];
+
                 setImages(merged.length ? merged : [PLACEHOLDER]);
+
+                /* =======================
+                   4) Specs
+                   ======================= */
+                const firstVariant = prod?.variants?.[0] ?? null;
+                const initialSpecs =
+                    prod?.variants?.find(v => v?.isActive)?.specs ??
+                    firstVariant?.specs ??
+                    prod?.specs ??
+                    [];
+
+                setSpecs(Array.isArray(initialSpecs) ? [...initialSpecs] : []);
             } catch (err) {
                 console.error("Lỗi khi lấy sản phẩm:", err);
+                setProduct(null);
                 setImages([PLACEHOLDER]);
+                setSpecs([]);
             }
         })();
     }, [id]);
 
-    // ----------- Helpers -------------
 
-    /*     const safeImages = useMemo(() => {
-            // Lấy tất cả ảnh từ các biến thể
-            const variantImages = (product?.variants || [])
-                .map((v) => v.imageUrl)
-                .filter(Boolean);
-    
-            // Đưa ảnh variant đang chọn lên đầu
-            const currentImage = selectedVariant?.imageUrl;
-    
-            const allImages = [
-                ...(currentImage ? [currentImage] : []),
-                ...variantImages,
-            ];
-    
-            // Loại trùng (theo URL)
-            return allImages.filter((v, i, arr) => arr.indexOf(v) === i);
-        }, [product]); */
+    /* ===========================================================
+       Khi đổi biến thể → đổi ảnh và kéo theo specs
+       =========================================================== */
     const handleVariantChange = (variant) => {
+        // bảo đảm variant có thể là id hoặc object
+        const variantObj = typeof variant === "object" ? variant : (product?.variants || []).find((v) => v?.id === variant || v?.variantId === variant) ?? null;
+
+        // 1) xử lý ảnh variant
+        const imgData = variantObj?.imageUrl ?? variantObj?.image ?? null;
         let variantImages = [];
 
-        const imgData = variant?.imageUrl;
-
-        if (Array.isArray(imgData)) {
-            // ✅ Trường hợp là mảng
-            variantImages = imgData.map((img) =>
-                typeof img === "string" ? img : img?.imageUrl
-            ).filter(Boolean);
-        } else if (typeof imgData === "string") {
-            // ✅ Trường hợp là chuỗi (1 ảnh)
-            variantImages = [imgData];
-        } else if (imgData && typeof imgData === "object") {
-            // ✅ Trường hợp là object đơn (ví dụ { imageUrl: "..." })
-            if (imgData.imageUrl) variantImages = [imgData.imageUrl];
+        if (imgData) {
+            if (typeof imgData === "string") variantImages = [imgData];
+            else if (Array.isArray(imgData)) {
+                variantImages = imgData.map((i) => (typeof i === "string" ? i : i?.imageUrl ?? i?.url ?? null)).filter(Boolean);
+            } else if (typeof imgData === "object") {
+                const url = imgData.imageUrl ?? imgData.url ?? null;
+                if (url) variantImages = [url];
+            }
+        } else {
+            // fallback: add product images (do not remove existing)
+            const prodImages = Array.isArray(product?.images)
+                ? product.images.map((i) => (typeof i === "string" ? i : i?.image_url ?? i?.imageUrl ?? null)).filter(Boolean)
+                : [];
+            setImages((prev) => {
+                const merged = [...prev, ...prodImages];
+                return [...new Set(merged)];
+            });
         }
 
-        // Nếu biến thể có ảnh riêng → hiển thị nó
         if (variantImages.length > 0) {
-            setImages(variantImages);
-            return;
+            setImages((prev) => {
+                const merged = [...variantImages, ...prev]; // ưu tiên ảnh variant lên trước
+                return [...new Set(merged)];
+            });
         }
 
-        // Nếu không → fallback sang ảnh của product
-        const productImages = (product?.imageUrl || [])
-            .map((i) => (typeof i === "string" ? i : i?.image_url))
-            .filter(Boolean);
-
-        setImages(productImages.length ? productImages : [PLACEHOLDER]);
+        // 2) kéo theo specs (luôn đặt mảng)
+        const newSpecs = variantObj?.specs ?? product?.specs ?? [];
+        setSpecs(Array.isArray(newSpecs) ? [...newSpecs] : []);
     };
 
+    /* callback khi ProductInfoPanel load variants (chứa ảnh) */
+    const handleVariantsLoaded = (imgs) => {
+        if (!Array.isArray(imgs) || imgs.length === 0) return;
+        const list = imgs.map((i) => (typeof i === "string" ? i : i?.imageUrl ?? i?.url ?? null)).filter(Boolean);
+        if (list.length === 0) return;
+        setImages((prev) => [...new Set([...prev, ...list])]);
+    };
 
     const descHtml = product?.longDescription || "";
 
-    const specsData = useMemo(() => product?.variants[0]?.specs ?? null, [product]);
+    /* ===========================================================
+       Parse hướng dẫn sử dụng (giữ nguyên)
+       =========================================================== */
     const notes = useMemo(() => product?.cautionNotes ?? null, [product]);
+
     const manual = useMemo(() => {
         const raw = product?.userManual;
         if (!raw) return null;
@@ -186,45 +260,29 @@ export default function ProductDetail() {
         let video = raw.video || null;
         let steps = [];
 
-        // Nếu đã là mảng step "bình thường"
         if (Array.isArray(raw.steps)) {
             raw.steps.forEach((item) => {
                 if (typeof item === "string") {
-                    // Thử parse JSON bên trong
                     try {
                         const parsed = JSON.parse(item);
-
                         if (!pdf && parsed.pdf) pdf = parsed.pdf;
                         if (!video && parsed.video) video = parsed.video;
 
                         if (Array.isArray(parsed.steps)) {
-                            steps.push(
-                                ...parsed.steps.filter((s) => typeof s === "string")
-                            );
+                            steps.push(...parsed.steps.filter((s) => typeof s === "string"));
                         }
                     } catch {
-                        // Không phải JSON → coi như 1 câu step bình thường
                         steps.push(item);
                     }
-                } else if (typeof item === "object" && item) {
-                    // Trường hợp lỡ lưu object step
-                    if (item.text && typeof item.text === "string") {
-                        steps.push(item.text);
-                    }
+                } else if (typeof item === "object" && item?.text) {
+                    steps.push(item.text);
                 }
             });
         }
 
-        // Fallback: nếu chưa có step nào nhưng có raw.text
-        if (!steps.length && typeof raw.text === "string") {
-            steps.push(raw.text);
-        }
+        if (!steps.length && raw.text) steps.push(raw.text);
 
-        return {
-            pdf,
-            video,
-            steps,
-        };
+        return { pdf, video, steps };
     }, [product]);
 
     const origin = product?.origin ?? null;
@@ -244,7 +302,9 @@ export default function ProductDetail() {
         ],
     };
 
-    // ----------- Render -------------
+    /* ===========================================================
+       Render
+       =========================================================== */
     return (
         <div className="container py-4">
             {/* Breadcrumb */}
@@ -260,17 +320,18 @@ export default function ProductDetail() {
             </nav>
 
             <div className="row g-4">
-                {/* Image gallery */}
+                {/* Image Gallery */}
                 <div className="col-12 col-md-6">
                     <div className="product-slider bg-white p-3 rounded-4 shadow-sm position-relative">
-                        {images.length ? (
+                        {Array.isArray(images) && images.length ? (
                             <>
-                                <Slider {...mainSettings} asNavFor={nav2} ref={setNav1} className="main-slider">
+                                <Slider {...mainSettings} asNavFor={nav2} ref={setNav1}>
                                     {images.map((src, i) => (
                                         <div key={i}>
                                             <InnerImageZoom
-                                                src={src}
-                                                zoomSrc={src}
+                                                src={process.env.REACT_APP_API_URL + src}
+                                                zoomSrc={process.env.REACT_APP_API_URL + src}
+
                                                 zoomType="hover"
                                                 zoomScale={1.2}
                                                 alt={`Ảnh sản phẩm ${i + 1}`}
@@ -281,22 +342,20 @@ export default function ProductDetail() {
                                     ))}
                                 </Slider>
 
-                                {images.length > 1 && (
-                                    <div className="mt-2">
-                                        <Slider {...thumbSettings} asNavFor={nav1} ref={setNav2} className="thumb-slider">
-                                            {images.map((src, i) => (
-                                                <div key={i} className="px-1">
-                                                    <img
-                                                        src={src}
-                                                        alt={`Thumb ${i + 1}`}
-                                                        className="img-fluid rounded-2 thumb-img"
-                                                        onError={(e) => (e.currentTarget.src = PLACEHOLDER)}
-                                                    />
-                                                </div>
-                                            ))}
-                                        </Slider>
-                                    </div>
-                                )}
+                                <div className="mt-2">
+                                    <Slider {...thumbSettings} asNavFor={nav1} ref={setNav2}>
+                                        {images.map((src, i) => (
+                                            <div key={i} className="px-1">
+                                                <img
+                                                    src={process.env.REACT_APP_API_URL + src}
+                                                    alt={`Thumb ${i + 1}`}
+                                                    className="img-fluid rounded-2 thumb-img"
+                                                    onError={(e) => (e.currentTarget.src = PLACEHOLDER)}
+                                                />
+                                            </div>
+                                        ))}
+                                    </Slider>
+                                </div>
                             </>
                         ) : (
                             <div className="text-center p-4 text-muted">
@@ -306,13 +365,10 @@ export default function ProductDetail() {
                                 </div>
                             </div>
                         )}
-                        <span className="zoom-hint position-absolute bottom-0 end-0 m-2 badge bg-dark-subtle text-dark">
-                            <i className="bi bi-zoom-in me-1"></i> Zoom
-                        </span>
                     </div>
                 </div>
 
-                {/* Product info */}
+                {/* Product Info */}
                 <div className="col-12 col-lg-6">
                     <ProductInfoPanel
                         product={product}
@@ -323,10 +379,10 @@ export default function ProductDetail() {
                         }}
                         defaultQty={1}
                         onVariantChange={handleVariantChange}
-                        onVariantsLoaded={setImages}
+                        onVariantsLoaded={handleVariantsLoaded}
                     />
 
-                    {/* Origin + stock badges */}
+                    {/* Origin + Stock */}
                     <div className="d-flex flex-wrap gap-2 mt-3">
                         {origin && (
                             <span className="badge bg-secondary-subtle text-secondary-emphasis">
@@ -369,70 +425,42 @@ export default function ProductDetail() {
                     </ul>
 
                     <div className="bg-white p-3 rounded-bottom shadow-sm border border-top-0">
-                        {activeTab === "desc" && (
-                            <div dangerouslySetInnerHTML={{ __html: descHtml }} />
-                        )}
-                        {activeTab === "specs" && <ProductSpecs specs={specsData} />}
+                        {activeTab === "desc" && <div dangerouslySetInnerHTML={{ __html: descHtml }} />}
+                        {activeTab === "specs" && <ProductSpecs specs={specs} />}
                         {activeTab === "notes" && <CautionNotes notes={notes} />}
                         {activeTab === "manual" && (
                             <div className="vstack gap-3">
-                                {/* Link PDF & Video nếu có */}
                                 <div className="d-flex flex-wrap gap-2">
                                     {manual?.pdf && (
-                                        <a
-                                            href={manual.pdf}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="btn btn-sm btn-outline-primary"
-                                        >
-                                            <i className="bi bi-file-earmark-pdf me-1" />
-                                            Xem hướng dẫn PDF
+                                        <a href={manual.pdf} target="_blank" rel="noreferrer"
+                                            className="btn btn-sm btn-outline-primary">
+                                            <i className="bi bi-file-earmark-pdf me-1" /> Xem hướng dẫn PDF
                                         </a>
                                     )}
                                     {manual?.video && (
-                                        <a
-                                            href={manual.video}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="btn btn-sm btn-outline-danger"
-                                        >
-                                            <i className="bi bi-play-circle me-1" />
-                                            Xem video hướng dẫn
+                                        <a href={manual.video} target="_blank" rel="noreferrer"
+                                            className="btn btn-sm btn-outline-danger">
+                                            <i className="bi bi-play-circle me-1" /> Xem video hướng dẫn
                                         </a>
                                     )}
                                 </div>
 
-                                {/* Danh sách các bước */}
                                 {manual?.steps?.length ? (
                                     <ol className="ps-3 mb-0">
                                         {manual.steps.map((step, idx) => (
-                                            <li key={idx} className="mb-1">
-                                                {step}
-                                            </li>
+                                            <li key={idx} className="mb-1">{step}</li>
                                         ))}
                                     </ol>
                                 ) : (
-                                    <p className="text-muted mb-0">
-                                        Chưa có hướng dẫn sử dụng chi tiết cho sản phẩm này.
-                                    </p>
+                                    <p className="text-muted mb-0">Chưa có hướng dẫn sử dụng chi tiết.</p>
                                 )}
                             </div>
                         )}
-
                     </div>
                 </div>
             </div>
 
-            {/* Related products (placeholder) */}
             <h2 className="mt-4 mb-2 fw-bold">Sản phẩm liên quan</h2>
-
-            {/* Quick cart modal */}
-            <ModalCart
-                show={showModalCart}
-                onClose={() => setShowModalCart(false)}
-                product={cartPreview || product}
-                images={images}
-            />
         </div>
     );
 }

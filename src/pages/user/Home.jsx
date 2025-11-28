@@ -83,6 +83,8 @@ function pickPricesFromVariant(variant) {
 }
 
 // ======================= Component =======================
+const PLACEHOLDER_IMG = "https://placehold.co/120x120?text=No+Image";
+
 export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     // ---- State
     const [allCats, setAllCats] = useState([]); // tất cả danh mục (chuẩn hoá id/parent)
@@ -145,8 +147,8 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
             const list = res?.data?.data || [];
 
             setAllProducts(list);
-            setFeaturedProducts(list.filter((p) => p?.status === 1 || p?.status === 12));
-            setNewProducts(list.filter((p) => p?.status === 2 || p?.status === 12));
+            setNewProducts(list.filter(p => (p.status & 1) > 0));
+            setFeaturedProducts(list.filter(p => (p.status & 2) > 0));
         } catch (e) {
             console.error("fetchProducts error:", e);
         }
@@ -403,8 +405,16 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
     // ======================= Render =======================
     return (
-        <div style={{ backgroundColor: "#fff" }}>
-            <div className="container py-4">
+        <div
+            style={{
+                backgroundImage: 'url("https://oenix.vn/wp-content/uploads/2021/12/PHONG-NEN-GIANG-SINH-scaled.jpg")',
+                backgroundSize: "cover",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "center",
+                minHeight: "100vh",
+            }}
+        >
+            <div className="container py-4 bg-white bg-opacity-75 rounded-4 shadow-sm">
                 {/* Desktop layout: Sidebar + Content */}
                 <div
                     className="d-none d-md-flex"
@@ -529,8 +539,9 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 // ===== Product card (reused in sections) =====
 function ProductCard({ p }) {
     const ribbons = (pickRibbonsFromStatus?.(p?.status) || []).slice(0, 3);
-    const imgSrc =
-        p?.variants?.[0]?.imageUrl || p?.imageUrl || "/placeholder.png";
+    const imgSrc = p.images?.find(img => img.isPrimary)?.imageUrl ??
+        p.images?.[0]?.imageUrl ??
+        PLACEHOLDER_IMG;
 
     // Tóm tắt giá từ variants nếu có
     const {
@@ -542,10 +553,23 @@ function ProductCard({ p }) {
         discountPercent,
     } = useMemo(() => {
         const variants = Array.isArray(p?.variants) ? p.variants : [];
+
+        // ⭐ Ưu tiên giá p.price nếu tồn tại
+        if (p?.price != null && !isNaN(p.price) && Number(p.price) !== 0) {
+            const price = Number(p.price);
+            return {
+                minFinal: price,
+                maxFinal: price,
+                minBase: null,
+                maxBase: null,
+                anyPromo: false,
+                discountPercent: 0,
+            };
+        }
+
         if (!variants.length) {
-            // fallback về priceRange cũ
-            const min = Number(p?.priceRange?.min || 0);
-            const max = Number(p?.priceRange?.max || min || 0);
+            const min = Number(p?.priceRange?.min);
+            const max = Number(p?.priceRange?.max || min);
             return {
                 minFinal: min,
                 maxFinal: max,
@@ -576,8 +600,8 @@ function ProductCard({ p }) {
         });
 
         if (!finalPrices.length) {
-            const min = Number(p?.priceRange?.min || 0);
-            const max = Number(p?.priceRange?.max || min || 0);
+            const min = Number(p?.priceRange?.min);
+            const max = Number(p?.priceRange?.max || min);
             return {
                 minFinal: min,
                 maxFinal: max,
@@ -644,7 +668,7 @@ function ProductCard({ p }) {
                         aria-label={p?.productName}
                     >
                         <img
-                            src={imgSrc}
+                            src={process.env.REACT_APP_API_URL + imgSrc}
                             alt={p?.productName}
                             loading="lazy"
                             decoding="async"

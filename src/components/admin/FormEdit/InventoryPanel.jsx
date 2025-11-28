@@ -34,7 +34,7 @@ function createEmptyItem() {
  *      createReceipt: ()=>string,
  *    }
  */
-export default function InventoryPanelEdit({
+export default function InventoryPanel({
     variants = [],
     onSaved,
     onChange,

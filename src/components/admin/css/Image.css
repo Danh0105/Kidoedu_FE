@@ -1,0 +1,21 @@
+.thumbnail-slider .slick-track {
+    display: flex;
+    align-items: center;
+}
+
+.thumbnail-slider .slick-slide {
+    display: flex;
+    justify-content: center;
+    /* Căn giữa ảnh */
+    padding: 0 8px;
+}
+
+.thumbnail-slider .slick-slide>div {
+    width: 200px !important;
+}
+
+/* Tùy chọn: làm slider thumbnail rộng full */
+.thumbnail-section {
+    margin: 0 -12px;
+    /* bù lại padding nếu cần */
+}

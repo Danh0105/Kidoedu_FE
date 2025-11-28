@@ -14,7 +14,6 @@ import UserManagement from "../pages/admin/UserManagement";
 import SystemSettings from "../pages/admin/SystemSettings";
 import Shipping from "../pages/admin/Shipping";
 import CouponManagement from "../pages/admin/CouponManagement";
-import OrderDetail from "../pages/admin/OrderManagement/Order-detail";
 import PrivateRoute from "../components/user/PrivateRoute";
 import PolicyManagerPage from "../pages/admin/policy/PolicyManagerPage";
 export default function AppRoutes() {
@@ -53,9 +52,7 @@ export default function AppRoutes() {
                 <Route path="/settings" element={<AdminLayout title="Setting" />}>
                     <Route index element={<SystemSettings />} />
                 </Route>
-                <Route path="/order-detail" element={<AdminLayout title="Order detail" />}>
-                    <Route index element={<OrderDetail />} />
-                </Route>
+
 
             </Routes>
         </BrowserRouter >

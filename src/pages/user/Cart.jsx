@@ -19,12 +19,13 @@ export default function Cart() {
             // ============================================
             if (!token || typeof token !== "string" || token.trim() === "") {
                 const guestCart = JSON.parse(Cookies.get("guest_cart") || "[]");
+                console.log("guestCart", guestCart);
 
                 if (guestCart.length === 0) {
                     setProducts([]);
                     return;
                 }
-
+                console.log("guestCart", guestCart);
                 setProducts(guestCart);
                 return;
             }
@@ -264,7 +265,7 @@ export default function Cart() {
                                         </td>
                                         <td>
                                             <img
-                                                src={prd.imageUrl || "/no-image.png"}
+                                                src={process.env.REACT_APP_API_URL + prd.imageUrl || "/no-image.png"}
                                                 alt={prd?.productName || "Sản phẩm"}
                                                 width={80}
                                                 height={80}
@@ -350,7 +351,7 @@ export default function Cart() {
 
                                         {/* Tổng tiền */}
                                         <td className="text-center text-danger fw-semibold">
-                                            {(prd.quantity * prd?.price).toLocaleString()} ₫
+                                            {(prd.quantity * (prd?.price)).toLocaleString()} ₫
                                         </td>
 
                                         {/* Thao tác */}

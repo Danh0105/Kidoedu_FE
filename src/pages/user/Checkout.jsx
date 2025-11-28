@@ -52,8 +52,7 @@ export default function Checkout() {
 
   // Lấy thông tin sản phẩm và shipping từ cookie
   useEffect(() => {
-    console.log(selectedProducts);
-
+    console.log("selectedProducts", selectedProducts);
     if (selectedProducts?.length) setProducts(selectedProducts);
     const saved = Cookies.get("shippingInfo");
     if (saved) {
@@ -77,7 +76,7 @@ export default function Checkout() {
 
   // Tính tổng tiền
   const totalPrice = products.reduce(
-    (sum, p) => sum + (p?.pricing || p?.price) * p.quantity,
+    (sum, p) => sum + (p?.pricing || p?.price || p?.data.price) * p.quantity,
     0
   );
   const shippingFee = 0;
@@ -99,12 +98,16 @@ export default function Checkout() {
       }
 
       // 🔹 Map danh sách sản phẩm → items
+
+
       const items = products.map((p) => ({
-        variantId: p?.variant?.variantId || p?.variantId,      // id biến thể
-        quantity: p.quantity,                                  // số lượng
-        pricePerUnit: Number(p.pricing ?? p.price),            // đơn giá
-        attributes: toAttrObj(p.selectedAttr)                  // thuộc tính (màu, size,...)
+        variantId: p?.variant?.variantId ?? p?.variantId ?? undefined, // dùng undefined thay vì null
+        productId: p.productId ?? undefined,                            // không gửi nếu không có
+        quantity: p.quantity,
+        pricePerUnit: Number(p.pricing ?? p.price),
+        attributes: toAttrObj(p.selectedAttr),
       }));
+
 
       const payload = {
         username: shippingInfo.address.full_name,
@@ -282,7 +285,7 @@ export default function Checkout() {
                   <td className="d-flex align-items-start align-items-md-center gap-2">
                     <img
                       onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
-                      src={prd.variant?.imageUrl || prd?.imageUrl || PLACEHOLDER_IMG}
+                      src={process.env.REACT_APP_API_URL + prd?.imageUrl || PLACEHOLDER_IMG}
                       alt="Sản phẩm"
                       className="rounded me-0 me-md-2 object-cover"
                       style={{ objectFit: "scale-down", objectPosition: "center", padding: 8 }}
@@ -300,7 +303,7 @@ export default function Checkout() {
                           title={prd.data?.productName || prd?.productName}
 
                         >
-                          {prd.data?.productName || prd.productName}
+                          {prd.productName} {prd.variantName}
                         </div>
                         {prd.variant && (
                           <div className="text-muted small mt-1">
@@ -313,18 +316,18 @@ export default function Checkout() {
                         )}
                         <div className="d-sm-none mt-2">
                           <span className="fw-bold text-danger small">
-                            {Number(prd?.pricing || prd?.price).toLocaleString()} ₫
+                            {Number(prd?.pricing || prd?.price || prd?.data.price).toLocaleString()} ₫
                           </span>
                         </div>
                       </div>
                     </div>
                   </td>
                   <td className="text-center d-none d-md-table-cell">
-                    {Number(prd?.pricing || prd.price).toLocaleString()} ₫
+                    {Number(prd?.pricing || prd.price || prd?.data.price).toLocaleString()} ₫
                   </td>
                   <td className="text-center">{prd.quantity}</td>
                   <td className="text-center text-danger fw-bold">
-                    {((prd?.pricing || prd.price) * prd.quantity).toLocaleString()} ₫
+                    {((prd?.pricing || prd.price || prd?.data.price) * prd.quantity).toLocaleString()} ₫
                   </td>
                 </tr>
               ))

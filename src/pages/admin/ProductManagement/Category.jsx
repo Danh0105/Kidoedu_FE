@@ -7,12 +7,12 @@ export default function Category({ onChange }) {
   const [categoryName, setCategoryName] = useState("");
   const [parentId, setParentId] = useState(null);
 
-  // UI/UX states
+  // UI states
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
   const [query, setQuery] = useState("");
 
-  // ===== Fetch roots (không đổi API/luồng) =====
+  // ===== FETCH ROOT CATEGORIES =====
   const fetchRoots = async () => {
     try {
       setLoading(true);
@@ -22,10 +22,9 @@ export default function Category({ onChange }) {
       const roots = raw.filter((cat) => cat.parent === null);
 
       const normalized = roots.map((r) => ({
-        // CHUẨN HOÁ ID & NAME
         category_id: r.category_id ?? r.categoryId ?? r.id,
         categoryName: r.categoryName ?? r.name,
-        children: r.children ?? [],   // nếu API chưa trả children thì để []
+        children: r.children ?? [],
       }));
 
       setCategories(normalized);
@@ -38,16 +37,14 @@ export default function Category({ onChange }) {
     }
   };
 
-
   useEffect(() => {
     fetchRoots();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ===== Delete (không đổi logic) =====
+  // ===== DELETE =====
   const handleDelete = async (id, isParent = false) => {
     const confirmMsg = isParent
-      ? "Danh mục này là danh mục cha. Xoá nó sẽ xoá luôn các danh mục con. Bạn có chắc chắn không?"
+      ? "Danh mục này là danh mục cha. Xoá nó sẽ xoá luôn các danh mục con."
       : "Bạn có chắc chắn muốn xoá danh mục này?";
     if (!window.confirm(confirmMsg)) return;
 
@@ -55,24 +52,20 @@ export default function Category({ onChange }) {
       await axios.delete(`${process.env.REACT_APP_API_URL}/categories/${id}`);
       await fetchRoots();
     } catch (error) {
-      console.error("Xoá thất bại:", error);
+      console.error(error);
       alert("Không thể xoá danh mục!");
     }
   };
 
-  // ===== Create (không đổi API/luồng) =====
+  // ===== CREATE =====
   const handleSubmit = async () => {
-    if (!categoryName.trim()) {
-      alert("Vui lòng nhập tên danh mục!");
-      return;
-    }
+    if (!categoryName.trim()) return alert("Vui lòng nhập tên danh mục!");
 
     try {
       const dto = {
-        categoryName: categoryName,
+        categoryName,
         parentCategoryId: parentId || null,
       };
-      console.log(dto);
 
       const res = await axios.post(`${process.env.REACT_APP_API_URL}/categories`, dto);
       const newCatRaw = res.data;
@@ -99,23 +92,24 @@ export default function Category({ onChange }) {
       setCategoryName("");
       setParentId(null);
     } catch (err) {
-      console.error("Lỗi khi thêm danh mục:", err);
+      console.error(err);
       alert("Thêm danh mục thất bại!");
     }
   };
 
-
-  // ===== Search (lọc theo tên cha và tên con nếu có) =====
+  // ===== FILTER =====
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return categories;
+
     return categories
-      .map((p) => {
-        const matchParent = (p.categoryName || "").toLowerCase().includes(q);
-        const kids = (p.children || []).filter((c) =>
-          (c.categoryName || "").toLowerCase().includes(q)
+      .map((parent) => {
+        const matchParent = parent.categoryName.toLowerCase().includes(q);
+        const kids = parent.children.filter((c) =>
+          c.categoryName.toLowerCase().includes(q)
         );
-        if (matchParent || kids.length) return { ...p, children: kids };
+
+        if (matchParent || kids.length) return { ...parent, children: kids };
         return null;
       })
       .filter(Boolean);
@@ -123,13 +117,16 @@ export default function Category({ onChange }) {
 
   return (
     <>
-      <div className="card shadow-sm" >
-        {/* Header: tiêu đề + ô tìm kiếm + refresh */}
+      {/* CARD MAIN */}
+      <div className="card shadow-sm">
+
+        {/* HEADER */}
         <div
           className="card-header bg-white d-flex align-items-center gap-2 sticky-top"
-          style={{ top: 0, zIndex: 1 }}
+          style={{ top: 0, zIndex: 10 }}
         >
           <span className="fw-semibold">Danh mục</span>
+
           <div className="ms-auto d-flex gap-2" style={{ minWidth: 180 }}>
             <input
               type="search"
@@ -137,12 +134,12 @@ export default function Category({ onChange }) {
               placeholder="Tìm danh mục…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              aria-label="Tìm danh mục"
             />
+
             <button
               type="button"
               className="btn btn-sm btn-outline-secondary"
-              title="Tải lại"
+              title="Làm mới"
               onClick={fetchRoots}
             >
               ⟳
@@ -150,13 +147,11 @@ export default function Category({ onChange }) {
           </div>
         </div>
 
-        {/* Body: danh sách + form thêm */}
+        {/* BODY */}
         <div
           className="card-body p-2"
           style={{ maxHeight: 420, overflow: "auto" }}
-          aria-live="polite"
         >
-          {/* Loading */}
           {loading && (
             <div className="d-flex flex-column gap-2 p-2">
               <CatSkeleton />
@@ -165,28 +160,27 @@ export default function Category({ onChange }) {
             </div>
           )}
 
-          {/* Error */}
           {!loading && err && (
-            <div className="alert alert-danger d-flex align-items-center justify-content-between py-2 px-3" role="alert">
+            <div className="alert alert-danger d-flex justify-content-between py-2">
               <span className="small">{err}</span>
-              <button type="button" className="btn btn-sm btn-light" onClick={fetchRoots}>
+              <button className="btn btn-sm btn-light" onClick={fetchRoots}>
                 Thử lại
               </button>
             </div>
           )}
 
-          {/* Empty */}
           {!loading && !err && filtered.length === 0 && (
             <div className="text-center text-muted p-4 border rounded-3 bg-light-subtle">
               <div className="fw-semibold mb-1">Không tìm thấy danh mục phù hợp</div>
-              <div className="small mb-2">Hãy thử từ khóa khác hoặc xóa bộ lọc.</div>
-              <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => setQuery?.("")}>
+              <button
+                className="btn btn-sm btn-outline-secondary mt-2"
+                onClick={() => setQuery("")}
+              >
                 Xóa từ khóa
               </button>
             </div>
           )}
 
-          {/* List */}
           {!loading && !err && filtered.length > 0 && (
             <div className="d-flex flex-column gap-2">
               {filtered.map((cat) => (
@@ -200,23 +194,18 @@ export default function Category({ onChange }) {
             </div>
           )}
         </div>
-
-
-        {/* CSS nhỏ để hiển thị gọn */}
-        <style>{`
-        .card-body::-webkit-scrollbar{width:8px}
-        .card-body::-webkit-scrollbar-thumb{background:#e6e6e6;border-radius:8px}
-      `}</style>
       </div>
+
+      {/* DROPDOWN ADD CATEGORY */}
       <div className="dropdown text-start mt-3">
         <button
           className="btn btn-outline-primary dropdown-toggle"
           type="button"
           data-bs-toggle="dropdown"
-          aria-expanded="false"
         >
           Thêm danh mục mới
         </button>
+
         <ul className="dropdown-menu p-3" style={{ minWidth: 280 }}>
           <li className="mb-2">
             <label className="form-label small mb-1">Tên danh mục</label>
@@ -228,6 +217,7 @@ export default function Category({ onChange }) {
               onChange={(e) => setCategoryName(e.target.value)}
             />
           </li>
+
           <li className="mb-2">
             <label className="form-label small mb-1">Danh mục cha (tuỳ chọn)</label>
             <select
@@ -245,16 +235,48 @@ export default function Category({ onChange }) {
               ))}
             </select>
           </li>
+
           <li>
-            <button type="button" className="btn btn-primary w-100" onClick={handleSubmit}>
+            <button className="btn btn-primary w-100" onClick={handleSubmit}>
               Thêm danh mục
             </button>
           </li>
         </ul>
       </div>
+
+      {/* CSS – SCROLLBAR + SKELETON */}
+      <style>{`
+        .card-body::-webkit-scrollbar { width: 8px; }
+        .card-body::-webkit-scrollbar-thumb { background:#e6e6e6; border-radius: 8px; }
+
+        .skeleton-row {
+          background: var(--bs-body-bg);
+          border: 1px solid #eee;
+        }
+        .skeleton-line, .skeleton-pill {
+          background: #f1f3f5;
+          position: relative;
+          overflow: hidden;
+        }
+        .skeleton-line { height: 10px; border-radius: 6px; }
+        .skeleton-pill { height: 26px; width: 96px; border-radius: 999px; }
+
+        .skeleton-line::after,
+        .skeleton-pill::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          transform: translateX(-100%);
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent);
+          animation: sk 1.3s infinite;
+        }
+        @keyframes sk { 100% { transform: translateX(100%); } }
+      `}</style>
     </>
   );
 }
+
+// Skeleton loader
 function CatSkeleton() {
   return (
     <div className="skeleton-row rounded-3 p-2">
@@ -267,21 +289,3 @@ function CatSkeleton() {
     </div>
   );
 }
-<style>{`
-  .skeleton-row { background: var(--bs-body-bg); border: 1px solid #eee; }
-  .skeleton-line, .skeleton-pill {
-    position: relative; overflow: hidden; background: #f1f3f5;
-  }
-  .skeleton-line { height: 10px; border-radius: 6px; }
-  .skeleton-pill { height: 26px; width: 96px; border-radius: 999px; }
-  .skeleton-line::after, .skeleton-pill::after {
-    content: ""; position: absolute; inset: 0; transform: translateX(-100%);
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent);
-    animation: sk 1.2s infinite;
-  }
-  @keyframes sk { 100% { transform: translateX(100%); } }
-
-  /* scrollbar nhẹ nhàng */
-  .card-body::-webkit-scrollbar{ width: 8px; }
-  .card-body::-webkit-scrollbar-thumb{ background:#e6e6e6; border-radius: 8px; }
-`}</style>

@@ -73,7 +73,11 @@ export default function Header() {
 
     return (
         <>
+            <div className='d-flex w-100 justify-content-center'>
+                <img src="https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/Picture//Tm/Tm_picture_346/banner-khuyen-m_197_1920.png.webp" alt="" />
+            </div>
             <div className={`sticky-lg-top ${scrolled ? 'bg-success-subtle shadow-sm' : 'bg-white'}`}>
+
                 <header className="container d-flex justify-content-between align-items-center py-0 gap-3 pt-2 mb-2">
                     {/* Left: Logo + Menu */}
                     <div className="navbar-nav d-flex flex-row gap-3 justify-content-between align-items-center w-100 w-lg-auto">

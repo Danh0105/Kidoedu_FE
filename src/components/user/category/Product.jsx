@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import ModalCart from "../ModalCart";
 import ModalBuy from "../ModalBuy";
 import { pickRibbonFromStatus } from "../../../hooks/useUiUtils";
@@ -27,8 +26,11 @@ export default function Product({ prod }) {
     const status = prod?.status ?? prod?.data?.status;
     const ribbon = pickRibbonFromStatus(status);
 
+
     const firstImage =
-        prod?.variants?.[0]?.imageUrl || PLACEHOLDER_IMG;
+        prod?.images?.find(img => img.isPrimary)?.imageUrl ||
+        PLACEHOLDER_IMG;
+
 
     // 🧮 Fetch giá theo biến thể
     // 🧮 Fetch dải giá theo biến thể (min - max)
@@ -133,7 +135,7 @@ export default function Product({ prod }) {
             {/* Ảnh sản phẩm */}
             <Link to={`/productdetail/${id}`} className="nav-link p-0">
                 <img
-                    src={firstImage}
+                    src={process.env.REACT_APP_API_URL + firstImage}
                     alt={name || "product"}
                     className="card-img-top object-fit-contain bg-white"
                     style={{ height: 180 }}

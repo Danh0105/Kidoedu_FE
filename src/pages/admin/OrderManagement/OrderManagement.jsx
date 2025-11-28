@@ -1,40 +1,39 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
-
+import OrderDetailModal from "./OrderDetailModal";
 const API_BASE = process.env.REACT_APP_API_URL;
 
+/* ======================= Helpers ======================= */
+const formatCurrency = (v) =>
+    `${new Intl.NumberFormat("vi-VN").format(Number(v))} đ`;
+
+const formatDate = (v) =>
+    v ? new Date(v).toLocaleString("vi-VN") : "";
+
+const buildOrderCode = (id) =>
+    `DH${String(id).padStart(4, "0")}`;
+
+const getCustomerName = (o) =>
+    o.user?.fullName || o.user?.username || "Khách lẻ";
+
+/* ======================= Component ======================= */
 export default function OrderManager() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
     const [q, setQ] = useState(""); // search local
 
-    // ===== Helpers =====
-    const formatCurrency = (v) =>
-        new Intl.NumberFormat("vi-VN").format(Number(v)) + " đ";
-
-    const formatDate = (v) =>
-        v ? new Date(v).toLocaleString("vi-VN") : "";
-
-    const buildOrderCode = (o) =>
-        `DH${String(o.orderId).padStart(4, "0")}`;
-
-    const getCustomerName = (o) =>
-        o.user?.fullName || o.user?.username || "Khách lẻ";
-
-    // =========================== LOAD ORDERS ===========================
+    /* ======================= API ======================= */
     const fetchOrders = async () => {
+        setLoading(true);
         try {
-            setLoading(true);
-
             const res = await axios.get(`${API_BASE}/orders`);
+            const list = Array.isArray(res.data)
+                ? res.data
+                : Array.isArray(res.data?.data)
+                    ? res.data.data
+                    : [];
 
-            if (Array.isArray(res.data)) {
-                setOrders(res.data);
-            } else if (Array.isArray(res.data.data)) {
-                setOrders(res.data.data);
-            } else {
-                setOrders([]);
-            }
+            setOrders(list);
         } catch (err) {
             console.error("Lỗi tải đơn hàng:", err);
         } finally {
@@ -42,11 +41,6 @@ export default function OrderManager() {
         }
     };
 
-    useEffect(() => {
-        fetchOrders();
-    }, []);
-
-    // =========================== DELETE ===========================
     const deleteOrder = async (id) => {
         if (!window.confirm("Bạn chắc chắn muốn xóa đơn hàng này?")) return;
 
@@ -59,15 +53,11 @@ export default function OrderManager() {
         }
     };
 
-    // =========================== UPDATE STATUS ===========================
     const updateStatus = async (id, status) => {
         try {
             await axios.put(`${API_BASE}/orders/${id}/status`, { status });
-
             setOrders((prev) =>
-                prev.map((o) =>
-                    o.orderId === id ? { ...o, status } : o
-                )
+                prev.map((o) => (o.orderId === id ? { ...o, status } : o))
             );
         } catch (err) {
             console.error("Lỗi cập nhật trạng thái:", err);
@@ -75,32 +65,58 @@ export default function OrderManager() {
         }
     };
 
-    // =========================== SEARCH FILTER ===========================
-    const filteredOrders = orders.filter((o) => {
-        const key = q.trim().toLowerCase();
-        if (!key) return true;
+    useEffect(() => {
+        fetchOrders();
+    }, []);
 
-        return (
-            buildOrderCode(o).toLowerCase().includes(key) ||
+    /* ======================= FILTER ======================= */
+
+    const filteredOrders = useMemo(() => {
+        const key = q.trim().toLowerCase();
+        if (!key) return orders;
+
+        return orders.filter((o) =>
+            buildOrderCode(o.orderId).toLowerCase().includes(key) ||
             getCustomerName(o).toLowerCase().includes(key)
         );
-    });
+    }, [q, orders]);
 
+    /* ======================= popup ======================= */
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+
+    const openDetail = async (orderId) => {
+        try {
+            const res = await axios.get(`${API_BASE}/orders/${orderId}`);
+            setSelectedOrder(res.data);
+            setShowModal(true);
+        } catch (err) {
+            console.error("Lỗi tải chi tiết đơn:", err);
+            alert("Không thể tải chi tiết đơn hàng!");
+        }
+    };
+
+    const closeDetail = () => {
+        setShowModal(false);
+        setSelectedOrder(null);
+    };
+
+    /* ======================= RENDER ======================= */
     return (
         <div className="card shadow-sm">
             <div className="card-body">
+
                 {/* Header */}
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h4 className="fw-bold">Quản lý đơn hàng</h4>
 
-                    <div style={{ width: 260 }}>
-                        <input
-                            className="form-control"
-                            placeholder="Tìm kiếm đơn hàng"
-                            value={q}
-                            onChange={(e) => setQ(e.target.value)}
-                        />
-                    </div>
+                    <input
+                        className="form-control"
+                        style={{ width: 260 }}
+                        placeholder="Tìm kiếm đơn hàng"
+                        value={q}
+                        onChange={(e) => setQ(e.target.value)}
+                    />
                 </div>
 
                 {/* Table */}
@@ -139,10 +155,20 @@ export default function OrderManager() {
                             {!loading &&
                                 filteredOrders.map((o) => (
                                     <tr key={o.orderId}>
-                                        <td className="fw-semibold">{buildOrderCode(o)}</td>
+                                        <td>
+                                            <button
+                                                className="btn btn-link p-0 fw-semibold"
+                                                onClick={() => openDetail(o.orderId)}
+                                                style={{ textDecoration: "none" }}
+                                            >
+                                                {buildOrderCode(o.orderId)}
+                                            </button>
+                                        </td>
+
+
                                         <td>{getCustomerName(o)}</td>
                                         <td>{o.user?.email || ""}</td>
-                                        <td>{o.user?.address?.phone_number || ""}</td>
+                                        <td>{o.shippingAddress?.phone_number || ""}</td>
                                         <td>{formatDate(o.orderDate)}</td>
 
                                         <td>
@@ -153,11 +179,10 @@ export default function OrderManager() {
                                                     updateStatus(o.orderId, e.target.value)
                                                 }
                                             >
-                                                <option value="Pending">Pending</option>
-                                                <option value="Confirmed">Confirmed</option>
-                                                <option value="Shipping">Shipping</option>
-                                                <option value="Completed">Completed</option>
-                                                <option value="Cancelled">Cancelled</option>
+                                                {["Pending", "Confirmed", "Shipping",
+                                                    "Completed", "Cancelled"].map((st) => (
+                                                        <option key={st} value={st}>{st}</option>
+                                                    ))}
                                             </select>
                                         </td>
 
@@ -178,6 +203,12 @@ export default function OrderManager() {
                         </tbody>
                     </table>
                 </div>
+                <OrderDetailModal
+                    show={showModal}
+                    onClose={closeDetail}
+                    order={selectedOrder}
+                />
+
             </div>
         </div>
     );

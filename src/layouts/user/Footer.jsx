@@ -437,6 +437,18 @@ export default function Footer() {
                     <a className="zalo-badge" href="https://zalo.me/0789636979" target="_blank" rel="noreferrer" aria-label="Chat Zalo"></a>
                 </div>
             </div>
+            <img
+                src="https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/FE/img/left-black-241125.png"
+                style={{ position: "fixed", bottom: "50%", left: 10, width: 100, zIndex: 9999 }}
+                alt="Black Friday Left"
+            />
+
+            {/* BLACK FRIDAY RIGHT ICON */}
+            <img
+                src="https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/FE/img/right-black-241125.png"
+                style={{ position: "fixed", bottom: "50%", right: 10, width: 100, zIndex: 9999 }}
+                alt="Black Friday Right"
+            />
 
 
         </footer >

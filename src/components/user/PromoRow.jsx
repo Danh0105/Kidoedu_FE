@@ -1,11 +1,8 @@
 import React, { useState } from "react";
 
-/**
- * Dải banner 3 ảnh ngang, UI gọn như mẫu.
- * - Tự co theo màn hình: clamp(76px, 11vw, 124px)
- * - Chống hotlink: no-referrer + fallback proxy
- * - Shimmer có bo góc, không bị gạch chân
- */
+const proxyUrl = (url) =>
+    `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=webp`;
+
 export default function PromoRow({
     items = [],
     height = "clamp(76px, 11vw, 124px)",
@@ -13,9 +10,9 @@ export default function PromoRow({
 }) {
     return (
         <div className="row g-3 my-3">
-            {items.map((it, idx) => (
+            {items.map((item, idx) => (
                 <div className="col-12 col-md-4" key={idx}>
-                    <BannerCard item={it} height={height} radius={radius} />
+                    <BannerCard item={item} height={height} radius={radius} />
                 </div>
             ))}
         </div>
@@ -23,64 +20,44 @@ export default function PromoRow({
 }
 
 function BannerCard({ item, height, radius }) {
-    const [loaded, setLoaded] = useState(false);
-    const [srcUrl, setSrcUrl] = useState(item.src);
+    const [imgSrc, setImgSrc] = useState(item.src);
 
-    const toProxy = (url) =>
-        `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=webp`;
+    const handleError = () => {
+        // lỗi lần đầu → đổi sang proxy
+        if (!imgSrc.startsWith("https://wsrv.nl/")) {
+            return setImgSrc(proxyUrl(item.src));
+        }
+    };
 
     return (
         <a
             href={item.href || "#"}
-            className="d-block w-100 shadow-sm"
-            style={{ borderRadius: radius, overflow: "hidden", textDecoration: "none" }}
             aria-label={item.alt || "banner"}
             target={item.newTab ? "_blank" : undefined}
             rel={item.newTab ? "noreferrer noopener" : undefined}
+            className="d-block w-100 shadow-sm"
+            style={{
+                borderRadius: radius,
+                overflow: "hidden",
+                textDecoration: "none",
+            }}
         >
-            {!loaded && <Shimmer height={height} />}
-
             <img
-                src={srcUrl}
+                src={imgSrc}
                 alt={item.alt || "banner"}
                 loading="lazy"
                 decoding="async"
                 referrerPolicy="no-referrer"
-                onLoad={() => setLoaded(true)}
-                onError={() => {
-                    // nếu lỗi lần đầu → chuyển sang proxy; nếu vẫn lỗi → giữ shimmer nhưng không treo vô hạn
-                    if (!srcUrl.startsWith("https://wsrv.nl/")) {
-                        setSrcUrl(toProxy(item.src));
-                    } else {
-                        setLoaded(true); // tắt shimmer để không “treo”
-                    }
-                }}
-                className={`w-100 ${loaded ? "fade-in" : "d-none"}`}
+                onError={handleError}
+                className="w-100"
                 style={{
                     height,
-                    objectFit: "cover",        // đổi "contain" nếu muốn thấy đủ 100% ảnh
+                    objectFit: "cover",
                     objectPosition: "center",
                     display: "block",
+                    background: "#f2f2f2", // giữ nền nhẹ khi ảnh chưa load
                 }}
             />
         </a>
-    );
-}
-
-function Shimmer({ height }) {
-    return (
-        <div
-            aria-hidden="true"
-            className="w-100 d-flex align-items-center justify-content-center bg-light"
-            style={{
-                height,
-                background:
-                    "linear-gradient(100deg,#edf1f4 40%,#f9fbfc 50%,#edf1f4 60%)",
-                backgroundSize: "200% 100%",
-                animation: "shimmer 1.2s infinite linear",
-            }}
-        >
-            <span className="text-muted small fst-italic">Đang tải…</span>
-        </div>
     );
 }

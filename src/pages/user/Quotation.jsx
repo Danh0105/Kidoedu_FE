@@ -6,10 +6,39 @@ import { CartContext } from "../../hooks/CartContext";
 
 export default function Quotation({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
   const [products, setProducts] = useState([]);
-  const [quality, setQuality] = useState(1); // ✅ Khai báo state quality
+  const [quantities, setQuantities] = useState({}); // ⭐ quantity theo từng sản phẩm
   const { setSelectedProducts } = useContext(CartContext);
 
-  // 🔧 Khởi tạo axios instance
+  // -------------------------------------------
+  // 🔧 Helper: lấy giá từ một variant
+  const pickPricesFromVariant = (v) => {
+    if (!v || !Array.isArray(v.prices)) return { finalPrice: 0 };
+
+    let basePrice = null;
+    let promoPrice = null;
+
+    v.prices.forEach((p) => {
+      if (p.priceType === "base") basePrice = Number(p.price);
+      if (p.priceType === "promo") promoPrice = Number(p.price);
+    });
+
+    return {
+      finalPrice: promoPrice ?? basePrice ?? 0,
+    };
+  };
+
+  // 🔧 Helper: lấy giá min từ tất cả variants
+  const getVariantMinPrice = (variants = []) => {
+    const prices = variants
+      .map((v) => pickPricesFromVariant(v).finalPrice)
+      .filter(Boolean);
+
+    if (!prices.length) return 0;
+    return Math.min(...prices);
+  };
+  // -------------------------------------------
+
+  // 🔧 Axios instance
   const api = axios.create({
     baseURL: apiBase.replace(/\/+$/, ""),
     timeout: 10000,
@@ -26,16 +55,24 @@ export default function Quotation({ apiBase = `${process.env.REACT_APP_API_URL}`
       }
     };
     fetchProducts();
-  }, [api]);
+  }, []);
 
   // 🛒 Khi nhấn "Mua ngay"
   const handleSubmit = (product) => {
+    const qty = quantities[product.productId] || 1;
+
     setSelectedProducts([
       {
         data: product,
-        quantity: quality || 1, // ✅ Dùng giá trị trong ô input
+        quantity: qty,
       },
     ]);
+  };
+
+  // 🖊 Khi thay đổi số lượng
+  const handleQtyChange = (id, value) => {
+    const newQty = Math.max(1, parseInt(value) || 1);
+    setQuantities((prev) => ({ ...prev, [id]: newQty }));
   };
 
   return (
@@ -57,70 +94,81 @@ export default function Quotation({ apiBase = `${process.env.REACT_APP_API_URL}`
 
           <tbody>
             {products.length > 0 ? (
-              products.map((p) => (
-                <tr key={p.productId}>
-                  {/* Hình ảnh */}
-                  <td>
-                    <img
-                      src={
-                        p.images?.[0]?.image_url ||
-                        "https://via.placeholder.com/100"
-                      }
-                      alt={p.productName}
-                      className="img-fluid rounded"
-                      style={{ maxHeight: "100px" }}
-                    />
-                  </td>
+              products.map((p) => {
+                // ⭐ Chọn ảnh đúng chuẩn
+                const img =
+                  p.images?.find((i) => i.isPrimary)?.imageUrl ||
+                  p.images?.[0]?.image_url ||
+                  "https://via.placeholder.com/100";
 
-                  {/* Tên sản phẩm */}
-                  <td className="text-start">
-                    <strong>{p.productName}</strong>
-                    <br />
-                    <button
-                      className="btn btn-sm btn-outline-primary mt-2"
-                      onClick={() =>
-                        window.open(`/productdetail/${p.productId}`, "_blank")
-                      }
-                    >
-                      Xem thêm
-                    </button>
-                  </td>
+                // ⭐ Tính giá
+                const price =
+                  Number(p.price) > 0
+                    ? Number(p.price)
+                    : getVariantMinPrice(p.variants);
 
-                  {/* Giá bán */}
-                  <td className="text-danger fw-bold">
-                    {Number(p.price).toLocaleString()} ₫
-                  </td>
+                return (
+                  <tr key={p.productId}>
+                    {/* Hình ảnh */}
+                    <td>
+                      <img
+                        src={process.env.REACT_APP_API_URL + img}
+                        alt={p.productName}
+                        className="img-fluid rounded"
+                        style={{ maxHeight: "100px" }}
+                      />
+                    </td>
 
-                  {/* Bảo hành */}
-                  <td>{p.warranty_period || "1 Tuần"}</td>
+                    {/* Tên sản phẩm */}
+                    <td className="text-start">
+                      <strong>{p.productName}</strong>
+                      <br />
+                      <button
+                        className="btn btn-sm btn-outline-primary mt-2"
+                        onClick={() =>
+                          window.open(`/productdetail/${p.productId}`, "_blank")
+                        }
+                      >
+                        Xem thêm
+                      </button>
+                    </td>
 
-                  {/* Số lượng */}
-                  <td>
-                    <input
-                      type="number"
-                      min="1"
-                      className="form-control text-center mx-auto"
-                      style={{ width: "70px" }}
+                    {/* Giá bán */}
+                    <td className="text-danger fw-bold">
+                      {price.toLocaleString()} ₫
+                    </td>
 
-                      onChange={(e) =>
-                        setQuality(Math.max(1, parseInt(e.target.value) || 1))
-                      }
-                    />
-                  </td>
+                    {/* Bảo hành */}
+                    <td>{p.warranty_period || "1 Tuần"}</td>
 
-                  {/* Thao tác */}
-                  <td>
-                    <NavLink
-                      to="/checkout"
-                      className="btn btn-primary d-flex align-items-center justify-content-center mx-auto"
-                      onClick={() => handleSubmit(p)}
-                    >
-                      <i className="bi bi-cart-fill me-2"></i>
-                      Mua ngay
-                    </NavLink>
-                  </td>
-                </tr>
-              ))
+                    {/* Số lượng */}
+                    <td>
+                      <input
+                        type="number"
+                        min="1"
+                        className="form-control text-center mx-auto"
+                        style={{ width: "70px" }}
+                        value={quantities[p.productId] || 1}
+                        onChange={(e) =>
+                          handleQtyChange(p.productId, e.target.value)
+                        }
+                      />
+                    </td>
+
+                    {/* Mua ngay */}
+                    <td>
+                      <NavLink
+                        to="/checkout"
+                        className="btn btn-primary d-flex align-items-center justify-content-center mx-auto"
+                        onClick={() => handleSubmit(p)}
+                      >
+                        <i className="bi bi-cart-fill me-2"></i>
+                        Mua ngay
+                      </NavLink>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td colSpan="6" className="text-muted py-4">

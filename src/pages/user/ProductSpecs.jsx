@@ -1,51 +1,69 @@
-// ---- ProductSpecs.jsx (có thể đặt chung file cho nhanh) ----
 import React, { useMemo } from "react";
 
 /**
- * Nhận vào:
- *  - specs: có thể là object, array, hoặc HTML string (ol/li từ editor)
- * Trả về UI 2 cột theo nhóm (mục nào <strong>... </strong> xem như header nhóm).
+ * ProductSpecs
+ * - specs: object | array | html string
  */
 export function ProductSpecs({ specs }) {
     const sections = useMemo(() => {
-        // 1) Nếu là object {key: value}
+        // helper: pretty value
+        const formatValue = (v) => {
+            if (v == null) return "";
+            if (Array.isArray(v)) return v.map((x) => String(x)).join(", ");
+            if (typeof v === "object") {
+                try {
+                    const s = JSON.stringify(v, null, 2);
+                    // truncate long JSON for UI clarity
+                    return s.length > 400 ? s.slice(0, 400) + "… (truncated)" : s;
+                } catch {
+                    return String(v);
+                }
+            }
+            return String(v);
+        };
+
+        // 1) Object {k: v}
         if (specs && typeof specs === "object" && !Array.isArray(specs)) {
-            return [
-                {
-                    title: "Thông số kỹ thuật",
-                    rows: Object.entries(specs).map(([k, v]) => ({
-                        label: k,
-                        value: typeof v === "string" ? v : JSON.stringify(v),
-                    })),
-                },
-            ];
+            const rows = Object.entries(specs)
+                .map(([k, v]) => ({ label: String(k).trim(), value: formatValue(v) }))
+                .filter((r) => r.label); // drop empty labels
+            return [{ title: "Thông số kỹ thuật", rows }];
         }
 
-        // 2) Nếu là array [{label, value}] hoặc ["k","v","k2","v2",...]
+        // 2) Array
         if (Array.isArray(specs)) {
             if (specs.length && typeof specs[0] === "object") {
-                return [
-                    {
-                        title: "Thông số kỹ thuật",
-                        rows: specs.map((r, i) => ({
-                            label: String(r.label ?? r.key ?? `Mục ${i + 1}`),
-                            value: String(r.value ?? ""),
-                        })),
-                    },
-                ];
+                const rows = specs.map((r, i) => ({
+                    label: String(r.label ?? r.key ?? `Mục ${i + 1}`).trim(),
+                    value: formatValue(r.value ?? r.val ?? ""),
+                })).filter(r => r.label);
+                return [{ title: "Thông số kỹ thuật", rows }];
             } else {
-                // Là mảng chuỗi, ghép cặp 2-2
+                // mảng chuỗi: ghép cặp
                 const rows = [];
                 for (let i = 0; i < specs.length; i += 2) {
-                    rows.push({ label: String(specs[i] ?? ""), value: String(specs[i + 1] ?? "") });
+                    const label = String(specs[i] ?? "").trim();
+                    const value = formatValue(specs[i + 1] ?? "");
+                    if (label) rows.push({ label, value });
                 }
                 return [{ title: "Thông số kỹ thuật", rows }];
             }
         }
 
-        // 3) Nếu là HTML string (ol/li) từ WYSIWYG
+        // 3) HTML string (li/ol). Guard DOMParser for SSR.
         if (typeof specs === "string") {
             try {
+                if (typeof DOMParser === "undefined") {
+                    // SSR/Node: fallback simple parsing
+                    const lines = specs.replace(/<[^>]+>/g, " ").split(/\n+/).map(s => s.trim()).filter(Boolean);
+                    const rows = [];
+                    for (let i = 0; i < lines.length; i += 2) {
+                        const label = lines[i], value = lines[i + 1] ?? "";
+                        if (label) rows.push({ label, value });
+                    }
+                    return [{ title: "Thông số kỹ thuật", rows }];
+                }
+
                 const doc = new DOMParser().parseFromString(specs, "text/html");
                 const liNodes = Array.from(doc.querySelectorAll("li"));
                 const out = [];
@@ -62,22 +80,25 @@ export function ProductSpecs({ specs }) {
                 };
 
                 liNodes.forEach((li, idx) => {
-                    const hasStrong = !!li.querySelector("strong, b");
+                    const hasHeader =
+                        !!li.querySelector("strong, b, h1, h2, h3, h4, h5, h6") ||
+                        /\b(header|title)\b/i.test(li.className || "");
+
                     const text = li.textContent?.trim() ?? "";
 
-                    if (hasStrong) {
-                        // gặp header mới => đẩy nhóm cũ
+                    if (hasHeader) {
                         if (current) {
                             flushPairsToCurrent();
                             out.push(current);
                         }
-                        current = { title: text.replace(/^\d+\.\s*/, ""), rows: [] };
+                        // header text: remove leading numbers "1. "
+                        const headerText = text.replace(/^\d+\.\s*/, "");
+                        current = { title: headerText || "Thông số", rows: [] };
                     } else {
-                        // dồn vào buffer để ghép 2-2
+                        // push into buffer
                         buffer.push(text);
                     }
 
-                    // cuối danh sách => flush
                     if (idx === liNodes.length - 1) {
                         if (!current) current = { title: "Thông số kỹ thuật", rows: [] };
                         flushPairsToCurrent();
@@ -85,19 +106,18 @@ export function ProductSpecs({ specs }) {
                     }
                 });
 
-                // fallback khi không có <strong>
+                // fallback: parse plain text when no liNodes or out empty
                 if (!out.length) {
                     const plain = (doc.body.textContent || "").split(/\n+/).map(s => s.trim()).filter(Boolean);
                     const rows = [];
                     for (let i = 0; i < plain.length; i += 2) {
-                        rows.push({ label: plain[i], value: plain[i + 1] ?? "" });
+                        const label = plain[i], value = plain[i + 1] ?? "";
+                        if (label) rows.push({ label, value });
                     }
                     return [{ title: "Thông số kỹ thuật", rows }];
                 }
-
                 return out;
             } catch {
-                // Không parse được -> hiển thị HTML thô
                 return [{ title: "Thông số kỹ thuật", rawHtml: specs, rows: [] }];
             }
         }
@@ -109,10 +129,29 @@ export function ProductSpecs({ specs }) {
         return <p className="text-muted m-0">Chưa có thông số kỹ thuật.</p>;
     }
 
+    const handleCopy = async (text) => {
+        if (!text) return;
+        try {
+            if (navigator?.clipboard?.writeText) {
+                await navigator.clipboard.writeText(text);
+            } else {
+                // fallback for insecure contexts: create temp textarea
+                const ta = document.createElement("textarea");
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand("copy");
+                document.body.removeChild(ta);
+            }
+        } catch (e) {
+            console.warn("Copy failed", e);
+        }
+    };
+
     return (
         <div className="vstack gap-3">
             {sections.map((sec, i) => (
-                <div key={i} className="spec-card border rounded-3 shadow-sm">
+                <div key={sec.title ?? i} className="spec-card border rounded-3 shadow-sm">
                     <div className="d-flex align-items-center gap-2 px-3 py-2 border-bottom bg-light">
                         <span className="spec-dot" aria-hidden="true" />
                         <h6 className="mb-0">{sec.title || "Thông số"}</h6>
@@ -124,7 +163,7 @@ export function ProductSpecs({ specs }) {
                         <div className="p-2">
                             <div className="row row-cols-1 row-cols-md-2 g-2">
                                 {sec.rows.map((r, idx) => (
-                                    <div key={idx} className="col">
+                                    <div key={r.label || idx} className="col">
                                         <div className="d-flex justify-content-between align-items-start spec-row p-2 rounded-2">
                                             <div className="text-secondary small me-3">{r.label}</div>
                                             <div className="fw-semibold text-wrap text-end">
@@ -134,7 +173,7 @@ export function ProductSpecs({ specs }) {
                                                         type="button"
                                                         className="btn btn-link btn-sm text-decoration-none ms-2 p-0"
                                                         title="Sao chép"
-                                                        onClick={() => navigator.clipboard.writeText(r.value)}
+                                                        onClick={() => handleCopy(r.value)}
                                                     >
                                                         <i className="bi bi-clipboard-check" />
                                                     </button>
@@ -151,7 +190,6 @@ export function ProductSpecs({ specs }) {
                 </div>
             ))}
 
-            {/* Hành động nhanh */}
             <div className="d-flex gap-2">
                 <button
                     type="button"

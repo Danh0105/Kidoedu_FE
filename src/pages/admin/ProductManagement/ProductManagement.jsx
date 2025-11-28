@@ -1,12 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import ModalLG from "./ModalLG";
 import axios from "axios";
+import ModalEditProduct from "../../../components/admin/FormEdit/ModalEditProduct";
 
 const PLACEHOLDER_IMG = "https://placehold.co/120x120?text=No+Image";
 
 export default function ProductManagement() {
     const [products, setProducts] = useState([]);
     const [meta, setMeta] = useState(null);
+    const [editProduct, setEditProduct] = useState(null);
+    const [isOpen, setIsOpen] = useState(false);
 
     const formatCurrency = (value) =>
         new Intl.NumberFormat("vi-VN", {
@@ -50,7 +53,7 @@ export default function ProductManagement() {
 
             if (!prices.length) continue;
 
-            map[prod.productId] = {
+            map[prod?.productId] = {
                 min: Math.min(...prices),
                 max: Math.max(...prices),
             };
@@ -68,7 +71,7 @@ export default function ProductManagement() {
             );
 
             // Xóa khỏi state
-            setProducts((prev) => prev.filter((p) => p.productId !== id));
+            setProducts((prev) => prev.filter((p) => p?.productId !== id));
 
             // Giảm total trong meta
             setMeta((prev) =>
@@ -226,7 +229,6 @@ export default function ProductManagement() {
                                 </th>
                                 <th className="align-middle">Tên sản phẩm</th>
                                 <th className="align-middle">Mã sản phẩm</th>
-                                <th className="align-middle">Kho</th>
                                 <th className="">Giá</th>
                                 <th className="align-middle">Danh mục</th>
                                 <th className="align-middle">Ngày tạo</th>
@@ -239,21 +241,17 @@ export default function ProductManagement() {
                                 products.map((p) => {
                                     // Ảnh đại diện: ưu tiên ảnh variant, sau đó ảnh sản phẩm, cuối cùng placeholder
                                     const thumb =
-                                        p?.variants?.[0]?.imageUrl ||
-                                        p.images?.[0]?.image_url ||
+                                        p.images?.find(img => img.isPrimary)?.imageUrl ??
+                                        p.images?.[0]?.imageUrl ??
                                         PLACEHOLDER_IMG;
 
                                     // SKU / mã
                                     const sku =
                                         p.sku ||
                                         p?.variants?.[0]?.sku ||
-                                        `SP-${p.productId}`;
+                                        `SP-${p?.productId}`;
 
-                                    // Tồn kho (tùy backend)
-                                    const stock =
-                                        p.stockQuantity ??
-                                        p.stock_quantity ??
-                                        0;
+
 
                                     // Ngày tạo
                                     const createdAt = p.createdAt || p.created_at;
@@ -262,23 +260,23 @@ export default function ProductManagement() {
                                         : "";
 
                                     // ✅ Lấy priceRange cho từng sản phẩm
-                                    const range = priceRangeByProductId[p.productId];
+                                    const range = priceRangeByProductId[p?.productId];
                                     const displayedPrice = range
                                         ? range.min === range.max
                                             ? formatCurrency(range.min)
                                             : `${formatCurrency(
                                                 range.min
                                             )} - ${formatCurrency(range.max)}`
-                                        : "—";
+                                        : formatCurrency(p.price);
 
                                     return (
-                                        <tr key={p.productId} className="align-middle">
+                                        <tr key={p?.productId} className="align-middle">
                                             <td>
                                                 <input type="checkbox" />
                                             </td>
                                             <td className="text-center">
                                                 <img
-                                                    src={thumb}
+                                                    src={process.env.REACT_APP_API_URL + thumb}
                                                     alt={p.productName}
                                                     width={64}
                                                     height={64}
@@ -296,7 +294,6 @@ export default function ProductManagement() {
                                                     : "(Không tên)"}
                                             </td>
                                             <td>{sku}</td>
-                                            <td>{stock}</td>
                                             <td>{displayedPrice}</td>
                                             <td>
                                                 {p.category?.categoryName ||
@@ -306,12 +303,18 @@ export default function ProductManagement() {
                                             </td>
                                             <td>{createdLabel}</td>
                                             <td className="text-center">
-                                                <button className="btn btn-primary btn-sm me-2">
+                                                <button
+                                                    className="btn btn-primary btn-sm me-2"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalEditProduct"
+                                                    onClick={() => { setEditProduct(p); setIsOpen(true); }}
+                                                >
                                                     Edit
                                                 </button>
+
                                                 <button
                                                     className="btn btn-danger btn-sm"
-                                                    onClick={() => handleDelete(p.productId)}
+                                                    onClick={() => handleDelete(p?.productId)}
                                                 >
                                                     Delete
                                                 </button>
@@ -365,6 +368,28 @@ export default function ProductManagement() {
                     </div>
                 </div>
             </div>
+            <ModalEditProduct
+                product={editProduct}
+                isOpen={isOpen}
+                onClosed={() => {
+                    setIsOpen(false);       // 🔥 quan trọng
+                    setEditProduct(null);   // tránh retain sản phẩm cũ
+                }}
+                onUpdated={(updated) => {
+                    if (!updated) return;
+
+                    setProducts(prev =>
+                        prev.map(p => {
+                            const oldId = p.productId;
+                            const newId = updated.productId;
+
+                            return oldId === newId ? updated : p;
+                        })
+                    );
+                }}
+
+            />
+
         </div>
     );
 }

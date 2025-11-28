@@ -1,656 +1,489 @@
-import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import React, {
+    forwardRef,
+    useEffect,
+    useImperativeHandle,
+    useRef,
+    useState,
+} from "react";
 
-function createEmptyAttrRow() {
-    return {
-        id: crypto.randomUUID(),
-        key: "",
-        value: "",
-    };
-}
+/* -------------------------------------------------------------------------- */
+/*                                   HELPERS                                  */
+/* -------------------------------------------------------------------------- */
 
-function buildRowsFromAttributes(raw) {
+// Tạo ID an toàn (String)
+const generateId = () =>
+    Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+const createEmptyAttrRow = () => ({
+    id: generateId(),
+    key: "",
+    value: "",
+});
+
+const buildRowsFromAttributes = (raw) => {
     const rows = [];
+    if (!raw) return [createEmptyAttrRow()];
 
-    if (!raw) {
-        rows.push(createEmptyAttrRow());
-        return rows;
-    }
-
-    // Nếu là object: { color: "Đen", size: "M" }
     if (typeof raw === "object" && !Array.isArray(raw)) {
         Object.entries(raw).forEach(([k, v]) => {
-            rows.push({
-                id: crypto.randomUUID(),
-                key: k,
-                value: String(v ?? ""),
-            });
+            rows.push({ id: generateId(), key: k, value: String(v ?? "") });
         });
-    }
-
-    // Nếu là array: [{ key: "color", value: "Đen" }, ...]
-    if (Array.isArray(raw)) {
+    } else if (Array.isArray(raw)) {
         raw.forEach((item) => {
-            if (!item) return;
-            const k =
-                item.key ||
-                item.name ||
-                item.label ||
-                item.attrName ||
-                "";
-            const v =
-                item.value ??
-                item.attrValue ??
-                item.val ??
-                "";
-            if (!k) return;
-            rows.push({
-                id: crypto.randomUUID(),
-                key: k,
-                value: String(v ?? ""),
-            });
+            const k = item.key || item.name || item.label || "";
+            const v = item.value ?? item.attrValue ?? "";
+            if (k) rows.push({ id: generateId(), key: k, value: String(v ?? "") });
         });
     }
+    return rows.length ? rows : [createEmptyAttrRow()];
+};
 
-    if (rows.length === 0) {
-        rows.push(createEmptyAttrRow());
-    }
+/* -------------------------------------------------------------------------- */
+/*                                  COMPONENT                                 */
+/* -------------------------------------------------------------------------- */
 
-    return rows;
-}
+function VariantForm({ productId, onChange }, ref) {
+    const collapseRef = useRef(null);
+    const isInternalUpdate = useRef(false);
 
-function parseMaybeJson(v) {
-    if (!v) return {};
-    if (typeof v === "object") return v;
-    try {
-        return JSON.parse(v);
-    } catch {
-        return {};
-    }
-}
-
-export default function VariantForm({
-    productId,
-    variantId,
-    apiBase = process.env.REACT_APP_API_URL,
-    onSaved,
-    onVariantsChange,
-}) {
-    const [loading, setLoading] = useState(!!variantId);
-    const [saving, setSaving] = useState(false);
-    const [err, setErr] = useState(null);
-
-    // form fields
+    const [editingId, setEditingId] = useState(null);
     const [variantName, setVariantName] = useState("");
     const [sku, setSku] = useState("");
     const [barcode, setBarcode] = useState("");
-    const [status, setStatus] = useState(1);
-    const [imageUrl, setImageUrl] = useState("");
 
-    // ✅ THUỘC TÍNH: dạng dòng key/value
+    // Prices
+    const [basePrice, setBasePrice] = useState("");
+    const [promoPrice, setPromoPrice] = useState("");
+
+    // --- NEW: Promo Start/End state ---
+    const [promoStartAt, setPromoStartAt] = useState("");
+    const [promoEndAt, setPromoEndAt] = useState("");
+
+    // Image
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreviewUrl, setImagePreviewUrl] = useState("");
+
     const [attributeRows, setAttributeRows] = useState([createEmptyAttrRow()]);
-
-    // specs (để pass ra AttributePanel / backend, không có UI ở đây)
     const [specs, setSpecs] = useState({});
 
-    // ✅ NEW: giá riêng cho từng biến thể
-    const [basePrice, setBasePrice] = useState("");   // giá gốc
-    const [promoPrice, setPromoPrice] = useState(""); // giá khuyến mãi (nếu có)
-
-    // danh sách biến thể đã thêm (lưu tạm để hiển thị)
     const [tempVariants, setTempVariants] = useState([]);
-    const [editingId, setEditingId] = useState(null);
+    const [errors, setErrors] = useState({});
+    const [saving, setSaving] = useState(false);
 
-    const isFirstVariant = tempVariants.length === 0;
-
-    const formValid = useMemo(() => {
-        if (!variantName?.trim()) return false;
-        return true;
-    }, [variantName]);
-
-    // load khi edit (trường hợp sửa biến thể từ backend)
     useEffect(() => {
-        let alive = true;
-        if (!variantId) return; // create mode
-        (async () => {
-            try {
-                setLoading(true);
-                const res = await axios.get(`${apiBase}/product-variants/${variantId}`);
-                const v = res?.data?.data || res?.data || {};
-                if (!alive) return;
+        if (typeof onChange === "function" && isInternalUpdate.current) {
+            onChange(tempVariants);
+        }
+    }, [tempVariants]);
 
-                setVariantName(v.variant_name || v.variantName || "");
-                setSku(v.sku || "");
-                setBarcode(v.barcode || "");
-                setStatus(Number(v.status ?? 1));
-                setImageUrl(v.image_url || v.imageUrl || "");
-
-                // attributes
-                const parsedAttrs = parseMaybeJson(v.attributes);
-                setAttributeRows(buildRowsFromAttributes(parsedAttrs));
-
-                // specs giữ để dùng cho AttributePanel
-                setSpecs(parseMaybeJson(v.specs));
-
-                // ✅ NEW: nếu backend có giá thì map vào (tuỳ structure của bạn)
-                const prices = v.prices || [];
-                const base = prices.find((p) => p.priceType === "base");
-                const promo = prices.find((p) => p.priceType === "promo");
-                setBasePrice(base ? String(base.price || "") : "");
-                setPromoPrice(promo ? String(promo.price || "") : "");
-
-                setErr(null);
-            } catch (e) {
-                console.error(e);
-                setErr("Không tải được biến thể");
-            } finally {
-                if (alive) setLoading(false);
-            }
-        })();
+    useEffect(() => {
         return () => {
-            alive = false;
+            if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
         };
-    }, [variantId, apiBase]);
+    }, [imagePreviewUrl]);
 
     const resetForm = () => {
         setVariantName("");
         setSku("");
         setBarcode("");
-        setStatus(1);
-        setImageUrl("");
-        setAttributeRows([createEmptyAttrRow()]);
-        setSpecs({});
         setBasePrice("");
         setPromoPrice("");
+
+        // --- NEW ---
+        setPromoStartAt("");
+        setPromoEndAt("");
+
+        setImageFile(null);
+        setImagePreviewUrl("");
+        setAttributeRows([createEmptyAttrRow()]);
+        setSpecs({});
+        setErrors({});
+        setEditingId(null);
     };
 
-    const removeTempVariant = (id) => {
-        setTempVariants((prev) => prev.filter((v) => v.id !== id));
+    const validateForm = () => {
+        const e = {};
+        if (!variantName.trim()) e.variantName = "Tên biến thể là bắt buộc";
+        if (!basePrice.toString().trim() || isNaN(Number(basePrice)))
+            e.basePrice = "Giá cơ bản không hợp lệ";
+
+        setErrors(e);
+        return Object.keys(e).length === 0;
     };
 
-    const buildAttributesObject = () => {
-        const obj = {};
+    const handleSave = () => {
+        if (!validateForm()) return;
+        setSaving(true);
+
+        const attributesObj = {};
         attributeRows.forEach((row) => {
-            const key = row.key?.trim();
-            if (!key) return;
-            obj[key] = row.value;
+            if (row.key?.trim()) attributesObj[row.key.trim()] = row.value;
         });
-        return obj;
-    };
 
-    const save = async () => {
-        try {
-            setSaving(true);
-            setErr(null);
+        const payload = {
+            variant_name: variantName.trim(),
+            sku: sku?.trim() || null,
+            barcode: barcode?.trim() || null,
+            basePrice: Number(basePrice),
+            promoPrice: promoPrice ? Number(promoPrice) : null,
 
-            const attributesObj = buildAttributesObject();
+            // --- NEW: push promo time to payload ---
+            promoStartAt: promoStartAt || null,
+            promoEndAt: promoEndAt || null,
 
-            const payload = {
-                product_id: Number(productId || 0),
-                variant_name: variantName.trim(),
-                sku: sku?.trim() || null,
-                barcode: barcode?.trim() || null,
-                status: Number(status || 1),
-                image_url: imageUrl?.trim() || null,
-                attributes: attributesObj,
-                specs, // giữ nguyên (object/array) để AttributePanel dùng
-                basePrice: basePrice ? Number(basePrice) : null,
-                promoPrice: promoPrice ? Number(promoPrice) : null,
-            };
+            attributes: attributesObj,
+            specs,
+            image_file: imageFile || null,
+            image_url: imageFile ? imagePreviewUrl : imagePreviewUrl || null,
+        };
 
-            // Nếu muốn call API thật, dùng đoạn này:
-            // let res;
-            // if (variantId) {
-            //     res = await axios.put(`${apiBase}/product-variants/${variantId}`, payload);
-            // } else {
-            //     res = await axios.post(`${apiBase}/product-variants`, payload);
-            // }
-            // const out = res?.data?.data || res?.data || payload;
-
-            const out = payload; // tạm thời dùng payload làm out
-
+        setTempVariants((prev) => {
+            isInternalUpdate.current = true;
             if (editingId) {
-                // ĐANG CHỈNH SỬA → cập nhật lại phần tử trong tempVariants
-                setTempVariants((prev) =>
-                    prev.map((v) =>
-                        v.id === editingId
-                            ? {
-                                ...v,
-                                variant_name: payload.variant_name,
-                                sku: payload.sku,
-                                barcode: payload.barcode,
-                                imageUrl: payload.image_url,
-                                attributes: payload.attributes,
-                                specs: payload.specs,
-                                status: payload.status,
-                                basePrice: payload.basePrice,
-                                promoPrice: payload.promoPrice,
-                            }
-                            : v
-                    )
+                return prev.map((v) =>
+                    String(v.id) === String(editingId)
+                        ? { ...v, ...payload }
+                        : v
                 );
             } else {
-                // ĐANG TẠO MỚI → thêm dòng mới
-                setTempVariants((prev) => [
-                    ...prev,
-                    {
-                        id: out.variant_id || out.id || Date.now(),
-                        variant_name: out.variant_name || variantName,
-                        sku: out.sku || sku,
-                        barcode: out.barcode || barcode,
-                        image_url: out.image_url || imageUrl || "",
-                        attributes: out.attributes || attributesObj || {},
-                        specs: out.specs || specs || {},
-                        status: out.status ?? status,
-                        basePrice: out.basePrice ?? (basePrice ? Number(basePrice) : null),
-                        promoPrice: out.promoPrice ?? (promoPrice ? Number(promoPrice) : null),
-                    },
-                ]);
+                return [...prev, { id: generateId(), ...payload }];
             }
-
-            // sau khi lưu xong, thoát chế độ edit
-            setEditingId(null);
-
-            // reset form nếu đang tạo mới
-            if (!variantId) {
-                resetForm();
-            }
-
-            // bắn ra ngoài
-            onSaved?.(out);
-        } catch (e) {
-            console.error(e);
-            setErr("Lưu biến thể thất bại");
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const editTempVariant = (variant) => {
-        setEditingId(variant.id);
-
-        setVariantName(variant.variant_name || "");
-        setSku(variant.sku || "");
-        setBarcode(variant.barcode || "");
-        setImageUrl(variant.image_url || "");
-
-        // attributes từ object → rows
-        const attrs = variant.attributes || {};
-        setAttributeRows(buildRowsFromAttributes(attrs));
-
-        // specs giữ nguyên
-        setSpecs(variant.specs || {});
-
-        setBasePrice(
-            typeof variant.basePrice === "number"
-                ? String(variant.basePrice)
-                : variant.basePrice || ""
-        );
-        setPromoPrice(
-            typeof variant.promoPrice === "number"
-                ? String(variant.promoPrice)
-                : variant.promoPrice || ""
-        );
-
-        if (typeof variant.status !== "undefined") {
-            setStatus(variant.status);
-        }
-
-        const el = document.getElementById("variant-collapse");
-        if (el) {
-            if (window.bootstrap?.Collapse) {
-                const instance = window.bootstrap.Collapse.getOrCreateInstance(el);
-                instance.show();
-            } else {
-                el.classList.add("show");
-            }
-        }
-    };
-
-    // mỗi lần tempVariants đổi → bắn ra parent qua onVariantsChange
-    useEffect(() => {
-        if (typeof onVariantsChange === "function") {
-            onVariantsChange(tempVariants);
-        }
-    }, [tempVariants, onVariantsChange]);
-
-    // ======================= Handlers cho attributes =======================
-
-    const addAttrRow = () => {
-        setAttributeRows((prev) => [...prev, createEmptyAttrRow()]);
-    };
-
-    const updateAttrRow = (rowId, patch) => {
-        setAttributeRows((prev) =>
-            prev.map((r) => (r.id === rowId ? { ...r, ...patch } : r))
-        );
-    };
-
-    const removeAttrRow = (rowId) => {
-        setAttributeRows((prev) => {
-            if (prev.length <= 1) return prev; // không xoá dòng cuối
-            return prev.filter((r) => r.id !== rowId);
         });
+
+        setSaving(false);
+        resetForm();
     };
 
-    // ======================= Render =======================
+    const handleEdit = (v) => {
+        setEditingId(String(v.id));
+        setVariantName(v.variant_name || "");
+        setSku(v.sku || "");
+        setBarcode(v.barcode || "");
+        setBasePrice(v.basePrice || "");
+        setPromoPrice(v.promoPrice || "");
+
+        // --- NEW: fill promo time ---
+        setPromoStartAt(v.promoStartAt || "");
+        setPromoEndAt(v.promoEndAt || "");
+
+        setImageFile(null);
+        setImagePreviewUrl(v.image_url || "");
+        setAttributeRows(buildRowsFromAttributes(v.attributes));
+        setSpecs(v.specs || {});
+
+        if (collapseRef.current) {
+            collapseRef.current.classList.add("show");
+            setTimeout(() => {
+                collapseRef.current.scrollIntoView({ behavior: "smooth" });
+            }, 100);
+        }
+    };
+
+    const handleRemove = (id) => {
+        if (window.confirm("Bạn chắc chắn xóa biến thể này?")) {
+            isInternalUpdate.current = true;
+            setTempVariants((prev) => prev.filter((v) => String(v.id) !== String(id)));
+            if (String(id) === String(editingId)) resetForm();
+        }
+    };
+
+    const onFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+
+            setImageFile(file);
+            setImagePreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
+    useImperativeHandle(ref, () => ({
+        getData: () => tempVariants,
+        clear: () => {
+            setTempVariants([]);
+            resetForm();
+        },
+    }));
+
+    const isFirst = tempVariants.length === 0;
 
     return (
         <div className="p-2">
-            {/* nút mở/đóng form */}
-            <div className="p-2 d-flex justify-content-center">
-                <button
+            {/* BUTTON ADD */}
+            <div className="d-flex justify-content-center mb-3">
+                <a
                     className="btn btn-outline-primary"
-                    type="button"
+                    type="a"
                     data-bs-toggle="collapse"
                     data-bs-target="#variant-collapse"
-                    aria-expanded={isFirstVariant ? "true" : "false"}
-                    aria-controls="variant-collapse"
+                    aria-expanded={isFirst}
+                    onClick={resetForm}
                 >
-                    Thêm biến thể
-                </button>
+                    <i className="bi bi-plus-lg me-2"></i>
+                    Thêm biến thể mới
+                </a>
             </div>
 
+            {/* FORM */}
             <div
-                className={`collapse rounded-0 ${isFirstVariant ? "show" : ""}`}
+                className={`collapse ${isFirst ? "show" : ""}`}
                 id="variant-collapse"
+                ref={collapseRef}
             >
-                <div className="d-flex align-items-center justify-content-between mb-2">
-                    <div className="fw-semibold">
-                        {variantId ? `Sửa biến thể #${variantId}` : "Tạo biến thể mới"}
-                    </div>
-                    {loading && (
-                        <div className="d-flex align-items-center gap-2 text-muted small">
-                            <div className="spinner-border spinner-border-sm" />
-                            Đang tải…
-                        </div>
-                    )}
-                </div>
+                <div className="card card-body bg-light border-0 shadow-sm mb-4">
+                    <h6 className="fw-bold text-primary mb-3">
+                        {editingId ? "CẬP NHẬT BIẾN THỂ" : "TẠO BIẾN THỂ MỚI"}
+                    </h6>
 
-                {/* form fields */}
-                <div className="row g-3">
-                    <div className="col-12 col-md-6">
-                        <label className="form-label mb-1">
-                            Tên biến thể <span className="text-danger">*</span>
-                        </label>
-                        <input
-                            className="form-control"
-                            placeholder="VD: Màu đen / 32GB"
-                            value={variantName}
-                            onChange={(e) => setVariantName(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="col-6 col-md-3">
-                        <label className="form-label mb-1">SKU</label>
-                        <input
-                            className="form-control"
-                            value={sku}
-                            onChange={(e) => setSku(e.target.value)}
-                        />
-                    </div>
-                    <div className="col-6 col-md-3">
-                        <label className="form-label mb-1">Barcode</label>
-                        <input
-                            className="form-control"
-                            value={barcode}
-                            onChange={(e) => setBarcode(e.target.value)}
-                        />
-                    </div>
-
-                    {/* ✅ NEW: Giá biến thể */}
-                    <label className="form-label mb-1 mt-2">Giá biến thể</label>
-                    <div className="d-flex justify-content-between gap-2">
-                        <div className="input-group">
-                            <span className="input-group-text">Giá base</span>
+                    <div className="row g-3">
+                        {/* NAME - SKU - BARCODE */}
+                        <div className="col-md-6">
+                            <label className="form-label small fw-bold">Tên biến thể *</label>
                             <input
-                                className="form-control text-end"
-                                value={basePrice}
-                                onChange={(e) => setBasePrice(e.target.value)}
-                                placeholder="VD: 1200000"
+                                className={`form-control ${errors.variantName ? "is-invalid" : ""}`}
+                                value={variantName}
+                                onChange={(e) => setVariantName(e.target.value)}
                             />
                         </div>
-                        <div className="input-group">
-                            <span className="input-group-text">Giá promo</span>
-                            <input
-                                className="form-control text-end"
-                                value={promoPrice}
-                                onChange={(e) => setPromoPrice(e.target.value)}
-                                placeholder="VD: 990000"
-                            />
-                        </div>
-                    </div>
 
-                    <div className="col-12">
-                        <label className="form-label mb-1">Ảnh (URL)</label>
-                        <div className="input-group">
-                            <input
-                                className="form-control"
-                                placeholder="https://..."
-                                value={imageUrl}
-                                onChange={(e) => setImageUrl(e.target.value)}
-                            />
-                            {imageUrl && (
-                                <span className="input-group-text">
-                                    <a href={imageUrl} target="_blank" rel="noreferrer">
-                                        Mở
-                                    </a>
-                                </span>
-                            )}
+                        <div className="col-md-3">
+                            <label className="form-label small fw-bold">SKU</label>
+                            <input className="form-control" value={sku} onChange={(e) => setSku(e.target.value)} />
                         </div>
-                        {imageUrl && (
-                            <div className="mt-2">
-                                <img
-                                    src={imageUrl}
-                                    alt="preview"
-                                    style={{ maxWidth: 180, maxHeight: 120, objectFit: "cover" }}
+
+                        <div className="col-md-3">
+                            <label className="form-label small fw-bold">Barcode</label>
+                            <input className="form-control" value={barcode} onChange={(e) => setBarcode(e.target.value)} />
+                        </div>
+
+                        {/* PRICE + PROMO */}
+                        <div className="col-12">
+                            <label className="form-label small fw-bold">Thiết lập giá</label>
+
+                            <div className="d-flex gap-3 flex-wrap">
+
+                                <div className="input-group">
+                                    <span className="input-group-text bg-white">Giá Base *</span>
+                                    <input
+                                        type="number"
+                                        className={`form-control ${errors.basePrice ? "is-invalid" : ""}`}
+                                        value={basePrice}
+                                        onChange={(e) => setBasePrice(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="input-group">
+                                    <span className="input-group-text bg-white">Giá Promo</span>
+                                    <input
+                                        type="number"
+                                        className="form-control"
+                                        value={promoPrice}
+                                        onChange={(e) => setPromoPrice(e.target.value)}
+                                    />
+                                </div>
+
+                                {/* --- NEW 2 INPUTS --- */}
+                                <div className="input-group">
+                                    <span className="input-group-text bg-white small">Bắt đầu</span>
+                                    <input
+                                        type="datetime-local"
+                                        className="form-control"
+                                        value={promoStartAt}
+                                        onChange={(e) => setPromoStartAt(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="input-group">
+                                    <span className="input-group-text bg-white small">Kết thúc</span>
+                                    <input
+                                        type="datetime-local"
+                                        className="form-control"
+                                        value={promoEndAt}
+                                        onChange={(e) => setPromoEndAt(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* IMAGE */}
+                        <div className="col-12">
+                            <label className="form-label small fw-bold">Hình ảnh</label>
+                            <div className="d-flex gap-3 align-items-center">
+                                <div
+                                    className="border rounded bg-white d-flex justify-content-center align-items-center"
+                                    style={{ width: 70, height: 70, overflow: "hidden" }}
+                                >
+                                    {imagePreviewUrl ? (
+                                        <img src={imagePreviewUrl} className="w-100 h-100" />
+                                    ) : (
+                                        <span className="text-muted small">No Img</span>
+                                    )}
+                                </div>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="form-control"
+                                    onChange={onFileChange}
                                 />
                             </div>
-                        )}
-                    </div>
+                        </div>
 
-                    {/* ✅ THUỘC TÍNH: form key/value giống AttributePanel */}
-                    <div className="col-12">
-                        <label className="form-label mb-1">Thuộc tính</label>
-                        <div className="table-responsive">
-                            <table className="table table-sm align-middle mb-0">
-                                <thead className="table-light">
-                                    <tr>
-                                        <th className="text-center" style={{ width: "40%" }}>
-                                            Tên thuộc tính
-                                        </th>
-                                        <th className="text-center" style={{ width: "40%" }}>
-                                            Giá trị
-                                        </th>
-                                        <th className="text-center" style={{ width: "20%" }}>
-                                            Action
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {attributeRows.map((r) => (
-                                        <tr key={r.id}>
-                                            <td className="text-center">
-                                                <input
-                                                    className="form-control form-control-sm"
-                                                    placeholder="VD: Màu, Kích thước..."
-                                                    value={r.key}
-                                                    onChange={(e) =>
-                                                        updateAttrRow(r.id, {
-                                                            key: e.target.value,
-                                                        })
+                        {/* ATTRIBUTES */}
+                        <div className="col-12">
+                            <label className="form-label small fw-bold">Thuộc tính</label>
+
+                            <div className="table-responsive border rounded bg-white">
+                                <table className="table table-sm mb-0">
+                                    <thead className="table-light">
+                                        <tr>
+                                            <th className="ps-3">Tên</th>
+                                            <th>Giá trị</th>
+                                            <th style={{ width: 50 }} />
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {attributeRows.map((r) => (
+                                            <tr key={r.id}>
+                                                <td className="ps-3">
+                                                    <input
+                                                        className="form-control form-control-sm border-1"
+                                                        value={r.key}
+                                                        onChange={(e) =>
+                                                            setAttributeRows((prev) =>
+                                                                prev.map((x) =>
+                                                                    x.id === r.id ? { ...x, key: e.target.value } : x
+                                                                )
+                                                            )
+                                                        }
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        className="form-control form-control-sm border-1"
+                                                        value={r.value}
+                                                        onChange={(e) =>
+                                                            setAttributeRows((prev) =>
+                                                                prev.map((x) =>
+                                                                    x.id === r.id ? { ...x, value: e.target.value } : x
+                                                                )
+                                                            )
+                                                        }
+                                                    />
+                                                </td>
+                                                <td className="text-center">
+                                                    <a
+                                                        className="btn btn-link text-danger p-0"
+                                                        disabled={attributeRows.length === 1}
+                                                        onClick={() =>
+                                                            setAttributeRows((prev) =>
+                                                                prev.length > 1
+                                                                    ? prev.filter((x) => x.id !== r.id)
+                                                                    : prev
+                                                            )
+                                                        }
+                                                    >
+                                                        <i className="bi bi-trash"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+
+                                    <tfoot>
+                                        <tr>
+                                            <td colSpan={3}>
+                                                <a
+                                                    className="btn btn-light w-100 btn-sm"
+                                                    onClick={() =>
+                                                        setAttributeRows((prev) => [...prev, createEmptyAttrRow()])
                                                     }
-                                                />
-                                            </td>
-                                            <td className="text-center">
-                                                <input
-                                                    className="form-control form-control-sm"
-                                                    placeholder="VD: Đen, 32GB..."
-                                                    value={r.value}
-                                                    onChange={(e) =>
-                                                        updateAttrRow(r.id, {
-                                                            value: e.target.value,
-                                                        })
-                                                    }
-                                                />
-                                            </td>
-                                            <td className="text-center">
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-outline-danger btn-sm"
-                                                    onClick={() => removeAttrRow(r.id)}
-                                                    disabled={attributeRows.length === 1}
                                                 >
-                                                    ×
-                                                </button>
+                                                    + Thêm dòng
+                                                </a>
                                             </td>
                                         </tr>
-                                    ))}
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colSpan={3}>
-                                            <button
-                                                type="button"
-                                                className="btn btn-outline-primary btn-sm"
-                                                onClick={addAttrRow}
-                                            >
-                                                + Thêm dòng
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {err && (
-                    <div className="alert alert-danger py-2 px-3 mt-3" role="alert">
-                        {err}
+                    {/* ACTIONS */}
+                    <div className="mt-3 text-end border-top pt-3">
+                        <a className="btn btn-secondary me-2" data-bs-toggle="collapse" data-bs-target="#variant-collapse">
+                            Đóng
+                        </a>
+                        <a
+                            className="btn btn-primary px-4 fw-bold"
+                            onClick={handleSave}
+                            disabled={saving}
+                        >
+                            {saving ? "Đang xử lý..." : editingId ? "Cập nhật" : "Lưu"}
+                        </a>
                     </div>
-                )}
-
-                <div className="d-flex gap-2 mt-3">
-                    <button
-                        type="button"
-                        className="btn btn-primary"
-                        disabled={!formValid || saving}
-                        onClick={save}
-                    >
-                        {saving
-                            ? "Đang lưu…"
-                            : editingId
-                                ? "Cập nhật biến thể"
-                                : "Tạo biến thể"}
-                    </button>
                 </div>
             </div>
 
-            {/* DANH SÁCH BIẾN THỂ ĐÃ THÊM */}
+            {/* LIST */}
             {tempVariants.length > 0 && (
-                <div className="mt-3">
-                    <div className="fw-semibold mb-2">Biến thể đã thêm</div>
-                    {tempVariants.map((v) => (
-                        <div
-                            key={v.id}
-                            className="list-group-item border-0 px-0 py-2"
-                        >
-                            <div className="d-flex align-items-center">
-                                {/* Ảnh thumbnail */}
+                <div className="card shadow-sm">
+                    <div className="card-header bg-white fw-bold">Danh sách biến thể</div>
+
+                    <div className="list-group list-group-flush">
+                        {tempVariants.map((v) => (
+                            <div key={v.id} className="list-group-item d-flex align-items-center gap-3 py-2">
+
                                 <div
-                                    className="flex-shrink-0 rounded me-3 bg-light d-flex align-items-center justify-content-center"
-                                    style={{ width: 56, height: 56, overflow: "hidden" }}
+                                    className="border rounded"
+                                    style={{ width: 60, height: 60, overflow: "hidden" }}
                                 >
                                     {v.image_url ? (
-                                        <img
-                                            src={v.image_url}
-                                            alt={v.variant_name}
-                                            style={{
-                                                width: "100%",
-                                                height: "100%",
-                                                objectFit: "cover",
-                                            }}
-                                        />
+                                        <img src={v.image_url} className="w-100 h-100" />
                                     ) : (
-                                        <span className="text-muted small">No image</span>
+                                        <span className="text-muted small">NO IMG</span>
                                     )}
                                 </div>
 
-                                {/* Thông tin biến thể */}
                                 <div className="flex-grow-1">
-                                    <div className="d-flex flex-column justify-content-center">
-                                        <div className="fw-semibold text-truncate">
-                                            {v.variant_name || "(Chưa đặt tên)"}
-                                        </div>
+                                    <div className="fw-bold">{v.variant_name}</div>
+                                    <div className="small text-muted">
+                                        <span>{Number(v.basePrice).toLocaleString()}đ</span>
+                                        {v.promoPrice && (
+                                            <span className="text-decoration-line-through ms-2">
+                                                {Number(v.promoPrice).toLocaleString()}đ
+                                            </span>
+                                        )}
+                                    </div>
 
-                                        <div className="small text-muted text-truncate">
-                                            {v.attributes && Object.keys(v.attributes).length > 0 ? (
-                                                Object.entries(v.attributes).map(
-                                                    ([key, value], idx) => (
-                                                        <span key={key}>
-                                                            {idx > 0 && " · "}
-                                                            <span className="text-capitalize">{key}:</span>{" "}
-                                                            {String(value)}
-                                                        </span>
-                                                    )
-                                                )
-                                            ) : (
-                                                "(Chưa có thuộc tính)"
+                                    {/* --- NEW: Show promo time in list --- */}
+                                    {(v.promoStartAt || v.promoEndAt) && (
+                                        <div className="small text-muted mt-1">
+                                            {v.promoStartAt && (
+                                                <span>BĐ: {v.promoStartAt} </span>
+                                            )}
+                                            {v.promoEndAt && (
+                                                <span> • KT: {v.promoEndAt}</span>
                                             )}
                                         </div>
-                                    </div>
-
-                                    <div className="small text-muted mt-1">
-                                        <span className="me-3">
-                                            <span className="fw-semibold">SKU:</span>{" "}
-                                            {v.sku || "-"}
-                                        </span>
-                                        <span className="me-3">
-                                            <span className="fw-semibold">Barcode:</span>{" "}
-                                            {v.barcode || "-"}
-                                        </span>
-                                        {/* ✅ NEW: hiển thị giá */}
-                                        <span>
-                                            <span className="fw-semibold">Giá:</span>{" "}
-                                            {v.basePrice
-                                                ? Number(v.basePrice).toLocaleString("vi-VN")
-                                                : "-"}{" "}
-                                            {v.promoPrice
-                                                ? ` (KM: ${Number(
-                                                    v.promoPrice
-                                                ).toLocaleString("vi-VN")})`
-                                                : ""}
-                                        </span>
-                                    </div>
+                                    )}
                                 </div>
 
-                                <button
-                                    type="button"
-                                    className="btn btn-link btn-sm text-decoration-none p-0 mb-1"
-                                    onClick={() => editTempVariant(v)}
-                                >
-                                    Chỉnh sửa
-                                </button>
-
-                                <button
-                                    type="button"
-                                    className="btn-close ms-2"
-                                    aria-label="Xoá biến thể này"
-                                    style={{
-                                        width: "0.6rem",
-                                        height: "0.6rem",
-                                        transform: "scale(0.9)",
-                                        filter:
-                                            "invert(34%) sepia(94%) saturate(7476%) hue-rotate(353deg) brightness(100%) contrast(110%)",
-                                    }}
-                                    onClick={() => removeTempVariant(v.id)}
-                                />
+                                <div className="d-flex flex-column gap-1">
+                                    <a className="btn btn-sm btn-outline-primary" onClick={() => handleEdit(v)}>
+                                        Sửa
+                                    </a>
+                                    <a className="btn btn-sm btn-outline-danger" onClick={() => handleRemove(v.id)}>
+                                        Xóa
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             )}
         </div>
     );
 }
+
+export default forwardRef(VariantForm);

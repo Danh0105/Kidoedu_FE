@@ -3,34 +3,40 @@ import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ROBOT from "../../assets/user/ROBOT.png";
 
-export default function NewProducts({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
+export default function NewProducts({ apiBase = process.env.REACT_APP_API_URL }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState("");
+  const [error, setError] = useState("");
 
-  // Khởi tạo axios instance
+  // Axios instance gọn hơn – tự động cleanup dấu /
   const api = useMemo(
     () =>
       axios.create({
-        baseURL: apiBase.replace(/\/+$/, ""),
+        baseURL: apiBase?.replace(/\/+$/, ""),
         timeout: 10000,
       }),
     [apiBase]
   );
 
-  // Fetch danh sách sản phẩm mới
+  // Fetch sản phẩm mới
   const fetchNewProducts = async () => {
     setLoading(true);
-    setErr("");
+    setError("");
+
     try {
       const res = await api.get("/products");
-      const data = res.data?.data || [];
-      // Lọc theo status
-      const newItems = data.filter((p) => p.status === 2 || p.status === 12);
+
+      // Chuẩn response:
+      // { success, statusCode, message, meta, data: [...] }
+      const items = res.data?.data ?? [];
+
+      // Lọc các sản phẩm có status = 2 hoặc 12 (mới)
+      const newItems = items.filter(p => (p.status & 1) !== 0);
+
       setProducts(newItems);
-    } catch (e) {
-      setErr("Không thể tải dữ liệu sản phẩm.");
-      console.error(e);
+    } catch (err) {
+      console.error(err);
+      setError("Không thể tải dữ liệu sản phẩm.");
     } finally {
       setLoading(false);
     }
@@ -42,11 +48,10 @@ export default function NewProducts({ apiBase = `${process.env.REACT_APP_API_URL
 
   return (
     <div className="container py-5 bg-white">
-      {/* Tiêu đề */}
+
+      {/* Header */}
       <div className="text-center mb-5">
-        <h2 className="fw-bold display-6 text-uppercase">
-          🆕 Sản phẩm mới
-        </h2>
+        <h2 className="fw-bold display-6 text-uppercase">🆕 Sản phẩm mới</h2>
         <p className="text-muted">Khám phá những sản phẩm mới nhất của chúng tôi!</p>
         <div
           style={{
@@ -59,14 +64,25 @@ export default function NewProducts({ apiBase = `${process.env.REACT_APP_API_URL
         ></div>
       </div>
 
-      {/* Trạng thái tải */}
+      {/* Loading / Error */}
       {loading && <p className="text-center text-secondary">⏳ Đang tải...</p>}
-      {err && <p className="text-center text-danger">{err}</p>}
+      {error && <p className="text-center text-danger">{error}</p>}
 
-      {/* Danh sách sản phẩm */}
+      {/* Product List */}
       <div className="row g-4 justify-content-center">
-        {products.length > 0 ? (
-          products.map((p) => (
+        {!loading && products.length === 0 && (
+          <div className="col-12 text-center text-muted">
+            Chưa có sản phẩm mới nào.
+          </div>
+        )}
+
+        {products.map((p) => {
+          const firstImage =
+            p.images?.find((img) => img.isPrimary)?.imageUrl ||
+            p.images?.[0]?.image_url ||
+            ROBOT;
+
+          return (
             <div
               key={p.productId}
               className="col-xl-3 col-lg-4 col-md-6 col-sm-12 d-flex justify-content-center"
@@ -76,40 +92,43 @@ export default function NewProducts({ apiBase = `${process.env.REACT_APP_API_URL
                 style={{ maxWidth: "300px" }}
               >
                 <div className="position-relative">
-                  {/* Badge "Mới" */}
-                  <span
-                    className="badge bg-success position-absolute top-0 start-0 m-2 px-3 py-2"
-                    style={{ borderRadius: "8px", fontSize: "0.9rem" }}
-                  >
+
+                  {/* Badge */}
+                  <span className="badge bg-success position-absolute top-0 start-0 m-2 px-3 py-2 rounded">
                     Mới
                   </span>
 
-                  {/* Ảnh sản phẩm */}
                   <img
-                    src={p.images?.[0]?.image_url || ROBOT}
+                    src={process.env.REACT_APP_API_URL + firstImage}
                     alt={p.productName}
                     className="card-img-top"
-                    style={{
-                      backgroundColor: "#f8f9fa",
-                    }}
+                    style={{ backgroundColor: "#f8f9fa" }}
+                    onError={(e) => (e.currentTarget.src = ROBOT)}
                   />
                 </div>
 
-                {/* Nội dung */}
+                {/* Content */}
                 <div className="card-body text-center">
-                  <h6
-                    className="fw-semibold text-truncate mb-2"
-                    title={p.productName}
-                  >
+                  <h6 className="fw-semibold text-truncate mb-2" title={p.productName}>
                     {p.productName}
                   </h6>
+
                   <p className="text-danger fw-bold mb-3">
-                    {Number(p.price).toLocaleString()} ₫
-                  </p>
-                  <button
-                    onClick={() =>
-                      window.open(`/productdetail/${p.productId}`)
+                    {p.price > 0
+                      ? `${Number(p.price).toLocaleString()} ₫`
+                      : (() => {
+                        const { min, max } = pickVariantRange(p.variants || []);
+                        if (min === 0 && max === 0) return "0 ₫";
+                        return min === max
+                          ? `${min.toLocaleString()} ₫`
+                          : `${min.toLocaleString()} - ${max.toLocaleString()} ₫`;
+                      })()
                     }
+
+                  </p>
+
+                  <button
+                    onClick={() => window.open(`/productdetail/${p.productId}`)}
                     className="btn btn-outline-primary btn-sm rounded-pill px-3"
                   >
                     Xem chi tiết
@@ -117,15 +136,34 @@ export default function NewProducts({ apiBase = `${process.env.REACT_APP_API_URL
                 </div>
               </div>
             </div>
-          ))
-        ) : (
-          !loading && (
-            <div className="col-12 text-center text-muted">
-              Chưa có sản phẩm mới nào.
-            </div>
-          )
-        )}
+          );
+        })}
       </div>
     </div>
   );
+}
+function pickVariantRange(variants) {
+  const basePrices = [];
+
+  variants.forEach(v => {
+    if (!Array.isArray(v.prices)) return;
+
+    let basePrice = null;
+
+    v.prices.forEach(pr => {
+      if (pr.priceType === "base") {
+        const price = Number(pr.price);
+        if (!isNaN(price)) basePrice = price;
+      }
+    });
+
+    if (basePrice !== null) basePrices.push(basePrice);
+  });
+
+  if (!basePrices.length) return { min: 0, max: 0 };
+
+  return {
+    min: Math.min(...basePrices),
+    max: Math.max(...basePrices),
+  };
 }
