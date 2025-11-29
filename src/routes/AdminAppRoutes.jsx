@@ -16,6 +16,7 @@ import Shipping from "../pages/admin/Shipping";
 import CouponManagement from "../pages/admin/CouponManagement";
 import PrivateRoute from "../components/user/PrivateRoute";
 import PolicyManagerPage from "../pages/admin/policy/PolicyManagerPage";
+import InventoryManager from "../pages/admin/Inventory/InventoryManager";
 export default function AppRoutes() {
 
     return (
@@ -52,7 +53,9 @@ export default function AppRoutes() {
                 <Route path="/settings" element={<AdminLayout title="Setting" />}>
                     <Route index element={<SystemSettings />} />
                 </Route>
-
+                <Route path="/inventory" element={<AdminLayout title="Invenory Manager" />}>
+                    <Route index element={<InventoryManager />} />
+                </Route>
 
             </Routes>
         </BrowserRouter >

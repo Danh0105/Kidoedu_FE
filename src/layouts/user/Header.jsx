@@ -76,7 +76,7 @@ export default function Header() {
             <div className='d-flex w-100 justify-content-center'>
                 <img src="https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/Picture//Tm/Tm_picture_346/banner-khuyen-m_197_1920.png.webp" alt="" />
             </div>
-            <div className={`sticky-lg-top ${scrolled ? 'bg-success-subtle shadow-sm' : 'bg-white'}`}>
+            <div className={`sticky-lg-top ${scrolled ? 'bg-menu2 shadow-sm' : 'bg-menu1'}`}>
 
                 <header className="container d-flex justify-content-between align-items-center py-0 gap-3 pt-2 mb-2">
                     {/* Left: Logo + Menu */}
@@ -92,36 +92,38 @@ export default function Header() {
 
                         {/* Nav (giữ nguyên cấu trúc) */}
                         <nav
-                            className={`navbar navbar-expand-lg sticky-lg-top ${scrolled ? 'bg-success-subtle' : 'bg-white'} flex-grow-1`}
-                            aria-label="Eleventh navbar example"
+/*                             className={`navbar navbar-expand-lg sticky-lg-top ${scrolled ? 'bg-menu2' : ''} flex-grow-1`}
+ */                            aria-label="Eleventh navbar example"
                         >
-                            <nav
-                                className={`navbar navbar-expand-lg sticky-lg-top ${scrolled ? 'bg-success-subtle' : 'bg-white'} flex-grow-1`}
-                                aria-label="Eleventh navbar example"
-                            >
-                                <div className="container-fluid px-0 d-flex justify-content-center">
 
-                                    {/* Mobile / Tablet: chỉ hiện icon dropdown */}
-                                    <div className="d-lg-none">
-                                        <MenuCompact />
-                                    </div>
+                            <div className="container-fluid px-0 d-flex justify-content-center">
 
-                                    {/* Desktop: menu bình thường */}
-                                    <div className="collapse navbar-collapse show d-none d-lg-block" id="navbarsExample09">
-                                        <ul className="navbar-nav me-auto mb-2 mb-lg-0 p-2 header-menu-scroll">
-                                            <Menu />
-                                        </ul>
-                                    </div>
+                                {/* Mobile / Tablet: chỉ hiện icon dropdown */}
+                                <div className="d-lg-none">
+                                    <MenuCompact />
                                 </div>
-                            </nav>
+
+                                {/* Desktop: menu bình thường */}
+                                <div className="collapse navbar-collapse show d-none d-lg-block" id="navbarsExample09">
+                                    <ul className="navbar-nav me-auto mb-2 mb-lg-0 p-2 header-menu-scroll">
+                                        <Menu />
+                                    </ul>
+                                </div>
+                            </div>
                         </nav>
+
                     </div>
 
                     {/* Right: Icons */}
                     <div className="navbar-nav d-flex flex-row gap-3 ms-lg-3">
                         <NavLink to="/cart" className="d-inline-block position-relative" aria-label="Giỏ hàng">
                             <i className="bi bi-cart3"
-                                style={{ fontSize: 'clamp(1.4rem, 3.2vw, 1.75rem)' }} />
+                                style={{
+                                    fontSize: 'clamp(1.4rem, 3.2vw, 1.75rem)',
+                                    color: '#ffffff'
+                                }}
+                            />
+
                             <span
                                 className="position-absolute top-0 start-100 translate-middle badge rounded-circle text-danger border d-flex align-items-center justify-content-center bg-white"
                                 style={{

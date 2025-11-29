@@ -5,6 +5,7 @@ import axios from "axios";
 import "../../components/user/css/Store.css";
 import Product from "../../components/user/category/Product";
 import SidebarCategories from "../../components/user/SidebarCategories";
+import '../../components/user/css/Store.css'
 
 /* --------- Hook breakpoint để phân nhánh Desktop/Mobile ---------- */
 function useIsDesktop() {

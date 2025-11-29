@@ -247,7 +247,7 @@ export default function ModalLG({ onProductAdded }) {
                                         <input type="text" className={`form-control ${errors.nameproduct ? "is-invalid" : ""}`} value={nameproduct} onChange={(e) => setNameproduct(e.target.value)} />
                                         {errors.nameproduct && <div className="invalid-feedback">{errors.nameproduct}</div>}
                                     </div>
-                                    <div className="mb-3 text-start">
+                                    <div className="mb-3 text-start" >
                                         <label className="form-label">Mô tả dài</label>
 
                                         <ReactQuill
@@ -256,6 +256,7 @@ export default function ModalLG({ onProductAdded }) {
                                             className="border rounded overflow-auto"
                                             style={{ height: "250px" }}
                                         />
+
                                     </div>
 
 

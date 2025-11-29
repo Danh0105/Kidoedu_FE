@@ -6,6 +6,7 @@ import { faArrowUp, faLocationDot, faPhone, faEnvelope, faGlobe } from '@fortawe
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "../../assets/user/Logo.png";
+import '../../components/user/css/Footer.css'
 
 export default function Footer() {
     const [showScroll, setShowScroll] = useState(false);
@@ -439,16 +440,22 @@ export default function Footer() {
             </div>
             <img
                 src="https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/FE/img/left-black-241125.png"
+                className="sticker-bounce"
                 style={{ position: "fixed", bottom: "50%", left: 10, width: 100, zIndex: 9999 }}
-                alt="Black Friday Left"
             />
 
-            {/* BLACK FRIDAY RIGHT ICON */}
+            <img
+                src="https://res.cloudinary.com/dlnkeb4dm/image/upload/v1764338030/upzyolmvm6mlvyy6cvew.png"
+                className="sticker-wobble"
+                style={{ position: "fixed", bottom: "15%", left: -30, width: 150, zIndex: 9999 }}
+            />
+
             <img
                 src="https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/FE/img/right-black-241125.png"
+                className="sticker-pulse"
                 style={{ position: "fixed", bottom: "50%", right: 10, width: 100, zIndex: 9999 }}
-                alt="Black Friday Right"
             />
+
 
 
         </footer >

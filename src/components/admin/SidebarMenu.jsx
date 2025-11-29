@@ -34,32 +34,48 @@ const SidebarMenu = () => {
                 onClick={() => handleToggle(2)}
             />
             <MenuItem
+                to="/inventory"
+                icon="nav-icon bi bi-box-seam"
+                label="Quản lý kho"
+                isOpen={openIndex === 3}
+                onClick={() => handleToggle(3)}
+            />
+
+            <MenuItem
+                to="/orders"
+                icon="nav-icon bi bi-images"
+                label="Quản lý banner"
+                isOpen={openIndex === 4}
+                onClick={() => handleToggle(4)}
+            />
+
+            <MenuItem
                 to="/users"
                 icon="bi-palette"
                 label="Quản lý người dùng"
-                isOpen={openIndex === 3}
-                onClick={() => handleToggle(3)}
+                isOpen={openIndex === 5}
+                onClick={() => handleToggle(5)}
             />
             <MenuItem
                 to="/coupons"
                 icon="nav-icon bi bi-ticket-perforated-fill"
                 label="Quản lý phiếu giảm giá"
-                isOpen={openIndex === 4}
-                onClick={() => handleToggle(4)}
+                isOpen={openIndex === 6}
+                onClick={() => handleToggle(6)}
             />
             <MenuItem
                 to="/reports"
                 icon="nav-icon bi bi-bar-chart-fill"
                 label="Thống kê & báo cáo"
-                isOpen={openIndex === 5}
-                onClick={() => handleToggle(5)}
+                isOpen={openIndex === 7}
+                onClick={() => handleToggle(7)}
             />
             <MenuItem
 
                 icon="nav-icon bi bi-truck"
                 label="Thanh toán & vận chuyển"
-                isOpen={openIndex === 6}
-                onClick={() => handleToggle(6)}
+                isOpen={openIndex === 8}
+                onClick={() => handleToggle(8)}
             >
                 <li className="nav-item">
                     <NavLink
@@ -84,8 +100,8 @@ const SidebarMenu = () => {
                 to="/settings"
                 icon="nav-icon bi bi-gear-fill"
                 label="Quản trị hệ thống"
-                isOpen={openIndex === 7}
-                onClick={() => handleToggle(7)}
+                isOpen={openIndex === 9}
+                onClick={() => handleToggle(9)}
             />
         </ul>
     );

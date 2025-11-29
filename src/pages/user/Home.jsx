@@ -405,15 +405,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
     // ======================= Render =======================
     return (
-        <div
-            style={{
-                backgroundImage: 'url("https://oenix.vn/wp-content/uploads/2021/12/PHONG-NEN-GIANG-SINH-scaled.jpg")',
-                backgroundSize: "cover",
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "center",
-                minHeight: "100vh",
-            }}
-        >
+        <div >
             <div className="container py-4 bg-white bg-opacity-75 rounded-4 shadow-sm">
                 {/* Desktop layout: Sidebar + Content */}
                 <div

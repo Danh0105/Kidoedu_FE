@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import OrderDetailModal from "./OrderDetailModal";
+import ExportSlipModal from "./ExportSlipModal";
 const API_BASE = process.env.REACT_APP_API_URL;
 
 /* ======================= Helpers ======================= */
@@ -81,7 +82,7 @@ export default function OrderManager() {
         );
     }, [q, orders]);
 
-    /* ======================= popup ======================= */
+    /* ======================= Order Detail ======================= */
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
@@ -99,6 +100,25 @@ export default function OrderManager() {
     const closeDetail = () => {
         setShowModal(false);
         setSelectedOrder(null);
+    };
+    /* ======================= Export Slip ======================= */
+    const [showExport, setShowExport] = useState(false);
+    const [exportOrder, setExportOrder] = useState(null);
+
+    const openExportSlip = async (orderId) => {
+        try {
+            const res = await axios.get(`${API_BASE}/orders/${orderId}`);
+            setExportOrder(res.data);
+            setShowExport(true);
+        } catch (err) {
+            console.error("Lỗi tải phiếu xuất kho:", err);
+            alert("Không thể mở phiếu xuất kho!");
+        }
+    };
+
+    const closeExportSlip = () => {
+        setShowExport(false);
+        setExportOrder(null);
     };
 
     /* ======================= RENDER ======================= */
@@ -192,6 +212,13 @@ export default function OrderManager() {
 
                                         <td className="text-center">
                                             <button
+                                                className="btn btn-sm btn-primary me-2"
+                                                onClick={() => openExportSlip(o.orderId)}
+                                            >
+                                                Phiếu XK
+                                            </button>
+
+                                            <button
                                                 className="btn btn-sm btn-outline-danger"
                                                 onClick={() => deleteOrder(o.orderId)}
                                             >
@@ -207,6 +234,11 @@ export default function OrderManager() {
                     show={showModal}
                     onClose={closeDetail}
                     order={selectedOrder}
+                />
+                <ExportSlipModal
+                    show={showExport}
+                    onClose={closeExportSlip}
+                    order={exportOrder}
                 />
 
             </div>
