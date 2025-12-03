@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "../../assets/user/Logo.png";
 import '../../components/user/css/Footer.css'
+import axios from "axios";
 
 export default function Footer() {
     const [showScroll, setShowScroll] = useState(false);
@@ -21,6 +22,33 @@ export default function Footer() {
 
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+    const [banners, setBanners] = useState([]);
+    // Stable axios instance
+    const loadBanners = async () => {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/banners`);
+        setBanners(res.data);
+    };
+
+    useEffect(() => {
+        loadBanners();
+    }, []);
+    const getBanner = (id) => banners.find(b => b.id === id);
+    const BannerBox = ({ id, label, className }) => {
+        const banner = getBanner(id);
+        return (
+            <div className={className}>
+                {banner?.imageUrl ? (
+                    <img
+                        src={`${process.env.REACT_APP_API_URL}${banner.imageUrl}`}   // Rất quan trọng
+                        alt={label}
+                        className='banner-img'
+                    />
+                ) : (
+                    <span>{label}</span>
+                )}
+            </div>
+        );
     };
     return (
         <footer className="mt-1 border-top border-3">
@@ -438,24 +466,10 @@ export default function Footer() {
                     <a className="zalo-badge" href="https://zalo.me/0789636979" target="_blank" rel="noreferrer" aria-label="Chat Zalo"></a>
                 </div>
             </div>
-            <img
-                src="https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/FE/img/left-black-241125.png"
-                className="sticker-bounce"
-                style={{ position: "fixed", bottom: "50%", left: 10, width: 100, zIndex: 9999 }}
-            />
 
-            <img
-                src="https://res.cloudinary.com/dlnkeb4dm/image/upload/v1764338030/upzyolmvm6mlvyy6cvew.png"
-                className="sticker-wobble"
-                style={{ position: "fixed", bottom: "15%", left: -30, width: 150, zIndex: 9999 }}
-            />
-
-            <img
-                src="https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/FE/img/right-black-241125.png"
-                className="sticker-pulse"
-                style={{ position: "fixed", bottom: "50%", right: 10, width: 100, zIndex: 9999 }}
-            />
-
+            <BannerBox id={6} label="D — Sticker Trái" className="sticker-left-u-h" />
+            <BannerBox id={7} label="F — Sticker Trái nhỏ" className="sticker-left-a-h" />
+            <BannerBox id={8} label="E — Sticker Phải" className="sticker-right" />
 
 
         </footer >

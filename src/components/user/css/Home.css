@@ -1,0 +1,13 @@
+.product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* Không che mất banner */
+    padding: 8px;
+}
+
+.product-small-badge {
+    width: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}

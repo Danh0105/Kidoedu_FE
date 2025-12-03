@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import ModalCart from "../ModalCart";
 import ModalBuy from "../ModalBuy";
 import { pickRibbonFromStatus } from "../../../hooks/useUiUtils";
-
+import "../css/Product.css";
+import axios from "axios";
 const PLACEHOLDER_IMG = "https://placehold.co/600x600?text=No+Image";
 
 const formatCurrency = (value) =>
@@ -64,7 +65,16 @@ export default function Product({ prod }) {
             console.error("Lỗi khi lấy sản phẩm:", err);
         }
     };
+    const [banners, setBanners] = useState([]);
+    // Stable axios instance
+    const loadBanners = async () => {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/banners/12`);
+        setBanners(res.data);
+    };
 
+    useEffect(() => {
+        loadBanners();
+    }, []);
     const handleAddToCart = () => fetchProductAndOpen(id, "cart");
     const handleBuy = () => fetchProductAndOpen(id, "buy");
 
@@ -134,15 +144,27 @@ export default function Product({ prod }) {
 
             {/* Ảnh sản phẩm */}
             <Link to={`/productdetail/${id}`} className="nav-link p-0">
-                <img
-                    src={process.env.REACT_APP_API_URL + firstImage}
-                    alt={name || "product"}
-                    className="card-img-top object-fit-contain bg-white"
-                    style={{ height: 180 }}
-                    onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
+                <div
+                    className="product-image-wrapper"
                     onMouseEnter={() => setHovered(true)}
-                />
+                >
+                    <img
+                        src={process.env.REACT_APP_API_URL + firstImage}
+                        alt={name || "product"}
+                        className="product-image-store"
+                        onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
+                    />
+
+                    {/* Badge nhỏ phía dưới ảnh (tuỳ bạn) */}
+                    <img
+                        height={22}
+                        className="product-small-badge"
+                        src={process.env.REACT_APP_API_URL + banners.imageUrl}
+                        alt=""
+                    />
+                </div>
             </Link>
+
 
             {/* Hover actions */}
             <div
@@ -179,9 +201,14 @@ export default function Product({ prod }) {
 
                 <div style={{ height: 42 }} className="mb-2">
                     <Link to={`/productdetail/${id}`} className="nav-link p-0">
-                        <p className="card-text mt-2" style={{ fontSize: 14 }}>
-                            {trimText(desc, 50)}
-                        </p>
+                        <p
+                            className="card-text mt-2"
+                            style={{ fontSize: 14 }}
+                            dangerouslySetInnerHTML={{
+                                __html: trimHtml(desc, 50)
+                            }}
+                        ></p>
+
                     </Link>
                 </div>
 
@@ -248,4 +275,10 @@ export default function Product({ prod }) {
             </div>
         </div>
     );
+}
+function trimHtml(html, maxLength) {
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    const text = div.innerText || div.textContent;
+    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
 }

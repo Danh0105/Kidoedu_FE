@@ -4,7 +4,6 @@ import ImagesEdit from "./ImageEdit";
 import RichTextEditor from "../RichTextEditor";
 import CategoryEdit from "./CategoryEdit";
 import VariantFormEdit from "./VariantFormEdit";
-import InventoryPanelEdit from "./InventoryPanel";
 import AttributePanelEdit from "./AttributePanel";
 
 const MODAL_ID = "modalEditProduct";
@@ -105,8 +104,8 @@ export default function ModalEditProduct({ product, onUpdated, isOpen, onClosed 
         formData.append("price", String(Number(price) || 0));
         formData.append("origin", (origin || "").trim());
         formData.append("status", String(statusEdu));
-        formData.append("short_description", form.shortDescription || "");
-        formData.append("long_description", form.longDescription || "");
+        formData.append("shortDescription", form.shortDescription || "");
+        formData.append("longDescription", form.longDescription || "");
 
         // === 2. Ảnh sản phẩm chung ===
         const oldProductImages = form.images
@@ -269,7 +268,6 @@ export default function ModalEditProduct({ product, onUpdated, isOpen, onClosed 
                                 <div className="d-flex align-items-start border border-2">
                                     <div className="nav flex-column nav-pills w-25 ">
                                         <a className="nav-link active" data-bs-toggle="pill" data-bs-target="#variantsedit">Biến thể sản phẩm</a>
-                                        <a className="nav-link" data-bs-toggle="pill" data-bs-target="#inventoryedit">Kiểm kê kho hàng</a>
                                         <a className="nav-link" data-bs-toggle="pill" data-bs-target="#attributesedit">Các thuộc tính</a>
                                     </div>
 
@@ -277,9 +275,7 @@ export default function ModalEditProduct({ product, onUpdated, isOpen, onClosed 
                                         <div className="tab-pane fade show active" id="variantsedit">
                                             <VariantFormEdit data={variantsFromForm} onChange={setVariantsFromForm} disabled={Number(form.price || product?.price) > 0} />
                                         </div>
-                                        <div className="tab-pane fade" id="inventoryedit">
-                                            <InventoryPanelEdit variants={variantsFromForm} onChange={setInventoryDraft} initialInventory={inventoryDraft} />
-                                        </div>
+
                                         <div className="tab-pane fade" id="attributesedit">
                                             <AttributePanelEdit variants={variantsFromForm} onVariantsChange={setVariantsFromForm} />
                                         </div>

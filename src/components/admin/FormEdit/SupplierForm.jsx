@@ -13,25 +13,6 @@ export default function SupplierForm({ onCancel, onSubmit, initialData }) {
     const [form, setForm] = useState(initialState);
     const [errors, setErrors] = useState({});
 
-    // Khi mở modal với dữ liệu cũ -> fill form
-    useEffect(() => {
-        if (initialData) {
-            setForm({
-                supplierName: initialData.supplierName || "",
-                phone: initialData.supplierPhone || initialData.phone || "",
-                email: initialData.supplierEmail || initialData.email || "",
-                address:
-                    initialData.supplierAddress || initialData.address || "",
-                note: initialData.supplierNote || initialData.note || "",
-                refCode:
-                    initialData.supplierRefCode || initialData.refCode || "",
-            });
-        } else {
-            setForm(initialState);
-        }
-        setErrors({});
-    }, [initialData]);
-
     const handleChange = (field) => (e) => {
         setForm((prev) => ({ ...prev, [field]: e.target.value }));
     };
@@ -57,11 +38,10 @@ export default function SupplierForm({ onCancel, onSubmit, initialData }) {
         // Chuẩn hóa data và đổi tên field cho khớp InventoryPanel / ModalLG
         const payload = {
             supplierName: form.supplierName.trim(),
-            supplierPhone: form.phone.trim() || "",
-            supplierEmail: form.email.trim() || "",
-            supplierAddress: form.address.trim() || "",
-            supplierNote: form.note.trim() || "",
-            supplierRefCode: form.refCode.trim() || "",
+            phone: form.phone.trim() || "",
+            email: form.email.trim() || "",
+            address: form.address.trim() || "",
+            note: form.note.trim() || "",
         };
 
         onSubmit?.(payload);
@@ -109,7 +89,7 @@ export default function SupplierForm({ onCancel, onSubmit, initialData }) {
 
             <div className="row g-3 mb-2">
                 {/* Email */}
-                <div className="col-12 col-md-6">
+                <div className="col-12">
                     <label className="form-label fw-semibold">Email</label>
                     <input
                         type="email"
@@ -122,20 +102,6 @@ export default function SupplierForm({ onCancel, onSubmit, initialData }) {
                     {errors.email && (
                         <div className="invalid-feedback">{errors.email}</div>
                     )}
-                </div>
-
-                {/* Mã / Số tham chiếu */}
-                <div className="col-12 col-md-6">
-                    <label className="form-label fw-semibold">
-                        Mã / Số tham chiếu
-                    </label>
-                    <input
-                        type="text"
-                        className="form-control rounded-3"
-                        placeholder="Tùy chọn"
-                        value={form.refCode}
-                        onChange={handleChange("refCode")}
-                    />
                 </div>
             </div>
 

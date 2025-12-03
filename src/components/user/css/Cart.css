@@ -1,0 +1,49 @@
+/* Ảnh thumbnail trong giỏ hàng */
+.cart-thumb {
+
+
+    object-fit: contain;
+    /* Ảnh luôn đầy khung, không méo */
+    object-position: center;
+    /* Lấy trung tâm ảnh */
+
+    border-radius: 10px;
+    /* Bo góc mềm */
+    border: 1px solid #e1e1e1;
+    /* Viền nhẹ sang trọng */
+
+    background: #f8f8f8;
+    /* Khi ảnh load chậm vẫn đẹp */
+
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    /* Đổ bóng nhẹ */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Hiệu ứng hover */
+.cart-thumb:hover {
+    transform: scale(1.04);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+td .fw-bold {
+    font-size: 15px;
+}
+
+td .text-primary {
+    color: #3b78ff !important;
+}
+
+td .small {
+    font-size: 13px;
+}
+
+td .text-muted {
+    opacity: 0.8;
+}
+
+.cart-footer {
+    position: absolute;
+    bottom: 0%;
+    width: 100%;
+}

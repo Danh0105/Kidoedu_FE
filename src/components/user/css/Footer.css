@@ -126,3 +126,256 @@
         filter: drop-shadow(0 0 0px rgba(255, 0, 90, 0.35));
     }
 }
+
+.banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sticker-right {
+    position: fixed;
+    right: 10px;
+    bottom: 50%;
+    width: 80px;
+    height: 80px;
+
+    background: #ff3030;
+    color: white;
+    font-weight: bold;
+    border-radius: 50%;
+
+    display: flex;
+    /* bật flexbox */
+    align-items: center;
+    /* căn giữa theo chiều dọc */
+    justify-content: center;
+    /* căn giữa theo chiều ngang */
+    text-align: center;
+}
+
+.sticker-left-u-h {
+    position: fixed;
+    left: 5px;
+    bottom: 50%;
+    width: 80px;
+    height: 80px;
+
+    color: white;
+    font-weight: bold;
+    border-radius: 50%;
+
+    display: flex;
+    /* bật flexbox */
+    align-items: center;
+    /* căn giữa theo chiều dọc */
+    justify-content: center;
+    /* căn giữa theo chiều ngang */
+    text-align: center;
+}
+
+.sticker-left-a-h {
+    position: fixed;
+    left: -20px;
+    bottom: 15%;
+    width: 150px;
+    height: 150px;
+
+    color: white;
+    font-weight: bold;
+    border-radius: 50%;
+
+    display: flex;
+    /* bật flexbox */
+    align-items: center;
+    /* căn giữa theo chiều dọc */
+    justify-content: center;
+    /* căn giữa theo chiều ngang */
+    text-align: center;
+}
+
+/* Vị trí icon hotline */
+.hotline-bubble {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 58px;
+    height: 58px;
+    background: #ff3b30;
+    /* màu đỏ nổi */
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 26px;
+    text-decoration: none;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    z-index: 9999;
+    transition: 0.25s ease;
+}
+
+/* Hiệu ứng hover */
+.hotline-bubble:hover {
+    transform: scale(1.1);
+    background: #e91e1e;
+}
+
+/* Tooltip */
+.hotline-tip {
+    position: absolute;
+    right: 70px;
+    bottom: 50%;
+    transform: translateY(50%);
+    background: #ff3b30;
+    padding: 8px 14px;
+    border-radius: 6px;
+    color: white;
+    white-space: nowrap;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+/* Hover mới hiện tooltip */
+.hotline-bubble:hover .hotline-tip {
+    opacity: 1;
+    right: 65px;
+}
+
+/* Hiệu ứng rung — tùy chọn */
+@keyframes phone-ring {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    20% {
+        transform: rotate(15deg);
+    }
+
+    40% {
+        transform: rotate(-15deg);
+    }
+
+    60% {
+        transform: rotate(10deg);
+    }
+
+    80% {
+        transform: rotate(-10deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.hotline-bubble i {
+    animation: phone-ring 1.6s infinite;
+    display: block;
+}
+
+/* Khung tổng */
+.hotline-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 10%;
+    transform: translateX(-50%);
+
+    background: #ffffff;
+    border-radius: 50px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    width: fit-content;
+    animation: slideUp 0.3s ease-out;
+}
+
+/* Icon điện thoại */
+.hotline-icon {
+    width: 44px;
+    height: 44px;
+    background: #ff3b30;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 22px;
+}
+
+/* Text */
+.hotline-text {
+    line-height: 1.1;
+}
+
+.hotline-text div {
+    font-size: 14px;
+    color: #333;
+}
+
+/* Số điện thoại */
+.hotline-text strong {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ff3b30;
+}
+
+/* Hiệu ứng Shine */
+.shine {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+}
+
+.shine::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 80%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent 0%, rgba(193, 11, 11, 0.6) 50%, transparent 100%);
+    animation: shineMove 1.8s linear infinite;
+}
+
+/* Badge Zalo */
+.zalo-badge {
+    width: 38px;
+    height: 38px;
+    background-image: url("https://cdn-icons-png.flaticon.com/512/5968/5968855.png");
+    background-size: cover;
+    background-position: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Animation slide-up */
+@keyframes slideUp {
+    from {
+        transform: translate(-50%, 20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+/* Shine animation */
+@keyframes shineMove {
+    from {
+        left: -100%;
+    }
+
+    to {
+        left: 120%;
+    }
+}

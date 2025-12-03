@@ -4,6 +4,8 @@ import { CartContext } from "../../hooks/CartContext";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import Cookies from "js-cookie";
+import "../user/css/ProductInfoPanel.css"
+import { addToCartHelper } from "../../utils/addToCartHelper";
 
 import {
   pickPricesFromVariant,
@@ -21,15 +23,22 @@ export default function ProductInfoPanel({
   onVariantChange,
   onVariantsLoaded,
 }) {
-  const { setCartCount, setSelectedProducts } = useContext(CartContext);
+
+  const { setCartCount, setSelectedProducts, addToCartContext } =
+    useContext(CartContext);
 
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedAttr, setSelectedAttr] = useState(null);
-
+  const [activeVariant, setActiveVariant] = useState(null);
   const variants = product?.variants || [];
 
   /* ----------------------- Load default variant ----------------------- */
+  useEffect(() => {
+    if (variants.length && !activeVariant) {
+      setActiveVariant(variants[0]);
+    }
+  }, [variants, activeVariant]);
   useEffect(() => {
     if (variants.length > 0 && !selectedVariant) {
       const first = variants[0];
@@ -51,7 +60,16 @@ export default function ProductInfoPanel({
 
     onVariantsLoaded?.(variantImages);
   }, [product, variants]);
+  const [banners, setBanners] = useState([]);
+  // Stable axios instance
+  const loadBanners = async () => {
+    const res = await axios.get(`${process.env.REACT_APP_API_URL}/banners/13`);
+    setBanners(res.data);
+  };
 
+  useEffect(() => {
+    loadBanners();
+  }, []);
   /* --------------------------- Derived Values -------------------------- */
 
   const active = selectedVariant || {};
@@ -59,7 +77,17 @@ export default function ProductInfoPanel({
 
   const { basePrice, promoPrice, finalPrice } = pickPricesFromVariant(active);
 
-  const displayPrice = promoPrice ?? basePrice ?? product?.price ?? finalPrice;
+  const displayPrice =
+    product?.price > 0
+      ? product.price
+      : promoPrice > 0
+        ? promoPrice
+        : basePrice > 0
+          ? basePrice
+          : finalPrice > 0
+            ? finalPrice
+            : 0;
+
 
   const hasPromo =
     promoPrice != null && (basePrice ?? promoPrice) > promoPrice;
@@ -94,67 +122,20 @@ export default function ProductInfoPanel({
   const increase = () => setQuantity((n) => Math.min(999, n + 1));
   const decrease = () => setQuantity((n) => Math.max(1, n - 1));
 
-  /* ----------------------- ADD TO CART ----------------------- */
-
-  const addToCart = async (productId, qty) => {
-    try {
-      const token = localStorage.getItem("Authorization");
-
-      // 1) User logged in → send to server
-      if (token?.trim()) {
-        const userId = jwtDecode(token).sub;
-
-        await axios.post(
-          `${process.env.REACT_APP_API_URL}/cart/${userId}/items`,
-          {
-            productId,
-            quantity: qty,
-            selectedVariant,
-            selectedAttr,
-          },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        alert("Đã thêm sản phẩm vào giỏ!");
-        fetchCountCart();
-        return;
-      }
-
-      // 2) Guest cart → save to cookie
-      const guest = JSON.parse(Cookies.get("guest_cart") || "[]");
-
-      const cartItem = makeCheckoutProduct({
-        product,
-        variant: active,
-        quantity: qty,
-        selectedAttr,
-      });
-
-      const idx = guest.findIndex(
-        (i) =>
-          i.productId === productId &&
-          (i.variantId || null) === (cartItem.variantId || null) &&
-          (i.selectedAttr || null) === (selectedAttr || null)
-      );
-
-      if (idx !== -1) guest[idx].quantity += qty;
-      else guest.push(cartItem);
-
-      Cookies.set("guest_cart", JSON.stringify(guest), { expires: 7 });
-
-      setCartCount(guest.length);
-      alert("Đã thêm sản phẩm!");
-    } catch (err) {
-      console.error(err);
-      alert("Không thể thêm vào giỏ hàng!");
-    }
-  };
-
+  /* =======================================================================
+   *                       FETCH CART COUNT
+   * ======================================================================= */
   const fetchCountCart = async () => {
     const token = localStorage.getItem("Authorization");
     if (!token?.trim()) return;
 
-    const userId = jwtDecode(token).sub;
+    let userId = null;
+    try {
+      userId = jwtDecode(token).sub;
+    } catch {
+      return;
+    }
+
     const res = await axios.get(
       `${process.env.REACT_APP_API_URL}/cart/${userId}`,
       { headers: { Authorization: `Bearer ${token}` } }
@@ -162,6 +143,11 @@ export default function ProductInfoPanel({
 
     setCartCount(res.data.items.length || 0);
   };
+
+
+  /* ===================================================================
+  *                     ADD TO CART — BẢN ĐƠN GIẢN & CHUẨN
+  * =================================================================== */
 
   /* ---------------------- Checkout Submit ---------------------- */
   const submitCheckout = () => {
@@ -171,8 +157,6 @@ export default function ProductInfoPanel({
       quantity,
       selectedAttr,
     });
-    console.log("checkoutItem", checkoutItem);
-
     setSelectedProducts([checkoutItem]);
   };
 
@@ -187,18 +171,19 @@ export default function ProductInfoPanel({
   /* -------------------------------- UI -------------------------------- */
 
   return (
-    <div className="bg-white p-4 rounded-4 shadow-sm position-relative">
-      <h1 className="h3 fw-bold mb-1">{name}</h1>
+    <div className="bg-white p-3 rounded-4 shadow-sm position-relative">
+      <div className="d-flex justify-content-between align-items-start">
+        {/* Tên sản phẩm nổi bật */}
+        <h1 className="product-title fw-bold mb-1">
+          {name}
+        </h1>
 
-      {/* TAGS */}
-      <div className="d-flex flex-wrap gap-2 mb-3 small">
-        {[1, 12].includes(product?.status) && (
-          <span className="badge bg-warning text-dark">Nổi bật</span>
-        )}
-        {[2, 12].includes(product?.status) && (
-          <span className="badge bg-danger">Mới</span>
-        )}
+        {/* Số lượng còn lại */}
+        <div className="stock-badge">
+          Còn {selectedVariant?.inventory?.stock_quantity}
+        </div>
       </div>
+
 
       {/* SKU */}
       <div className="d-flex flex-wrap gap-2 mb-3 small text-muted">
@@ -244,7 +229,53 @@ export default function ProductInfoPanel({
           </div>
         </div>
       )}
+      <div
+        className="mb-3 position-relative"
+        style={{
+          backgroundImage: `url("${process.env.REACT_APP_API_URL}${banners.imageUrl}")`,
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          minHeight: "20vh",
+          transition: "0.3s",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            bottom: "25%",
+            left: "100px",
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            gap: "40px",
+            alignItems: "center",
+          }}
+        >
+          {/* Giá đã giảm */}
+          <h2 className="text-light fw-bold mb-0">
+            {fmtVND(displayPrice * quantity)}
+          </h2>
 
+
+
+          {/* Badge % giảm */}
+          <span
+            style={{
+              background: "#ff3b3b",
+              color: "#fff",
+              padding: "6px 12px",
+              borderRadius: "8px",
+              fontWeight: "bold",
+              fontSize: "25px",
+            }}
+          >
+            -{Math.round((basePrice ? (basePrice - displayPrice) / basePrice : 0) * 100)}%
+          </span>
+        </div>
+
+
+      </div>
       {/* Attributes */}
       {selectedVariant && (
         <div className="border rounded p-3 bg-light-subtle mb-3">
@@ -289,9 +320,12 @@ export default function ProductInfoPanel({
           )}
         </div>
       )}
+
+      {/* SHORT DESCRIPTION */}
       <div className="feature-list-wrapper mb-3">
         <div dangerouslySetInnerHTML={{ __html: product?.shortDescription ?? "" }} />
       </div>
+
       {/* PRICE */}
       <div className="rounded-3 p-3 mb-3 bg-light">
         <div className="d-flex align-items-baseline gap-3 flex-wrap">
@@ -332,7 +366,9 @@ export default function ProductInfoPanel({
             max={999}
             value={quantity}
             onChange={(e) =>
-              setQuantity(Math.max(1, Math.min(999, Number(e.target.value))))
+              setQuantity(
+                Math.max(1, Math.min(999, Number(e.target.value)))
+              )
             }
           />
           <button className="btn btn-outline-secondary" onClick={increase}>
@@ -342,11 +378,20 @@ export default function ProductInfoPanel({
 
         <button
           className="btn btn-danger px-4"
-          onClick={() => addToCart(product.productId, quantity)}
+          onClick={() =>
+            addToCartHelper({
+              product,
+              variant: activeVariant,
+              quantity,
+              selectedAttr,
+              displayPrice,
+              setCartCount,
+              addToCartContext,
+            })
+          }
         >
-          + Thêm giỏ hàng
+          <i className="bi bi-bag-plus"></i> Thêm vào giỏ hàng
         </button>
-
         <NavLink
           to="/checkout"
           className="btn btn-primary px-4"

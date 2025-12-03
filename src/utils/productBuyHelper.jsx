@@ -4,40 +4,25 @@ export function pickPricesFromVariant(variant) {
         return { basePrice: null, promoPrice: null, finalPrice: 0 };
     }
 
-    if (!Array.isArray(variant.prices)) {
-        const cur = typeof variant.currentPrice === "number" ? variant.currentPrice : 0;
+    // Không có price list → fallback currentPrice
+    if (!Array.isArray(variant?.prices)) {
+        const price = Number(variant.currentPrice || 0);
         return {
-            basePrice: cur || null,
+            basePrice: price,
             promoPrice: null,
-            finalPrice: cur || 0,
+            finalPrice: price,
         };
     }
 
-    let baseRecord = null;
-    let promoRecord = null;
+    // Lấy giá từ mảng
+    const promo = variant?.prices.find((p) => p.priceType === "promo");
+    const base = variant?.prices.find((p) => p.priceType === "base");
 
-    variant.prices.forEach((p) => {
-        if (!p) return;
-        if (p.priceType === "base") {
-            if (!baseRecord || new Date(p.startAt) > new Date(baseRecord.startAt)) {
-                baseRecord = p;
-            }
-        }
-        if (p.priceType === "promo") {
-            if (!promoRecord || new Date(p.startAt) > new Date(promoRecord.startAt)) {
-                promoRecord = p;
-            }
-        }
-    });
+    const basePrice = base ? Number(base.price) : null;
+    const promoPrice = promo ? Number(promo.price) : null;
+    const finalPrice = promoPrice ?? basePrice ?? 0;
 
-    const basePrice = baseRecord ? Number(baseRecord.price) : null;
-    const promoPrice = promoRecord ? Number(promoRecord.price) : null;
-
-    return {
-        basePrice,
-        promoPrice,
-        finalPrice: promoPrice ?? basePrice ?? 0,
-    };
+    return { basePrice, promoPrice, finalPrice };
 }
 
 /** Chuẩn hoá sản phẩm để đưa sang Checkout */

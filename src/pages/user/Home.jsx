@@ -1,4 +1,4 @@
-import "../../App.css";
+import "../../components/user/csss/Home.css";
 import Carousel from "../../components/user/Carousel";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
@@ -207,7 +207,19 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         },
         [allProducts]
     );
+    const [banners, setBanners] = useState([]);
+    const getBanner = (id) => banners?.find((b) => b.id === id);
+    const frameproductN = getBanner(10);
+    const frameproductP = getBanner(11);
+    // Stable axios instance
+    const loadBanners = async () => {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/banners`);
+        setBanners(res.data || []);
+    };
 
+    useEffect(() => {
+        loadBanners();
+    }, []);
     // ======================= UI bits =======================
     const SkeletonCard = () => (
         <div
@@ -457,7 +469,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                     </div>
                     <div className="row justify-content-center">
                         {(showAllNew ? newProducts : newProducts.slice(0, 4)).map((p) => (
-                            <ProductCard key={p.productId} p={p} />
+                            <ProductCard key={p.productId} p={p} banners={frameproductN} />
                         ))}
                         {!newProducts.length && (
                             <p className="text-center text-muted">
@@ -496,7 +508,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                     <div className="row justify-content-center">
                         {(showAllFeatured ? featuredProducts : featuredProducts.slice(0, 4)).map(
                             (p) => (
-                                <ProductCard key={p.productId} p={p} />
+                                <ProductCard key={p.productId} p={p} banners={frameproductP} />
                             )
                         )}
                         {!featuredProducts.length && (
@@ -529,7 +541,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 }
 
 // ===== Product card (reused in sections) =====
-function ProductCard({ p }) {
+function ProductCard({ p, banners }) {
     const ribbons = (pickRibbonsFromStatus?.(p?.status) || []).slice(0, 3);
     const imgSrc = p.images?.find(img => img.isPrimary)?.imageUrl ??
         p.images?.[0]?.imageUrl ??
@@ -626,6 +638,7 @@ function ProductCard({ p }) {
     const showDiscountBadge =
         hasSale && discountPercent && discountPercent > 0;
 
+
     return (
         <div className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 d-flex">
             <article
@@ -633,38 +646,40 @@ function ProductCard({ p }) {
                 itemScope
                 itemType="https://schema.org/Product"
             >
-                <div className="position-relative">
+                <div className="product-frame">
+
+                    {/* Badge */}
                     {ribbons.map((rb, i) => (
                         <span
                             key={i}
-                            className={`badge position-absolute ribbon ${rb.className || "text-bg-warning"
-                                }`}
+                            className={`badge position-absolute ribbon ${rb.className || "text-bg-warning"}`}
                             data-pos={rb.position || "tl"}
                         >
                             {rb.text}
                         </span>
                     ))}
+
                     {showDiscountBadge && (
                         <span
                             className="badge position-absolute ribbon text-bg-danger"
                             data-pos="tr"
-                            aria-label={`Giảm ${discountPercent}%`}
                         >
                             -{discountPercent}%
                         </span>
                     )}
 
+                    {/* Ảnh sản phẩm */}
                     <a
                         href={`/productdetail/${p.productId}`}
-                        className="d-block ratio ratio-4x3 bg-light-subtle"
                         aria-label={p?.productName}
+                        className="product-image-wrapper"
                     >
                         <img
                             src={process.env.REACT_APP_API_URL + imgSrc}
                             alt={p?.productName}
                             loading="lazy"
                             decoding="async"
-                            className="w-100 h-100"
+                            className="w-100 h-100 product-img"
                             style={{
                                 objectFit: "scale-down",
                                 objectPosition: "center",
@@ -675,10 +690,21 @@ function ProductCard({ p }) {
                                 e.currentTarget.src = "/placeholder.png";
                             }}
                         />
+
                     </a>
+
+                    {/* KHUNG */}
+                    <img
+                        src={`${process.env.REACT_APP_API_URL}${banners?.imageUrl}`}
+                        alt="frame"
+                        className="frame-overlay"
+                    />
+
                 </div>
 
+
                 <div className="card-body d-flex flex-column text-center">
+
                     <h3
                         className="product-title fw-semibold text-body-emphasis mb-2 two-line-clamp"
                         title={p?.productName}

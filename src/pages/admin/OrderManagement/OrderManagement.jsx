@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import OrderDetailModal from "./OrderDetailModal";
 import ExportSlipModal from "./ExportSlipModal";
+import CreateOrderModal from "./CreateOrderModal"
 const API_BASE = process.env.REACT_APP_API_URL;
 
 /* ======================= Helpers ======================= */
@@ -22,6 +23,7 @@ export default function OrderManager() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
     const [q, setQ] = useState(""); // search local
+    const [showCreate, setShowCreate] = useState(false);
 
     /* ======================= API ======================= */
     const fetchOrders = async () => {
@@ -129,7 +131,12 @@ export default function OrderManager() {
                 {/* Header */}
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h4 className="fw-bold">Quản lý đơn hàng</h4>
-
+                    <button
+                        className="btn btn-success"
+                        onClick={() => setShowCreate(true)}
+                    >
+                        + Tạo đơn hàng
+                    </button>
                     <input
                         className="form-control"
                         style={{ width: 260 }}
@@ -239,6 +246,13 @@ export default function OrderManager() {
                     show={showExport}
                     onClose={closeExportSlip}
                     order={exportOrder}
+                />
+                <CreateOrderModal
+                    show={showCreate}
+                    onClose={() => setShowCreate(false)}
+                    onCreated={(newOrder) => {
+                        setOrders((prev) => [newOrder, ...prev]);
+                    }}
                 />
 
             </div>

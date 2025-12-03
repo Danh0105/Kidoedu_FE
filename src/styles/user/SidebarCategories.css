@@ -1,0 +1,273 @@
+/* --- Variables & Reset --- */
+.modern-cat-container {
+    overflow: visible !important;
+
+    --primary-color: #0d6efd;
+    --primary-light: #e7f1ff;
+    --text-dark: #333;
+    --text-gray: #6c757d;
+    --border-color: #e9ecef;
+    --radius-pill: 50px;
+    --radius-box: 12px;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 1rem;
+    background: #fff;
+    border-radius: var(--radius-box);
+    border: 1px solid var(--border-color);
+    width: 100%;
+    position: relative;
+}
+
+/* --- 1. Top Bar (Search) --- */
+.cat-top-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.search-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+    max-width: 320px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 8px 36px 8px 36px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-color);
+    background: #f8f9fa;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.search-input:focus {
+    background: #fff;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
+    outline: none;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-gray);
+    pointer-events: none;
+}
+
+.clear-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: var(--text-gray);
+    cursor: pointer;
+    padding: 4px;
+}
+
+.active-filter-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    border-radius: var(--radius-pill);
+    font-size: 0.85rem;
+}
+
+.remove-filter-btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: inherit;
+}
+
+/* --- 2. Category List (Cho phép xuống dòng) --- */
+.scroll-track {
+    display: flex;
+    flex-wrap: wrap;
+    /* ✔️ Cho phép xuống dòng */
+    gap: 12px;
+    overflow: visible !important;
+    padding: 10px 0;
+    position: relative;
+    z-index: 5;
+}
+
+/* --- 3. Category Chip --- */
+.cat-group {
+    position: relative;
+    z-index: 20;
+}
+
+.cat-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-pill);
+    color: var(--text-dark);
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.cat-chip:hover {
+    background: #f8f9fa;
+    border-color: #ced4da;
+}
+
+.cat-chip.active,
+.cat-chip.has-selection {
+    background: var(--text-dark);
+    color: #fff;
+    border-color: var(--text-dark);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cat-chip.active .cat-icon,
+.cat-chip.active .arrow-icon {
+    color: #fff;
+}
+
+.cat-icon {
+    color: var(--text-gray);
+}
+
+.arrow-icon {
+    transition: transform 0.2s;
+}
+
+.rotate {
+    transform: rotate(180deg);
+}
+
+/* --- 4. Dropdown Menu — Fixed để không bị che --- */
+.cat-dropdown-menu {
+    position: fixed !important;
+    /* ✔️ Không bao giờ bị che */
+    top: var(--drop-y);
+    left: var(--drop-x);
+
+    min-width: 260px;
+    background: #fff;
+    border-radius: var(--radius-box);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+    padding: 8px;
+    z-index: 999999;
+}
+
+.dropdown-arrow {
+    display: none;
+    /* Ẩn mũi tên vì fixed không kê đúng vị trí */
+}
+
+.dropdown-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Sub-item */
+.sub-cat-item {
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+}
+
+.sub-cat-item:hover {
+    background: #f8f9fa;
+}
+
+.sub-cat-item.selected {
+    background: var(--primary-light);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Radio fake */
+.custom-radio {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-radio.checked {
+    border-color: var(--primary-color);
+}
+
+.radio-dot {
+    width: 10px;
+    height: 10px;
+    background: var(--primary-color);
+    border-radius: 50%;
+}
+
+/* Animations */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-down {
+    animation: slideDown 0.2s ease-out forwards;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--text-gray);
+    padding: 20px;
+    font-style: italic;
+}

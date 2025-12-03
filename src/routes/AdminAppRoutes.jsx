@@ -16,7 +16,8 @@ import Shipping from "../pages/admin/Shipping";
 import CouponManagement from "../pages/admin/CouponManagement";
 import PrivateRoute from "../components/user/PrivateRoute";
 import PolicyManagerPage from "../pages/admin/policy/PolicyManagerPage";
-import InventoryManager from "../pages/admin/Inventory/InventoryManager";
+import InventoryManager from "../pages/admin/InventoryManagement/InventoryManager";
+import BannerManagement from "../pages/admin/BannerManagement/BannerManagement";
 export default function AppRoutes() {
 
     return (
@@ -56,7 +57,9 @@ export default function AppRoutes() {
                 <Route path="/inventory" element={<AdminLayout title="Invenory Manager" />}>
                     <Route index element={<InventoryManager />} />
                 </Route>
-
+                <Route path="/banners" element={<AdminLayout title="Banner Manager" />}>
+                    <Route index element={<BannerManagement />} />
+                </Route>
             </Routes>
         </BrowserRouter >
     );

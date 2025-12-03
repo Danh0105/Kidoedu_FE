@@ -1,15 +1,15 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import Slider from "react-slick";
-import InnerImageZoom from "react-inner-image-zoom";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import 'react-inner-image-zoom/lib/InnerImageZoom/styles.css';
 import { NavLink, useParams } from "react-router-dom";
 import axios from "axios";
-import ModalCart from "../../components/user/ModalCart";
 import ProductInfoPanel from "../../components/user/ProductInfoPanel";
 import { ProductSpecs } from "./ProductSpecs";
 import "../../components/user/css/ProductDetail.css";
+import { addToCartHelper } from "../../utils/addToCartHelper";
+import { CartContext } from "../../hooks/CartContext";
 
 const PLACEHOLDER = "/placeholder-800x800.png";
 
@@ -98,6 +98,7 @@ export default function ProductDetail() {
     const [showModalCart, setShowModalCart] = useState(false);
     const [cartPreview, setCartPreview] = useState(null);
     const [specs, setSpecs] = useState([]);
+    const { addToCartContext, setCartCount } = useContext(CartContext);
 
     /* ===========================================================
        Lấy sản phẩm từ API (safe parsing)
@@ -288,7 +289,7 @@ export default function ProductDetail() {
     const origin = product?.origin ?? null;
     const stock = typeof product?.stock_quantity === "number" ? product.stock_quantity : null;
 
-    const mainSettings = { arrows: true, fade: true, dots: false, adaptiveHeight: true };
+    const mainSettings = { arrows: false, fade: true, dots: false, adaptiveHeight: true };
     const thumbSettings = {
         slidesToShow: 4,
         swipeToSlide: true,
@@ -321,50 +322,66 @@ export default function ProductDetail() {
 
             <div className="row g-4">
                 {/* Image Gallery */}
-                <div className="col-12 col-md-6">
-                    <div className="product-slider bg-white p-3 rounded-4 shadow-sm position-relative">
-                        {Array.isArray(images) && images.length ? (
-                            <>
-                                <Slider {...mainSettings} asNavFor={nav2} ref={setNav1}>
-                                    {images.map((src, i) => (
-                                        <div key={i}>
-                                            <InnerImageZoom
-                                                src={process.env.REACT_APP_API_URL + src}
-                                                zoomSrc={process.env.REACT_APP_API_URL + src}
+                <div className="col-12 col-md-6 bg-white  p-3 rounded-4 shadow-sm">
 
-                                                zoomType="hover"
-                                                zoomScale={1.2}
-                                                alt={`Ảnh sản phẩm ${i + 1}`}
-                                                className="img-fluid rounded-3"
-                                                onError={(e) => (e.currentTarget.src = PLACEHOLDER)}
-                                            />
-                                        </div>
-                                    ))}
-                                </Slider>
+                    <div className="dmx-gallery position-relative">
 
-                                <div className="mt-2">
-                                    <Slider {...thumbSettings} asNavFor={nav1} ref={setNav2}>
-                                        {images.map((src, i) => (
-                                            <div key={i} className="px-1">
-                                                <img
-                                                    src={process.env.REACT_APP_API_URL + src}
-                                                    alt={`Thumb ${i + 1}`}
-                                                    className="img-fluid rounded-2 thumb-img"
-                                                    onError={(e) => (e.currentTarget.src = PLACEHOLDER)}
-                                                />
-                                            </div>
-                                        ))}
-                                    </Slider>
+                        {/* ===== SLIDER ẢNH LỚN ===== */}
+                        <Slider {...mainSettings} asNavFor={nav2} ref={setNav1}>
+                            {images.map((src, i) => (
+                                <div key={i} className="dmx-image-container">
+                                    <img
+                                        src={process.env.REACT_APP_API_URL + src}
+                                        alt={`Ảnh sản phẩm ${i + 1}`}
+                                        className="dmx-main-image"
+                                        onError={(e) => (e.currentTarget.src = PLACEHOLDER)}
+                                    />
                                 </div>
-                            </>
-                        ) : (
-                            <div className="text-center p-4 text-muted">
-                                <img src={PLACEHOLDER} alt="No image" className="img-fluid rounded-3" style={{ maxWidth: 400, opacity: 0.7 }} />
-                                <div className="mt-3">
-                                    <i className="bi bi-image me-2"></i> Chưa có hình ảnh sản phẩm
+                            ))}
+                        </Slider>
+
+                        {/* Nút chuyển trái/phải */}
+                        <button className="dmx-prev" onClick={() => nav1?.slickPrev()}>
+                            <i className="bi bi-chevron-left"></i>
+                        </button>
+
+                        <button className="dmx-next" onClick={() => nav1?.slickNext()}>
+                            <i className="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    {/* ===== SLIDE THUMBNAIL BÊN DƯỚI ===== */}
+                    <div className="dmx-thumb-wrapper mt-3">
+                        <Slider {...thumbSettings} asNavFor={nav1} ref={setNav2}>
+                            {images.map((src, i) => (
+                                <div key={i} className="dmx-thumb-item">
+                                    <img
+                                        src={process.env.REACT_APP_API_URL + src}
+                                        alt={`Thumb ${i + 1}`}
+                                        className="dmx-thumb-img"
+                                        onError={(e) => (e.currentTarget.src = PLACEHOLDER)}
+                                    />
                                 </div>
-                            </div>
-                        )}
+                            ))}
+                        </Slider>
+                    </div>
+                    <div className="dmx-tabs d-flex justify-content-center gap-4 mt-4">
+
+
+                        <div className="dmx-tab">
+                            <i className="bi bi-box"></i>
+                            <span>Thông số kỹ thuật</span>
+                        </div>
+
+                        <div className="dmx-tab">
+                            <i className="bi bi-info-circle"></i>
+                            <span>Mô tả sản phẩm</span>
+                        </div>
+
+                        <div className="dmx-tab">
+                            <div className="rating">4.7</div>
+                            <span>Đánh giá sản phẩm</span>
+                        </div>
                     </div>
                 </div>
 
@@ -372,15 +389,19 @@ export default function ProductDetail() {
                 <div className="col-12 col-lg-6">
                     <ProductInfoPanel
                         product={product}
-                        images={images}
-                        onAddToCart={(item) => {
-                            setCartPreview(item);
-                            setShowModalCart(true);
-                        }}
-                        defaultQty={1}
-                        onVariantChange={handleVariantChange}
-                        onVariantsLoaded={handleVariantsLoaded}
+                        onAddToCart={({ product, variant, quantity, selectedAttr }) =>
+                            addToCartHelper({
+                                product,
+                                variant,
+                                quantity,
+                                selectedAttr,
+                                setCartCount,
+                                addToCartContext,
+                            })
+                        }
                     />
+
+
 
                     {/* Origin + Stock */}
                     <div className="d-flex flex-wrap gap-2 mt-3">

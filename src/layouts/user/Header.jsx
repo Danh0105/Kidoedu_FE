@@ -70,11 +70,37 @@ export default function Header() {
     }, []);
 
 
+    const [banners, setBanners] = useState([]);
+    // Stable axios instance
+    const loadBanners = async () => {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/banners/1`);
+        setBanners(res.data);
+    };
 
+    useEffect(() => {
+        loadBanners();
+    }, []);
+    const BannerBox = ({ label, className }) => {
+
+
+        return (
+            <div className={className}>
+                {banners?.imageUrl ? (
+                    <img
+                        src={`${process.env.REACT_APP_API_URL}${banners.imageUrl}`}   // Rất quan trọng
+                        alt={label}
+                        className='banner-img'
+                    />
+                ) : (
+                    <span>{label}</span>
+                )}
+            </div>
+        );
+    };
     return (
         <>
-            <div className='d-flex w-100 justify-content-center'>
-                <img src="https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/Picture//Tm/Tm_picture_346/banner-khuyen-m_197_1920.png.webp" alt="" />
+            <div className='d-flex w-100 justify-content-center' >
+                <BannerBox label="B — Main Slider" className="top-promo" />
             </div>
             <div className={`sticky-lg-top ${scrolled ? 'bg-menu2 shadow-sm' : 'bg-menu1'}`}>
 

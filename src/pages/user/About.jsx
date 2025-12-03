@@ -2,7 +2,7 @@ import React from "react";
 
 export default function KidoEduIntro() {
     return (
-        <div className="container py-5">
+        <div className="container py-5 bg-white w-75">
             <header className="text-center mb-5">
                 <h1 className="display-4 fw-bold">GIỚI THIỆU VỀ CÔNG TY TNHH KIDO EDU</h1>
                 <p className="lead text-muted">Công nghệ – Giáo dục – Dịch vụ kỹ thuật số</p>

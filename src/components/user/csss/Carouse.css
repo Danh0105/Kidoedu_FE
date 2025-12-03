@@ -1,0 +1,68 @@
+.modern-carousel {
+    width: 100%;
+    max-width: 1200px;
+    margin: auto;
+    margin-bottom: 30px;
+}
+
+.carousel-frame {
+    position: relative;
+    width: 100%;
+    height: clamp(250px, 34vw, 450px);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.carousel-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .6s ease;
+}
+
+.carousel-frame:hover .carousel-image {
+    transform: scale(1.03);
+}
+
+/* Placeholder khi chưa có ảnh */
+.carousel-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #ddd, #bbb);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    color: #555;
+}
+
+/* Overlay gradient */
+.carousel-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 45%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent);
+}
+
+/* Caption */
+.carousel-caption {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    color: white;
+    z-index: 3;
+}
+
+.carousel-caption h3 {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.carousel-caption p {
+    font-size: 16px;
+    opacity: 0.9;
+}

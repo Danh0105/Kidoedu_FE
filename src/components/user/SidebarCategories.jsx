@@ -1,15 +1,40 @@
-import React, { useMemo, useState, useEffect, useCallback } from "react";
-import { Cpu } from "lucide-react";
-import CategoryTitle from "../../components/user/category/Category";
-import RadioCategoryItem from "../../components/user/category/CheckboxProduct";
+import React, {
+  useMemo,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
+import { Search, X, ChevronDown, Check, Layers } from "lucide-react";
+import "../../styles/user/SidebarCategories.css";
 
-/**
- * SidebarCategories (cleaned)
- * - Robustly supports either snake_case (category_id) or camelCase (categoryId)
- * - Keeps panel open when there's an active query or a selected category
- * - Safe Number() casts and null guards
- * - Keyboard accessible section headers (Enter/Space)
- */
+/** Normalize category object */
+const normalizeNode = (node) => ({
+  id: node.categoryId ?? node.category_id ?? node.id,
+  name: node.categoryName ?? node.name,
+  children: Array.isArray(node.children)
+    ? node.children.map(normalizeNode)
+    : [],
+});
+
+/** Filter with search query */
+const filterTree = (nodes, query) => {
+  const q = query.trim().toLowerCase();
+  if (!q) return nodes;
+
+  const walk = (node) => {
+    const nameMatch = node.name.toLowerCase().includes(q);
+    const children = node.children.map(walk).filter(Boolean);
+
+    if (nameMatch) return { ...node };
+    if (children.length) return { ...node, children };
+    return null;
+  };
+
+  return nodes.map(walk).filter(Boolean);
+};
+
+/** Component */
 export default function SidebarCategories({
   roots = [],
   selectedCatId,
@@ -18,150 +43,141 @@ export default function SidebarCategories({
 }) {
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState(null);
+  const containerRef = useRef(null);
 
-  // Normalize incoming tree nodes to a consistent shape
-  const normalized = useMemo(() => {
-    const norm = (node) => ({
-      id: node.categoryId ?? node.category_id ?? node.id,
-      name: node.categoryName ?? node.name,
-      children: Array.isArray(node.children)
-        ? node.children.map(norm)
-        : [],
-    });
-    return Array.isArray(roots) ? roots.map(norm) : [];
-  }, [roots]);
+  /** Normalize once */
+  const normalized = useMemo(
+    () => (Array.isArray(roots) ? roots.map(normalizeNode) : []),
+    [roots]
+  );
 
-  // Filter with query (case-insensitive). If parent matches, keep all its children
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return normalized;
+  /** Apply filter */
+  const filtered = useMemo(
+    () => filterTree(normalized, query),
+    [normalized, query]
+  );
 
-    const walk = (node) => {
-      const parentMatch = (node.name || "").toLowerCase().includes(q);
-      const kids = node.children.map(walk).filter(Boolean);
-      if (parentMatch) return { ...node, children: node.children };
-      if (kids.length) return { ...node, children: kids };
-      return null;
-    };
-
-    return normalized.map(walk).filter(Boolean);
-  }, [normalized, query]);
-
-  // Auto-open section that has selectedCatId or when user is searching
+  /** Auto open parent if a child is selected */
   useEffect(() => {
-    if (!filtered.length) return;
+    if (!selectedCatId) return;
 
-    if (query) {
-      // open the first matching section on search
-      setOpenId((cur) => cur ?? filtered[0]?.id ?? null);
-      return;
-    }
-
-    if (selectedCatId != null) {
-      // Find parent containing the selected child
-      const parent = filtered.find((p) =>
-        (p.children || []).some((c) => String(c.id) === String(selectedCatId))
+    filtered.forEach((parent) => {
+      const match = parent.children.some(
+        (c) => String(c.id) === String(selectedCatId)
       );
-      if (parent) setOpenId(parent.id);
-    }
-  }, [filtered, query, selectedCatId]);
+      if (match) setOpenId(parent.id);
+    });
+  }, [filtered, selectedCatId]);
 
-  const toggle = useCallback((id) => {
-    setOpenId((cur) => (cur === id ? null : id));
+  /** Close dropdown on outside click */
+  useEffect(() => {
+    const close = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setOpenId(null);
+      }
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
   }, []);
 
-  const handleKeyToggle = useCallback(
-    (e, id) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        toggle(id);
-      }
-    },
-    [toggle]
+  const toggleOpen = useCallback(
+    (id) => setOpenId((current) => (current === id ? null : id)),
+    []
   );
 
   return (
-    <aside
-      className="p-3 border rounded bg-white"
-      style={{
-        width: 330,
-        position: "sticky",
-        top: 16,
-        maxHeight: "calc(70vh - 32px)",
-        overflow: "auto",
-      }}
-    >
-      {/* Search */}
-      <div className="d-flex gap-2 mb-3">
-        <input
-          type="search"
-          className="form-control"
-          placeholder="Tìm danh mục…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <button
-          className="btn btn-outline-secondary"
-          onClick={() => setQuery("")}
-          disabled={!query}
-          aria-label="Xóa tìm kiếm"
-        >
-          ✕
-        </button>
+    <div className="modern-cat-container" ref={containerRef}>
+      {/* SEARCH BAR */}
+      <div className="cat-top-bar">
+        {selectedCatId && (
+          <div className="active-filter-badge animate-fade-in">
+            <span>Đang lọc: <b>#{selectedCatId}</b></span>
+            <button onClick={onClear} className="remove-filter-btn">
+              <X size={14} />
+            </button>
+          </div>
+        )}
       </div>
 
-      {selectedCatId != null && (
-        <div className="d-flex justify-content-between mb-2">
-          <span className="badge text-bg-primary">Đang chọn: #{selectedCatId}</span>
-          <button className="btn btn-link p-0" onClick={onClear}>
-            Xóa bộ lọc
-          </button>
+      {/* MAIN LIST */}
+      {!filtered.length ? (
+        <div className="empty-state">Không tìm thấy danh mục nào</div>
+      ) : (
+        <div className="d-flex justify-content-center align-item-center gap-2 p-2">
+          <div className="scroll-track ">
+            {filtered.map((cat) => {
+              const { id, name, children } = cat;
+              const hasChildren = children.length > 0;
+              const isOpen = openId === id;
+              const childSelected = children.some(
+                (c) => String(c.id) === String(selectedCatId)
+              );
+
+              return (
+                <div key={id} className="cat-group">
+                  {/* PARENT CHIP */}
+                  <button
+                    className={`cat-chip ${isOpen ? "active" : ""} ${childSelected ? "has-selection" : ""
+                      }`}
+                    onClick={() =>
+                      hasChildren ? toggleOpen(id) : onSelect(id)
+                    }
+                  >
+                    <Layers size={16} className="cat-icon" />
+                    <span className="cat-name">{name}</span>
+                    {hasChildren && (
+                      <ChevronDown
+                        size={14}
+                        className={`arrow-icon ${isOpen ? "rotate" : ""}`}
+                      />
+                    )}
+                  </button>
+
+                  {/* DROPDOWN */}
+                  {isOpen && hasChildren && (
+                    <div className="cat-dropdown-menu animate-slide-down">
+                      <div className="dropdown-arrow"></div>
+
+                      <div className="dropdown-grid">
+                        {children.map((child) => {
+                          const selected =
+                            String(child.id) === String(selectedCatId);
+                          return (
+                            <div
+                              key={child.id}
+                              className={`sub-cat-item ${selected ? "selected" : ""
+                                }`}
+                              onClick={() => onSelect(child.id)}
+                            >
+                              <div className="d-flex align-items-center gap-2 w-100">
+                                <div
+                                  className={`custom-radio ${selected ? "checked" : ""
+                                    }`}
+                                >
+                                  {selected && <div className="radio-dot" />}
+                                </div>
+
+                                <span className="sub-name">{child.name}</span>
+
+                                {selected && (
+                                  <Check
+                                    size={16}
+                                    className="ms-auto text-primary"
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
-
-      {!filtered.length ? (
-        <p className="text-center text-muted mb-0">Không có danh mục</p>
-      ) : (
-        filtered.map((cat) => {
-          const id = cat.id;
-          const isOpen = openId === id;
-          const children = cat.children || [];
-
-          return (
-            <div key={id ?? Math.random()} className="mb-1 border rounded">
-              <div
-                role="button"
-                tabIndex={0}
-                className="w-100 d-flex align-items-center justify-content-between px-3 py-2 bg-light"
-                onClick={() => toggle(id)}
-                onKeyDown={(e) => handleKeyToggle(e, id)}
-              >
-                <div className="d-flex align-items-center">
-                  <Cpu size={18} className="me-2 text-primary" />
-                  <CategoryTitle label={cat.name} />
-                </div>
-                {children.length > 0 && (
-                  <span className="badge text-bg-secondary">{children.length}</span>
-                )}
-              </div>
-
-              {isOpen && children.length > 0 && (
-                <div className="list-group list-group-flush">
-                  {children.map((child) => (
-                    <RadioCategoryItem
-                      key={child.id}
-                      id={child.id}
-                      name={child.name}
-                      selectedId={selectedCatId}
-                      onChange={(val) => onSelect(val ? Number(val) : null)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })
-      )}
-    </aside>
+    </div>
   );
 }

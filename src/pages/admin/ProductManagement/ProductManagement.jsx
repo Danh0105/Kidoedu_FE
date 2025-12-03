@@ -275,17 +275,35 @@ export default function ProductManagement() {
                                                 <input type="checkbox" />
                                             </td>
                                             <td className="text-center">
-                                                <img
-                                                    src={process.env.REACT_APP_API_URL + thumb}
-                                                    alt={p.productName}
-                                                    width={64}
-                                                    height={64}
+                                                <div
+                                                    className="border rounded shadow-sm"
                                                     style={{
-                                                        objectFit: "cover",
-                                                        borderRadius: 4,
+                                                        width: 60,
+                                                        height: 60,
+                                                        overflow: "hidden",
+                                                        backgroundColor: "#f8f9fa",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "center"
                                                     }}
-                                                />
+                                                >
+                                                    <img
+                                                        src={process.env.REACT_APP_API_URL + thumb}
+                                                        alt={p.productName}
+                                                        style={{
+                                                            width: "100%",
+                                                            height: "70%",
+                                                            objectFit: "cover",
+                                                            display: "block",
+                                                            padding: "10px",
+                                                        }}
+                                                        onError={(e) => {
+                                                            e.target.src = "/no-image.png";
+                                                        }}
+                                                    />
+                                                </div>
                                             </td>
+
                                             <td>
                                                 {p.productName
                                                     ? p.productName.length > 40

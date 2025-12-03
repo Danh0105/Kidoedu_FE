@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useContext } from 'react';
-import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { NavLink } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { CartContext } from '../../hooks/CartContext';
+import '../../components/user/css/Cart.css'
 const PLACEHOLDER_IMG = "https://placehold.co/600x600?text=No+Image";
 export default function Cart() {
     const [products, setProducts] = useState([]);
@@ -211,8 +211,8 @@ export default function Cart() {
     // 🧱 Render giao diện
     return (
         <div className='container cart-page'>
-            <div className="container text-center overflow-auto cart-scroll" style={{ maxHeight: "710px" }}>
-                <div style={{ height: "590px" }}>
+            <div className="container text-center overflow-auto cart-scroll " style={{ maxHeight: "710px" }}>
+                <div style={{ height: "590px" }} className='position-relative'>
                     <table className="table align-middle cart-table">
                         <thead className="bg-light text-secondary small text-uppercase">
                             <tr>
@@ -275,18 +275,25 @@ export default function Cart() {
                                         </td>
                                         {/* Sản phẩm */}
                                         <td>
-                                            <div className="d-flex align-items-start gap-3">
+                                            <div className="d-flex align-items-start justify-content-center w-100">
 
-                                                <div className="d-flex flex-column justify-content-between flex-grow-1">
+                                                <div className="d-flex flex-column flex-grow-1 text-center">
+
+                                                    {/* Tên + phiên bản + thuộc tính */}
                                                     <div
-                                                        className="fw-semibold text-center"
+                                                        className="fw-bold text-dark"
+                                                        style={{ lineHeight: "1.4" }}
                                                         title={prd?.productName}
-
                                                     >
-                                                        {prd?.productName} | {prd.variantName} | {prd.selectedAttr}
+                                                        {prd?.productName}
+                                                        <div className="text-primary small mt-1">
+                                                            {prd.variantName} {prd.selectedAttr && `| ${prd.selectedAttr}`}
+                                                        </div>
                                                     </div>
+
+                                                    {/* Chi tiết phiên bản */}
                                                     {prd.variant && (
-                                                        <div className="text-muted small mt-1">
+                                                        <div className="text-muted small mt-2">
                                                             {prd.variant.variantName
                                                                 ? `Phiên bản: ${prd.variant.variantName}`
                                                                 : prd.variant.attributes?.color
@@ -294,14 +301,18 @@ export default function Cart() {
                                                                     : ""}
                                                         </div>
                                                     )}
+
+                                                    {/* Giá khi màn nhỏ */}
                                                     <div className="d-sm-none mt-2">
                                                         <span className="fw-bold text-danger small">
                                                             {Number(prd?.price).toLocaleString()} ₫
                                                         </span>
                                                     </div>
                                                 </div>
+
                                             </div>
                                         </td>
+
 
                                         {/* Đơn giá */}
                                         <td className="text-center d-none d-sm-table-cell">
@@ -374,43 +385,44 @@ export default function Cart() {
                             )}
                         </tbody>
                     </table>
-
+                    <div className='bg-white p-2 border-top border-2 border-danger cart-footer'>
+                        <div className="d-flex justify-content-between flex-column flex-sm-row gap-2">
+                            <div className='d-flex align-items-center'>
+                                <div className='me-2'>
+                                    <input
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        checked={products.length > 0 && products.every(p => p.selected)}
+                                        onChange={(e) => {
+                                            const checked = e.target.checked;
+                                            setProducts(prev => prev.map(p => ({ ...p, selected: checked })));
+                                        }}
+                                    />
+                                </div>
+                                <div className='fw-semibold'>Chọn tất cả</div>
+                            </div>
+                            <div className='d-flex align-items-center gap-3 justify-content-between'>
+                                <div className='fw-semibold' style={{ color: '#ee4d2d' }}>
+                                    Tổng cộng ({totalQuantity} sản phẩm): ₫{totalPrice.toLocaleString()}
+                                </div>
+                                <div>
+                                    <NavLink
+                                        onClick={() => setSelectedProducts(products.filter(p => p.selected))}
+                                        to='/checkout'
+                                        className='btn btn-danger'
+                                    >
+                                        Mua Hàng
+                                    </NavLink>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
             </div>
 
             {/* Footer */}
-            <div className='bg-white p-2 border-top border-2 border-danger cart-footer'>
-                <div className="d-flex justify-content-between flex-column flex-sm-row gap-2">
-                    <div className='d-flex align-items-center'>
-                        <div className='me-2'>
-                            <input
-                                className="form-check-input"
-                                type="checkbox"
-                                checked={products.length > 0 && products.every(p => p.selected)}
-                                onChange={(e) => {
-                                    const checked = e.target.checked;
-                                    setProducts(prev => prev.map(p => ({ ...p, selected: checked })));
-                                }}
-                            />
-                        </div>
-                        <div className='fw-semibold'>Chọn tất cả</div>
-                    </div>
-                    <div className='d-flex align-items-center gap-3 justify-content-between'>
-                        <div className='fw-semibold' style={{ color: '#ee4d2d' }}>
-                            Tổng cộng ({totalQuantity} sản phẩm): ₫{totalPrice.toLocaleString()}
-                        </div>
-                        <div>
-                            <NavLink
-                                onClick={() => setSelectedProducts(products.filter(p => p.selected))}
-                                to='/checkout'
-                                className='btn btn-danger'
-                            >
-                                Mua Hàng
-                            </NavLink>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
         </div>
     );
 }

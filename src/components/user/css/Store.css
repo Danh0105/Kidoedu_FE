@@ -1,92 +1,97 @@
-/* ===================== MOBILE FIRST PRODUCT CARD ===================== */
+/* ==========================================================
+   PRODUCT CARD — MOBILE FIRST, CLEAN + OPTIMIZED
+   ========================================================== */
 
-/* Card tổng */
-.product-card .card,
-.product-card .product {
-    height: 100%;
+/* Khung tổng */
+.product-card {
     display: flex;
     flex-direction: column;
-    border-radius: 1rem;
-    border: none;
+    height: 100%;
     background: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    border-radius: 1rem;
     overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
     transition: 0.25s ease;
 }
 
-.product-card .card:hover {
+.product-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* Ảnh luôn vuông */
+/* ===================== IMAGE ===================== */
+
+/* Ảnh luôn vuông — auto crop */
 .product-card img,
 .product-card .product-image,
 .product-card .ratio {
     width: 100%;
-    aspect-ratio: 1/1;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
     display: block;
-    border-radius: .8rem .8rem 0 0;
     background: #f5f7fa;
 }
 
-/* Nội dung */
+/* Fix ảnh lỗi alt="" */
+.product-card img[alt=""] {
+    background: #f8f9fa;
+}
+
+/* ===================== CONTENT ===================== */
+
 .product-card .card-body {
     flex: 1;
+    padding: .75rem .75rem .6rem;
     display: flex;
     flex-direction: column;
-    padding: .75rem .7rem;
     gap: .35rem;
 }
 
-/* Tên sản phẩm */
+/* ===================== TITLE ===================== */
+.product-card .name,
 .product-card .product-title,
-.product-card .card-title,
-.product-card .name {
+.product-card .card-title {
     font-size: .95rem;
     font-weight: 600;
     color: #1d1d1d;
-    line-height: 1.25;
+    line-height: 1.28;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    margin-bottom: .25rem;
 }
 
-/* Mô tả */
+/* ===================== DESCRIPTION (Mobile Only) ===================== */
 @media (max-width: 575.98px) {
 
-    .product-card .product-desc,
-    .product-card .desc {
+    .product-card .desc,
+    .product-card .product-desc {
+        font-size: .82rem;
+        color: #6d6d6d;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        font-size: .82rem;
-        color: #6d6d6d;
     }
 }
 
-/* Giá */
+/* ===================== PRICE ===================== */
 .product-card .price,
 .product-card .product-price,
 .product-card .card-price {
     font-size: 1.05rem;
     font-weight: 700;
     color: #ff4d4d;
-    /* tươi – nổi bật */
     margin-top: .2rem;
 }
 
-/* Badge */
+/* ===================== BADGES ===================== */
 .product-card .badges,
 .product-card .promo-row {
     display: flex;
     gap: .3rem;
     overflow-x: auto;
-    padding-bottom: .25rem;
+    padding-bottom: .2rem;
     scrollbar-width: none;
 }
 
@@ -96,16 +101,15 @@
 
 .product-card .badge,
 .product-card .chip {
-    font-size: .7rem;
-    padding: .28rem .45rem;
-    border-radius: .5rem;
+    padding: .25rem .45rem;
     background: #e8f4ff;
     color: #007bff;
+    font-size: .7rem;
+    border-radius: .45rem;
     white-space: nowrap;
-    font-weight: 500;
 }
 
-/* Nút lớn dễ bấm */
+/* ===================== BUTTON AREA ===================== */
 .product-card .btn,
 .product-card button {
     min-height: 44px;
@@ -119,11 +123,11 @@
         display: grid;
         grid-template-columns: 1fr;
         gap: .45rem;
-        margin-top: .45rem;
+        margin-top: .4rem;
     }
 }
 
-/* Grid spacing mobile */
+/* ===================== GRID SPACING MOBILE ===================== */
 @media (max-width: 575.98px) {
     .row.row-cols-2.g-2 {
         --bs-gutter-x: .55rem;
@@ -131,12 +135,7 @@
     }
 }
 
-/* Fix ảnh lỗi */
-.product-card img[alt=""] {
-    background: #f8f9fa;
-}
-
-/* Full width mobile */
+/* ===================== FULL-WIDTH ON SMALL SCREEN ===================== */
 @media (max-width: 575.98px) {
 
     .product-card,

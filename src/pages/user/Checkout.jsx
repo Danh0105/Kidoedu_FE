@@ -297,31 +297,65 @@ export default function Checkout() {
                   <td>
                     <div className="d-flex align-items-start gap-3">
 
-                      <div className="d-flex flex-column justify-content-between flex-grow-1">
+                      {/* Vùng trái: ảnh sản phẩm nếu cần */}
+                      {prd?.thumb && (
                         <div
-                          className="fw-semibold"
-                          title={prd.data?.productName || prd?.productName}
-
+                          className="rounded border"
+                          style={{ width: 60, height: 60, overflow: "hidden" }}
                         >
-                          {prd.productName} {prd.variantName}
+                          <img
+                            src={prd.thumb}
+                            alt={prd.productName}
+                            className="w-100 h-100 object-fit-cover"
+                          />
                         </div>
+                      )}
+
+                      {/* Vùng phải */}
+                      <div className="d-flex flex-column justify-content-between flex-grow-1">
+
+                        {/* Tên sản phẩm */}
+                        <div
+                          className="fw-bold text-dark"
+                          style={{ lineHeight: "1.3" }}
+                          title={prd.data?.productName || prd?.productName}
+                        >
+                          {prd.productName}{" "}
+                          <span className="text-muted">{prd.variantName}</span>
+                        </div>
+
+                        {/* Thông tin phiên bản */}
                         {prd.variant && (
                           <div className="text-muted small mt-1">
                             {prd.variant.variantName
-                              ? `Phiên bản: ${prd?.variant.variantName || prd.variantName}  ${prd?.selectedAttr}`
+                              ? (
+                                <>
+                                  <span className="fw-semibold text-secondary">
+                                    Phiên bản:
+                                  </span>{" "}
+                                  {prd.variant.variantName} {prd?.selectedAttr}
+                                </>
+                              )
                               : prd.variant.attributes?.color
-                                ? ``
+                                ? `Màu sắc: ${prd.variant.attributes.color}`
                                 : ""}
                           </div>
                         )}
+
+                        {/* Giá (hiển thị khi màn hình nhỏ) */}
                         <div className="d-sm-none mt-2">
                           <span className="fw-bold text-danger small">
-                            {Number(prd?.pricing || prd?.price || prd?.data.price).toLocaleString()} ₫
+                            {Number(
+                              [prd?.pricing, prd?.price, prd?.data?.price].find(v => v > 0) ?? 0
+                            ).toLocaleString()}{" "}
+                            ₫
                           </span>
                         </div>
+
                       </div>
                     </div>
                   </td>
+
                   <td className="text-center d-none d-md-table-cell">
                     {Number(prd?.pricing || prd.price || prd?.data.price).toLocaleString()} ₫
                   </td>
@@ -387,7 +421,7 @@ export default function Checkout() {
             </a>
           </small>
           <button
-            className="btn btn-danger px-4 w-100 w-sm-auto"
+            className="btn btn-danger px-4 w-sm-auto"
             onClick={method === "momo" ? handleMomoPayment : handleSubmit}
           >
             Đặt hàng

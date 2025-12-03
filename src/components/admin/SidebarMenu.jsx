@@ -42,7 +42,7 @@ const SidebarMenu = () => {
             />
 
             <MenuItem
-                to="/orders"
+                to="/banners"
                 icon="nav-icon bi bi-images"
                 label="Quản lý banner"
                 isOpen={openIndex === 4}

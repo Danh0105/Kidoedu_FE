@@ -5,6 +5,8 @@ import axios from "axios";
 import { CartContext } from "../../hooks/CartContext";
 import { jwtDecode } from "jwt-decode";
 import Cookies from "js-cookie";
+import { addToCartHelper } from "../../utils/addToCartHelper";
+import { pickPricesFromVariant } from "../../utils/productBuyHelper";
 
 // ------------------------ Helpers ------------------------
 const formatCurrency = (value) =>
@@ -13,31 +15,7 @@ const formatCurrency = (value) =>
     currency: "VND",
   }).format(Number(value || 0));
 
-function pickPricesFromVariant(variant) {
-  if (!variant) {
-    return { basePrice: null, promoPrice: null, finalPrice: 0 };
-  }
 
-  // Không có price list → fallback currentPrice
-  if (!Array.isArray(variant?.prices)) {
-    const price = Number(variant.currentPrice || 0);
-    return {
-      basePrice: price,
-      promoPrice: null,
-      finalPrice: price,
-    };
-  }
-
-  // Lấy giá từ mảng
-  const promo = variant?.prices.find((p) => p.priceType === "promo");
-  const base = variant?.prices.find((p) => p.priceType === "base");
-
-  const basePrice = base ? Number(base.price) : null;
-  const promoPrice = promo ? Number(promo.price) : null;
-  const finalPrice = promoPrice ?? basePrice ?? 0;
-
-  return { basePrice, promoPrice, finalPrice };
-}
 
 // ===================================================================
 //                            COMPONENT
@@ -165,77 +143,6 @@ export default function ModalBuy({ show, onClose, product }) {
     setQuantity(Math.max(parseInt(raw || "1", 10), 1));
   };
 
-  // ------------------------ Add to Cart ------------------------
-  const addToCart = async (productId, qty) => {
-    try {
-      const token = localStorage.getItem("Authorization");
-
-      // Logged user
-      if (token) {
-        const decoded = jwtDecode(token);
-        await axios.post(
-          `${process.env.REACT_APP_API_URL}/cart/${decoded.sub}/items`,
-          {
-            productId,
-            quantity: qty,
-            variantId,
-            selectedAttr,
-          },
-          { headers: { Authorization: token } }
-        );
-
-        alert("Đã thêm sản phẩm!");
-        fetchCountCart();
-        return;
-      }
-
-      const promo = activeVariant?.prices.find((p) => p.priceType === "promo");
-      const base = activeVariant?.prices.find((p) => p.priceType === "base");
-
-      const basePrice = base ? Number(base.price) : null;
-      const promoPrice = promo ? Number(promo.price) : null;
-      const finalPrice = promoPrice ?? basePrice ?? product.price;
-
-
-      // Guest cart
-      const current = JSON.parse(Cookies.get("guest_cart") || "[]");
-      const img =
-        activeVariant?.imageUrl ||
-        product?.images?.find(img => img.isPrimary)?.imageUrl;
-
-      const item = {
-        productId,
-        productName: product.productName,
-        imageUrl: img,
-        variantId,
-        variantName: activeVariant?.variantName,
-        attributes: attrs,
-        price: finalPrice,
-        quantity: qty,
-        selectedAttr,
-      };
-
-      const idx = current.findIndex(
-        (i) =>
-          i.productId === item.productId &&
-          i.variantId === item.variantId &&
-          i.selectedAttr === item.selectedAttr
-      );
-
-      if (idx !== -1) current[idx].quantity += qty;
-      else current.push(item);
-      console.log("current", finalPrice);
-
-      Cookies.set("guest_cart", JSON.stringify(current), { expires: 7 });
-      addToCartContext(item);
-      setCartCount(current.length);
-
-      alert("Đã lưu sản phẩm vào giỏ hàng!");
-    } catch (error) {
-      console.error(error);
-      alert("Không thể thêm vào giỏ hàng!");
-    }
-  };
 
   // ------------------------ Render ------------------------
   if (!show) return null;
@@ -457,10 +364,23 @@ export default function ModalBuy({ show, onClose, product }) {
 
                   <button
                     className="btn btn-danger px-4"
-                    onClick={() => addToCart(product.productId, quantity)}
+                    onClick={() =>
+                      addToCartHelper({
+                        product,
+                        variant: activeVariant,
+                        quantity,
+                        selectedAttr,
+                        finalPrice,
+                        displayPrice: promoPrice ?? basePrice ?? finalPrice,
+                        setCartCount,
+                        addToCartContext,
+                      })
+                    }
                   >
                     <i className="bi bi-bag-plus"></i> Thêm vào giỏ hàng
                   </button>
+
+
                 </div>
 
                 {/* Extra info */}

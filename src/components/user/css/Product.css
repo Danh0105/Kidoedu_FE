@@ -1,0 +1,46 @@
+/* Khung ảnh */
+.product-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 190px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: linear-gradient(145deg, #fdfbfb 0%, #ebedee 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+
+/* Hiệu ứng hover */
+.product-image-wrapper:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+}
+
+/* Ảnh sản phẩm */
+.product-image-store {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform .3s ease;
+    padding: 2px;
+}
+
+.product-image-wrapper:hover .product-image {
+    transform: scale(1.05);
+}
+
+/* Badge nhỏ phía dưới ảnh */
+.product-small-badge {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2px 6px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .1);
+}
