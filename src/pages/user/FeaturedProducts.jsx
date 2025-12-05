@@ -102,13 +102,26 @@ export default function FeaturedProducts({ apiBase = process.env.REACT_APP_API_U
                     Nổi bật
                   </span>
 
-                  <img
-                    src={process.env.REACT_APP_API_URL + img}
-                    alt={p.productName}
-                    className="card-img-top"
-                    style={{ backgroundColor: "#f8f9fa" }}
-                    onError={(e) => (e.currentTarget.src = ROBOT)}
-                  />
+                  <div
+                    className="w-100 d-flex align-items-center justify-content-center"
+                    style={{
+                      height: "220px",       // chỉnh cao cố định
+                      background: "#f8f9fa",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <img
+                      src={process.env.REACT_APP_API_URL + img}
+                      alt={p.productName}
+                      style={{
+                        maxHeight: "100%",
+                        maxWidth: "100%",
+                        objectFit: "contain",
+                      }}
+                      onError={(e) => (e.currentTarget.src = ROBOT)}
+                    />
+                  </div>
+
                 </div>
 
                 {/* Nội dung */}
