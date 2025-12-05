@@ -1,7 +1,7 @@
 
 export function pickPricesFromVariant(variant) {
     if (!variant) {
-        return { basePrice: null, promoPrice: null, finalPrice: 0 };
+        return { basePrice: null, promoPrice: null, finalPrice: null };
     }
 
     // Không có price list → fallback currentPrice
@@ -20,7 +20,7 @@ export function pickPricesFromVariant(variant) {
 
     const basePrice = base ? Number(base.price) : null;
     const promoPrice = promo ? Number(promo.price) : null;
-    const finalPrice = promoPrice ?? basePrice ?? 0;
+    const finalPrice = promoPrice ?? basePrice ?? null;
 
     return { basePrice, promoPrice, finalPrice };
 }
