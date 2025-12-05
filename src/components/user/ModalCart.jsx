@@ -336,7 +336,7 @@ export default function ModalBuy({ show, onClose, product }) {
                 )}
                 {product?.shortDescription && (
                   <p className="text-body mt-3">
-                    {product.shortDescription}
+                    <div dangerouslySetInnerHTML={{ __html: product?.shortDescription ?? "" }} />
                   </p>
                 )}
 
