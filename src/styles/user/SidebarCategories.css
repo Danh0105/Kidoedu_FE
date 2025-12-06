@@ -103,7 +103,6 @@
 .scroll-track {
     display: flex;
     flex-wrap: wrap;
-    /* ✔️ Cho phép xuống dòng */
     gap: 12px;
     overflow: visible !important;
     padding: 10px 0;
@@ -114,7 +113,8 @@
 /* --- 3. Category Chip --- */
 .cat-group {
     position: relative;
-    z-index: 20;
+    /* Để dropdown bám theo */
+
 }
 
 .cat-chip {
@@ -131,6 +131,7 @@
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
+
 }
 
 .cat-chip:hover {
@@ -146,11 +147,6 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.cat-chip.active .cat-icon,
-.cat-chip.active .arrow-icon {
-    color: #fff;
-}
-
 .cat-icon {
     color: var(--text-gray);
 }
@@ -159,29 +155,22 @@
     transition: transform 0.2s;
 }
 
-.rotate {
+.arrow-icon.rotate {
     transform: rotate(180deg);
 }
 
-/* --- 4. Dropdown Menu — Fixed để không bị che --- */
+/* --- 4. Dropdown Menu — Bám thẻ cha --- */
 .cat-dropdown-menu {
-    position: fixed !important;
-    /* ✔️ Không bao giờ bị che */
-    top: var(--drop-y);
-    left: var(--drop-x);
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
 
-    min-width: 260px;
-    background: #fff;
-    border-radius: var(--radius-box);
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--border-color);
+    width: max-content;
+    background: white;
+    border-radius: 12px;
     padding: 8px;
-    z-index: 999999;
-}
-
-.dropdown-arrow {
-    display: none;
-    /* Ẩn mũi tên vì fixed không kê đúng vị trí */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    z-index: 9999 !important;
 }
 
 .dropdown-grid {
@@ -234,7 +223,7 @@
     border-radius: 50%;
 }
 
-/* Animations */
+/* Animation */
 @keyframes slideDown {
     from {
         opacity: 0;
@@ -249,20 +238,6 @@
 
 .animate-slide-down {
     animation: slideDown 0.2s ease-out forwards;
-}
-
-.animate-fade-in {
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
 }
 
 .empty-state {

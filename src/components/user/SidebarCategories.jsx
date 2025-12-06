@@ -8,7 +8,7 @@ import React, {
 import { Search, X, ChevronDown, Check, Layers } from "lucide-react";
 import "../../styles/user/SidebarCategories.css";
 
-/** Normalize category object */
+/* --------------------- NORMALIZE CATEGORY --------------------- */
 const normalizeNode = (node) => ({
   id: node.categoryId ?? node.category_id ?? node.id,
   name: node.categoryName ?? node.name,
@@ -17,16 +17,16 @@ const normalizeNode = (node) => ({
     : [],
 });
 
-/** Filter with search query */
+/* ------------------------- SEARCH FILTER ------------------------ */
 const filterTree = (nodes, query) => {
   const q = query.trim().toLowerCase();
   if (!q) return nodes;
 
   const walk = (node) => {
-    const nameMatch = node.name.toLowerCase().includes(q);
+    const match = node.name.toLowerCase().includes(q);
     const children = node.children.map(walk).filter(Boolean);
 
-    if (nameMatch) return { ...node };
+    if (match) return { ...node };
     if (children.length) return { ...node, children };
     return null;
   };
@@ -34,7 +34,7 @@ const filterTree = (nodes, query) => {
   return nodes.map(walk).filter(Boolean);
 };
 
-/** Component */
+/* ------------------------- MAIN COMPONENT ------------------------ */
 export default function SidebarCategories({
   roots = [],
   selectedCatId,
@@ -43,24 +43,24 @@ export default function SidebarCategories({
 }) {
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState(null);
+
   const containerRef = useRef(null);
 
-  /** Normalize once */
+  /* --------------------- NORMALIZE ROOTS --------------------- */
   const normalized = useMemo(
     () => (Array.isArray(roots) ? roots.map(normalizeNode) : []),
     [roots]
   );
 
-  /** Apply filter */
+  /* ---------------------- APPLY FILTER ----------------------- */
   const filtered = useMemo(
     () => filterTree(normalized, query),
     [normalized, query]
   );
 
-  /** Auto open parent if a child is selected */
+  /* ------------ OPEN PARENT IF CHILD SELECTED ---------------- */
   useEffect(() => {
     if (!selectedCatId) return;
-
     filtered.forEach((parent) => {
       const match = parent.children.some(
         (c) => String(c.id) === String(selectedCatId)
@@ -69,10 +69,11 @@ export default function SidebarCategories({
     });
   }, [filtered, selectedCatId]);
 
-  /** Close dropdown on outside click */
+  /* ---------------- CLOSE WHEN CLICK OUTSIDE ----------------- */
   useEffect(() => {
     const close = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
+      if (!containerRef.current) return;
+      if (!containerRef.current.contains(e.target)) {
         setOpenId(null);
       }
     };
@@ -80,14 +81,13 @@ export default function SidebarCategories({
     return () => document.removeEventListener("mousedown", close);
   }, []);
 
-  const toggleOpen = useCallback(
-    (id) => setOpenId((current) => (current === id ? null : id)),
-    []
-  );
+  /* ---------------- TOGGLE OPEN ----------------- */
+  const toggleOpen = useCallback((id) => {
+    setOpenId((prev) => (prev === id ? null : id));
+  }, []);
 
   return (
     <div className="modern-cat-container" ref={containerRef}>
-      {/* SEARCH BAR */}
       <div className="cat-top-bar">
         {selectedCatId && (
           <div className="active-filter-badge animate-fade-in">
@@ -99,32 +99,33 @@ export default function SidebarCategories({
         )}
       </div>
 
-      {/* MAIN LIST */}
       {!filtered.length ? (
         <div className="empty-state">Không tìm thấy danh mục nào</div>
       ) : (
-        <div className="d-flex justify-content-center align-item-center gap-2 p-2">
-          <div className="scroll-track ">
+        <div className="d-flex justify-content-center align-items-center gap-2 p-2">
+          <div className="scroll-track">
             {filtered.map((cat) => {
               const { id, name, children } = cat;
               const hasChildren = children.length > 0;
               const isOpen = openId === id;
+
               const childSelected = children.some(
                 (c) => String(c.id) === String(selectedCatId)
               );
 
               return (
                 <div key={id} className="cat-group">
-                  {/* PARENT CHIP */}
                   <button
-                    className={`cat-chip ${isOpen ? "active" : ""} ${childSelected ? "has-selection" : ""
-                      }`}
+                    className={`cat-chip 
+                      ${isOpen ? "active" : ""} 
+                      ${childSelected ? "has-selection" : ""}`}
                     onClick={() =>
                       hasChildren ? toggleOpen(id) : onSelect(id)
                     }
                   >
                     <Layers size={16} className="cat-icon" />
-                    <span className="cat-name">{name}</span>
+                    <span>{name}</span>
+
                     {hasChildren && (
                       <ChevronDown
                         size={14}
@@ -133,15 +134,13 @@ export default function SidebarCategories({
                     )}
                   </button>
 
-                  {/* DROPDOWN */}
                   {isOpen && hasChildren && (
                     <div className="cat-dropdown-menu animate-slide-down">
-                      <div className="dropdown-arrow"></div>
-
                       <div className="dropdown-grid">
                         {children.map((child) => {
                           const selected =
                             String(child.id) === String(selectedCatId);
+
                           return (
                             <div
                               key={child.id}
@@ -157,7 +156,7 @@ export default function SidebarCategories({
                                   {selected && <div className="radio-dot" />}
                                 </div>
 
-                                <span className="sub-name">{child.name}</span>
+                                <span>{child.name}</span>
 
                                 {selected && (
                                   <Check
