@@ -1,7 +1,11 @@
 /* === Chỉ áp dụng cho mobile (≤ 576px) === */
 @media (max-width: 575.98px) {
+    .hotline-banner {
+        left: 127px !important;
+        width: 55% !important;
 
-    /* Footer columns: xếp dọc, chữ gọn */
+    }
+
     .footer-columns {
         flex-direction: column !important;
         align-items: stretch !important;
@@ -20,7 +24,6 @@
         word-break: break-word;
     }
 
-    /* Nút nổi: thu nhỏ & định vị lại */
     .pulse-animation {
         bottom: 150px !important;
         right: 16px !important;
@@ -38,15 +41,13 @@
         right: 16px !important;
     }
 
-    /* Hotline bubble */
     .hotline-bubble {
-        left: 12px;
-        bottom: 20px;
-        padding: .45rem .65rem;
+        right: 16px !important;
+        bottom: 10px !important;
+        padding: 0.45rem 0.65rem;
         font-size: 14px;
     }
 
-    /* Scroll-to-top: nhỏ hơn, sát góc hơn */
     .bg-light .d-flex>div[style*="right: 90px"] {
         right: 72px !important;
         bottom: 18px !important;
@@ -55,12 +56,7 @@
         font-size: 22px !important;
     }
 
-    /* Banner hotline: chỉ hiện trên mobile */
-    .hotline-banner {
-        display: flex !important;
-    }
 
-    /* (Tuỳ chọn) giảm chuyển động cho người dùng prefer-reduced-motion */
     @media (prefers-reduced-motion: reduce) {
 
         .pulse-animation,
@@ -70,6 +66,7 @@
     }
 }
 
+/* ===== Sticker Animations ===== */
 .sticker-wobble {
     animation: wobbleSticker 2.4s infinite ease-in-out;
 }
@@ -113,17 +110,14 @@
 @keyframes pulseSticker {
     0% {
         transform: scale(1);
-        filter: drop-shadow(0 0 0px rgba(255, 0, 90, 0.4));
     }
 
     50% {
         transform: scale(1.06);
-        filter: drop-shadow(0 0 12px rgba(255, 0, 90, 0.55));
     }
 
     100% {
         transform: scale(1);
-        filter: drop-shadow(0 0 0px rgba(255, 0, 90, 0.35));
     }
 }
 
@@ -133,68 +127,43 @@
     object-fit: cover;
 }
 
-.sticker-right {
+/* ===== Sticker Positions ===== */
+.sticker-right-u-h,
+.sticker-left-u-h,
+.sticker-left-a-h {
     position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    z-index: 999;
+}
+
+.sticker-right-u-h {
     right: 10px;
     bottom: 50%;
     width: 80px;
     height: 80px;
-
-    background: #ff3030;
-    color: white;
-    font-weight: bold;
-    border-radius: 50%;
-
-    display: flex;
-    /* bật flexbox */
-    align-items: center;
-    /* căn giữa theo chiều dọc */
-    justify-content: center;
-    /* căn giữa theo chiều ngang */
-    text-align: center;
 }
 
 .sticker-left-u-h {
-    position: fixed;
     left: 5px;
     bottom: 50%;
     width: 80px;
     height: 80px;
-
-    color: white;
-    font-weight: bold;
-    border-radius: 50%;
-
-    display: flex;
-    /* bật flexbox */
-    align-items: center;
-    /* căn giữa theo chiều dọc */
-    justify-content: center;
-    /* căn giữa theo chiều ngang */
-    text-align: center;
 }
 
 .sticker-left-a-h {
-    position: fixed;
     left: -20px;
     bottom: 15%;
     width: 150px;
     height: 150px;
-
-    color: white;
-    font-weight: bold;
-    border-radius: 50%;
-
-    display: flex;
-    /* bật flexbox */
-    align-items: center;
-    /* căn giữa theo chiều dọc */
-    justify-content: center;
-    /* căn giữa theo chiều ngang */
-    text-align: center;
 }
 
-/* Vị trí icon hotline */
+/* ===== Hotline Button ===== */
 .hotline-bubble {
     position: fixed;
     right: 20px;
@@ -202,7 +171,6 @@
     width: 58px;
     height: 58px;
     background: #ff3b30;
-    /* màu đỏ nổi */
     color: white;
     border-radius: 50%;
     display: flex;
@@ -211,11 +179,10 @@
     font-size: 26px;
     text-decoration: none;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-    z-index: 9999;
     transition: 0.25s ease;
+    z-index: 999999 !important;
 }
 
-/* Hiệu ứng hover */
 .hotline-bubble:hover {
     transform: scale(1.1);
     background: #e91e1e;
@@ -231,24 +198,27 @@
     padding: 8px 14px;
     border-radius: 6px;
     color: white;
-    white-space: nowrap;
-    font-size: 14px;
     opacity: 0;
     pointer-events: none;
+    white-space: nowrap;
     transition: 0.25s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
 }
 
-/* Hover mới hiện tooltip */
 .hotline-bubble:hover .hotline-tip {
     opacity: 1;
     right: 65px;
 }
 
-/* Hiệu ứng rung — tùy chọn */
+/* Phone Ring Animation */
+.hotline-bubble i {
+    animation: phone-ring 1.6s infinite;
+}
+
 @keyframes phone-ring {
-    0% {
-        transform: rotate(0deg);
+
+    0%,
+    100% {
+        transform: rotate(0);
     }
 
     20% {
@@ -266,97 +236,167 @@
     80% {
         transform: rotate(-10deg);
     }
-
-    100% {
-        transform: rotate(0deg);
-    }
 }
 
-.hotline-bubble i {
-    animation: phone-ring 1.6s infinite;
-    display: block;
+/* ===== Hotline Banner ===== */
+/* ===========================================
+   RESET & BASE STYLE
+=========================================== */
+.hotline-banner,
+.floating-btn {
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* Khung tổng */
+/* ===========================================
+   HOTLINE BANNER (Mobile First)
+=========================================== */
 .hotline-banner {
     position: fixed;
     bottom: 20px;
-    left: 10%;
+    left: 118px;
     transform: translateX(-50%);
-
+    text-decoration: none !important;
     background: #ffffff;
-    border-radius: 50px;
     padding: 10px 16px;
+    border-radius: 50px;
+
     display: flex;
     align-items: center;
     gap: 12px;
 
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    z-index: 9999;
-    width: fit-content;
-    animation: slideUp 0.3s ease-out;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    z-index: 99999;
+
+    animation: fadeUp 0.35s ease-out;
 }
 
-/* Icon điện thoại */
 .hotline-icon {
-    width: 44px;
-    height: 44px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
     background: #ff3b30;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 20px;
+}
+
+.hotline-info .label {
+    font-size: 13px;
+    color: #666;
+}
+
+.phone-number {
+    font-size: 16px;
+    font-weight: 700;
+    color: #e53935;
+}
+
+/* Zalo Badge */
+.zalo-btn {
+    width: 38px;
+    height: 38px;
+
+    background: #fff url("https://i.imgur.com/2q9m2qP.png") center/22px no-repeat;
+    border-radius: 50%;
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.25);
+
+    animation: pulse 2s infinite ease-in-out;
+}
+
+/* ===========================================
+   FLOATER BUTTONS (Phone + Messenger)
+=========================================== */
+.floating-btn {
+    position: fixed;
+    right: 18px;
+
+    width: 52px;
+    height: 52px;
+
+    border-radius: 50%;
+    background: #ff3b30;
+
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 50%;
-    color: #fff;
-    font-size: 22px;
+
+    color: white;
+    font-size: 24px;
+    text-decoration: none;
+
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.25);
+    transition: 0.25s ease;
+    z-index: 99999;
 }
 
-/* Text */
-.hotline-text {
-    line-height: 1.1;
+.floating-btn:hover {
+    transform: scale(1.07);
 }
 
-.hotline-text div {
-    font-size: 14px;
-    color: #333;
+/* Vị trí nút */
+.phone-btn {
+    bottom: 95px;
 }
 
-/* Số điện thoại */
-.hotline-text strong {
-    font-size: 18px;
-    font-weight: bold;
-    color: #ff3b30;
+.messenger-btn {
+    bottom: 30px;
+    background: #0084ff;
 }
 
-/* Hiệu ứng Shine */
-.shine {
-    position: relative;
-    display: inline-block;
-    overflow: hidden;
+/* ===========================================
+   ANIMATIONS
+=========================================== */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
 }
 
-.shine::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 80%;
-    height: 100%;
-    background: linear-gradient(120deg, transparent 0%, rgba(193, 11, 11, 0.6) 50%, transparent 100%);
-    animation: shineMove 1.8s linear infinite;
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.07);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
-/* Badge Zalo */
-.zalo-badge {
-    width: 38px;
-    height: 38px;
-    background-image: url("https://cdn-icons-png.flaticon.com/512/5968/5968855.png");
-    background-size: cover;
-    background-position: center;
-    border-radius: 50%;
-    flex-shrink: 0;
+/* ===========================================
+   MOBILE RESPONSIVE
+=========================================== */
+@media (max-width: 575.98px) {
+
+
+    .floating-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+
+    .phone-btn {
+        bottom: 85px;
+    }
+
+    .messenger-btn {
+        bottom: 28px;
+    }
 }
 
-/* Animation slide-up */
+
 @keyframes slideUp {
     from {
         transform: translate(-50%, 20px);
@@ -369,13 +409,220 @@
     }
 }
 
-/* Shine animation */
-@keyframes shineMove {
-    from {
-        left: -100%;
+/* ===== Shine Effect ===== */
+.shine {
+    position: relative;
+    overflow: hidden;
+}
+
+.shine::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 120%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, .35) 50%, transparent 100%);
+    animation: shineSweep 3.5s ease-in-out infinite;
+}
+
+@keyframes shineSweep {
+    0% {
+        left: -120%;
     }
 
-    to {
+    60% {
         left: 120%;
+    }
+
+    100% {
+        left: 120%;
+    }
+}
+
+/* ========================================================= */
+/* ================== ZALO UPDATED EFFECTS ================= */
+/* ========================================================= */
+
+/* Zalo floating icon (nút nổi bên phải) */
+.pulse-animation {
+    animation: zaloFloat 3s ease-in-out infinite,
+        zaloGlow 2.2s ease-in-out infinite;
+    position: fixed !important;
+}
+
+@keyframes zaloFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+@keyframes zaloGlow {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 5px rgba(0, 145, 255, .45));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 14px rgba(0, 145, 255, .75));
+    }
+}
+
+.pulse-animation::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(0, 145, 255, 0.55);
+    animation: zaloPulseRing 1.8s infinite;
+}
+
+@keyframes zaloPulseRing {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 145, 255, .55);
+    }
+
+    70% {
+        box-shadow: 0 0 0 16px rgba(0, 145, 255, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 145, 255, 0);
+    }
+}
+
+/* ---- Zalo badge trong hotline banner ---- */
+.zalo-badge {
+    width: 38px;
+    height: 38px;
+    background: #fff url('https://i.imgur.com/2q9m2qP.png') center/22px no-repeat;
+    border-radius: 50%;
+    box-shadow: 0 5px 12px rgba(0, 0, 0, .28);
+    position: relative;
+    animation: zaloBadgePulse 1.8s infinite ease-in-out,
+        zaloBadgeFloat 3s infinite ease-in-out;
+}
+
+@keyframes zaloBadgePulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.08);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes zaloBadgeFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Ring effect */
+.zalo-badge::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    animation: zaloBadgeRing 1.8s infinite;
+}
+
+@keyframes zaloBadgeRing {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 110, 255, .45);
+    }
+
+    70% {
+        box-shadow: 0 0 0 14px rgba(0, 110, 255, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 110, 255, 0);
+    }
+}
+
+/* Shine sweep on badge */
+.zalo-badge.shine-icon::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 120%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, .55), transparent);
+    transform: skewX(-20deg);
+    animation: shineSweep 3s infinite;
+}
+
+/* ========================================================= */
+/* ================ Messenger floating button ============== */
+/* ========================================================= */
+
+.bounce-animation {
+    animation: msgBounce 2.2s infinite ease-in-out,
+        msgShake 4s infinite ease-in-out,
+        msgGlow 2s infinite ease-in-out;
+    position: fixed !important;
+}
+
+@keyframes msgBounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes msgShake {
+
+    0%,
+    100% {
+        transform: rotate(0);
+    }
+
+    25% {
+        transform: rotate(4deg);
+    }
+
+    50% {
+        transform: rotate(-4deg);
+    }
+
+    75% {
+        transform: rotate(2deg);
+    }
+}
+
+@keyframes msgGlow {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 6px rgba(0, 132, 255, .45));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 14px rgba(0, 132, 255, .75));
     }
 }

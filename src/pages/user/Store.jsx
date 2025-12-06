@@ -6,7 +6,11 @@ import "../../components/user/css/Store.css";
 import Product from "../../components/user/category/Product";
 import SidebarCategories from "../../components/user/SidebarCategories";
 import '../../components/user/css/Store.css'
-
+import {
+    fetchAllProductsApi,
+    searchProductsApi
+} from "../../services/Product";
+import { fetchCategoriesApi } from "../../services/Category"
 /* --------- Hook breakpoint để phân nhánh Desktop/Mobile ---------- */
 function useIsDesktop() {
     const get = () => window.matchMedia("(min-width: 992px)").matches; // Bootstrap lg breakpoint
@@ -89,12 +93,13 @@ export default function Store({
     // -------- Fetchers -------------
     const fetchCategories = useCallback(async () => {
         try {
-            const res = await api.get("/categories");
-            setCategories(res.data ?? []);
+            const data = await fetchCategoriesApi();
+            setCategories(data ?? []);
         } catch (e) {
-            console.error(e);
+            console.error("fetchCategories error:", e);
         }
-    }, [api]);
+    }, []);
+
 
     const fetchProducts = useCallback(
         async (abortSignal) => {
@@ -106,14 +111,13 @@ export default function Store({
                 if (selectedCatId) baseParams.category_id = selectedCatId;
                 if (sort) baseParams.sort = sort;
 
-                let res;
-
+                // --- Tìm kiếm ---
                 if (debouncedQ.trim()) {
-                    res = await api.get("/search/products", {
-                        params: { q: debouncedQ, ...baseParams },
-                        signal: abortSignal,
-                    });
-                    const data = res.data ?? {};
+                    const data = await searchProductsApi(
+                        { q: debouncedQ, ...baseParams },
+                        abortSignal
+                    );
+                    console.log("searchProductsApi", data);
                     setItems(data.items ?? []);
                     setMeta({
                         page: data.pagination?.page ?? page,
@@ -122,15 +126,12 @@ export default function Store({
                         limit: data.pagination?.limit ?? limit,
                     });
                 } else {
-                    // Không có q => dùng /products
-                    const res = await api.get("/products", { params: baseParams, signal: abortSignal });
-                    const body = res.data ?? {};
+                    // --- Danh sách sản phẩm mặc định ---
+                    const data = await fetchAllProductsApi(baseParams, abortSignal);
 
-                    // list sản phẩm nằm ở body.data
-                    setItems(body.data ?? []);
+                    setItems(data ?? []);
+                    const m = data ?? {};
 
-                    // meta nằm ở body.meta
-                    const m = body.meta ?? {};
                     setMeta({
                         page: m.page ?? page,
                         last_page: m.last_page ?? 0,
@@ -146,7 +147,7 @@ export default function Store({
                 setLoading(false);
             }
         },
-        [api, page, limit, debouncedQ, selectedCatId, sort]
+        [page, limit, debouncedQ, selectedCatId, sort]
     );
 
     // -------- Effects --------------

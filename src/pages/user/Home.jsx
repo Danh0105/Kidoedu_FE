@@ -6,7 +6,13 @@ import { Menu, Cpu, ChevronRight, Layers } from "lucide-react";
 import ProductHome from "../../components/user/ProductHome";
 import ModalBuy from "../../components/user/ModalBuy";
 import PromoRow from "../../components/user/PromoRow";
+import {
+    fetchCategoriesApi,
+    fetchProductsByCategoryApi,
 
+} from "../../services/Category";
+import fetchBannersApi from "../../services/Banner";
+import { fetchAllProductsApi } from "../../services/Product";
 // ======================= Helpers =======================
 const pickRibbonsFromStatus = (raw) => {
     const s = Number(raw ?? 0);
@@ -120,9 +126,8 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     // ======================= Data fetching =======================
     const fetchCategories = useCallback(async () => {
         try {
-            const res = await api.get("/categories");
-            const all = res?.data || [];
-            // Chuẩn hoá
+            const all = await fetchCategoriesApi();
+
             const norm = all.map((c) => ({
                 ...c,
                 _id: c.categoryId ?? c.category_id ?? c.id,
@@ -133,26 +138,27 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                         : c.parent ?? null),
                 _name: c.categoryName ?? c.name,
             }));
+
             setAllCats(norm);
             setRootCats(norm.filter((c) => c._parentId === null));
-            // Không auto chọn → mặc định hiển thị Carousel
         } catch (e) {
             console.error("fetchCategories error:", e);
         }
-    }, [api]);
+    }, []);
+
 
     const fetchProducts = useCallback(async () => {
         try {
-            const res = await api.get("/products");
-            const list = res?.data?.data || [];
-
+            const list = await fetchAllProductsApi();
             setAllProducts(list);
+
             setNewProducts(list.filter(p => (p.status & 1) > 0));
             setFeaturedProducts(list.filter(p => (p.status & 2) > 0));
         } catch (e) {
             console.error("fetchProducts error:", e);
         }
-    }, [api]);
+    }, []);
+
 
     // ==== Actions chung khi rời toàn bộ khu vực menu + panel
     const handleLeaveAll = useCallback(() => {
@@ -161,25 +167,21 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         setSelectedCatId(null);
     }, []);
 
-    const fetchProductsByCategory = useCallback(
-        async (categoryId) => {
-            try {
-                const catId = categoryId ?? selectedCatId;
-                if (!catId) return;
-                setLoading(true);
-                const res = await api.get("/search/products", {
-                    params: { category_id: catId },
-                });
-                const data = res?.data ?? {};
-                setItems(Array.isArray(data.items) ? data.items : []);
-            } catch (e) {
-                console.error("Error fetching products by category:", e);
-            } finally {
-                setLoading(false);
-            }
-        },
-        [api, selectedCatId]
-    );
+    const fetchProductsByCategory = useCallback(async (categoryId) => {
+        try {
+            const id = categoryId ?? selectedCatId;
+            if (!id) return;
+
+            setLoading(true);
+            const items = await fetchProductsByCategoryApi(id);
+            setItems(items);
+        } catch (e) {
+            console.error("fetchProductsByCategory error:", e);
+        } finally {
+            setLoading(false);
+        }
+    }, [selectedCatId]);
+
 
     // Initial load
     useEffect(() => {
@@ -213,9 +215,14 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     const frameproductP = getBanner(11);
     // Stable axios instance
     const loadBanners = async () => {
-        const res = await axios.get(`${process.env.REACT_APP_API_URL}/banners`);
-        setBanners(res.data || []);
+        try {
+            const data = await fetchBannersApi();
+            setBanners(data);
+        } catch (e) {
+            console.error("fetchBanners error:", e);
+        }
     };
+
 
     useEffect(() => {
         loadBanners();
@@ -247,36 +254,32 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     // ===== Sidebar (hover để mở panel, UI gọn gàng) =====
     const CategorySidebar = () => (
         <div
-            className="bg-white border rounded shadow-sm position-relative"
+            className="bg-white border rounded shadow-sm position-relative d-flex flex-column"
             style={{ minWidth: 260 }}
         >
             <div className="bg-danger text-white fw-bold d-flex align-items-center px-3 py-2">
                 <Menu size={20} className="me-2" /> MENU
             </div>
 
-            <ul className="list-group list-group-flush">
+            <ul className="list-group list-group-flush overflow-auto flex-grow-1">
                 {rootCats.length > 0 ? (
                     rootCats.map((cat) => {
                         const id = cat._id;
                         const isHover = String(hoverCatId) === String(id);
+
                         return (
                             <li
                                 key={id}
-                                className={`list-group-item list-group-item-action d-flex align-items-center justify-content-between ${isHover ? "bg-danger-subtle text-danger fw-semibold" : ""
-                                    }`}
-                                style={{ cursor: "pointer" }}
+                                className={`list-group-item list-group-item-action d-flex align-items-center justify-content-between 
+                            ${isHover ? "bg-danger-subtle text-danger fw-semibold" : ""}`}
                                 onMouseEnter={() => {
                                     setHoverCatId(id);
-                                    setShowHoverPanel(true); // Ẩn Carousel, hiện panel danh mục con
-                                    setSelectedCatId(null); // đảm bảo chưa vào chế độ sản phẩm
+                                    setShowHoverPanel(true);
+                                    setSelectedCatId(null);
                                 }}
                             >
                                 <div className="d-flex align-items-center">
-                                    <Cpu
-                                        size={18}
-                                        className={`me-2 ${isHover ? "text-danger" : "text-primary"
-                                            }`}
-                                    />
+                                    <Cpu size={18} className={`me-2 ${isHover ? "text-danger" : "text-primary"}`} />
                                     <span>{cat._name}</span>
                                 </div>
                                 <ChevronRight size={16} className="text-muted" />
@@ -292,6 +295,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                 )}
             </ul>
         </div>
+
     );
 
     // ===== Panel danh mục con trong khu vực nội dung =====
@@ -422,7 +426,6 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                 {/* Desktop layout: Sidebar + Content */}
                 <div
                     className="d-none d-md-flex"
-                    style={{ minHeight: "calc(80vh - 100px)" }}
                     onMouseLeave={handleLeaveAll}
                 >
                     <CategorySidebar />

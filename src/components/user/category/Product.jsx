@@ -30,7 +30,7 @@ export default function Product({ prod }) {
 
     const firstImage =
         prod?.images?.find(img => img.isPrimary)?.imageUrl ||
-        PLACEHOLDER_IMG;
+        prod?.imageUrl;
 
 
     // 🧮 Fetch giá theo biến thể

@@ -457,19 +457,27 @@ export default function Footer() {
                     <span class="hotline-tip">Gọi 0789 636 979</span>
                 </a>
                 {/* Hotline banner (hidden on md+) */}
-                <div className="hotline-banner d-md-none">
-                    <div className="hotline-icon"><i className="bi bi-phone"></i></div>
-                    <div className="hotline-text">
-                        <div>Hotline - Zalo</div>
-                        <strong className="shine">0789 636 979</strong>
+                <a class="hotline-banner " href="https://zalo.me/0789636979">
+                    <div class="hotline-icon">
+                        <i class="bi bi-phone"></i>
                     </div>
-                    <a className="zalo-badge" href="https://zalo.me/0789636979" target="_blank" rel="noreferrer" aria-label="Chat Zalo"></a>
-                </div>
+
+                    <div class="hotline-info d-flex flex-column">
+                        <span class="label">Hotline - Zalo</span>
+                        <strong class="phone-number">0789 636 979</strong>
+                    </div>
+
+                    <a class="zalo-btn" href="https://zalo.me/0789636979" target="_blank" aria-label="Chat Zalo">
+
+                    </a>
+                </a>
+
+
             </div>
 
             <BannerBox id={6} label="D — Sticker Trái" className="sticker-left-u-h" />
             <BannerBox id={7} label="F — Sticker Trái nhỏ" className="sticker-left-a-h" />
-            <BannerBox id={8} label="E — Sticker Phải" className="sticker-right" />
+            <BannerBox id={8} label="E — Sticker Phải" className="sticker-right-u-h" />
 
 
         </footer >
