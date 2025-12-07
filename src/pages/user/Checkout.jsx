@@ -85,23 +85,22 @@ export default function Checkout() {
   // 🧾 Xử lý đặt hàng COD
   const handleSubmit = async () => {
     const saved = Cookies.get("shippingInfo");
+
     if (!saved) {
-      alert("⚠️ Vui lòng nhập thông tin giao hàng trước khi đặt hàng!");
-      return;
+      return alert("⚠️ Vui lòng nhập thông tin giao hàng trước khi đặt hàng!");
     }
 
     if (!shippingInfo?.email) {
-      alert("⚠️ Thiếu email người dùng!");
-      return;
+      return alert("⚠️ Thiếu email người dùng!");
     }
 
     const email = shippingInfo.email.trim();
 
     try {
-      // Chuẩn hóa items gửi lên BE
+      // Chuẩn hóa dữ liệu items gửi lên BE
       const items = products.map((p) => ({
-        variantId: p?.variant?.variantId ?? p?.variantId ?? undefined,
-        productId: p?.productId ?? undefined,
+        variantId: p?.variant?.variantId ?? p?.variantId,
+        productId: p?.productId,
         quantity: p.quantity,
         pricePerUnit: Number(p.pricing ?? p.price),
         attributes: toAttrObj(p.selectedAttr),
@@ -114,29 +113,22 @@ export default function Checkout() {
         items,
       };
 
-      // 🔥 Gửi yêu cầu tạo user/order
-      const res = await axios.post(
-        "http://localhost:3000/users/register-individual",
-        payload
-      );
-
+      const url = shippingInfo.API;
+      const res = await axios.post(url, payload);
       const data = res.data;
 
       // ===============================
       // 🔥 CASE 1 — EMAIL CHƯA VERIFY
       // ===============================
-      if (data.order === null && data.message) {
+      if (!data.order && data.message) {
         console.warn("⛔ Email chưa xác thực:", email);
 
-        // Điều hướng sang trang chờ xác thực email
-        navigate("/verify-pending", {
-          state: {
-            email,
-            message: data.message,
-          },
-        });
+        alert(
+          "📧 Vui lòng kiểm tra email của bạn để xác thực tài khoản trước khi hoàn tất đơn hàng!\n\n" +
+          `Email của bạn: ${email}`
+        );
 
-        return; // ❗ KHÔNG tạo order
+        return;
       }
 
       // ===============================
@@ -149,6 +141,8 @@ export default function Checkout() {
       alert("Đã xảy ra lỗi khi gửi đơn hàng. Vui lòng thử lại!");
     }
   };
+
+
 
 
 
