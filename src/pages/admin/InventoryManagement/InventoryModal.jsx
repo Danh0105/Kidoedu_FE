@@ -56,7 +56,7 @@ export default function InventoryModal({ show, onClose, data, onSaved }) {
                     variantId: i.variantId,
                     variantName: i.variantName,
                     quantity: i.quantity,
-                    unit_cost: i.unit_cost
+                    unitCost: Number(i.unitCost)
                 })) || []
             );
         } else {
@@ -78,7 +78,7 @@ export default function InventoryModal({ show, onClose, data, onSaved }) {
                 variantId: "",
                 variantName: "",
                 quantity: 1,
-                unit_cost: ""
+                unitCost: 0
             }
         ]);
     };
@@ -99,6 +99,9 @@ export default function InventoryModal({ show, onClose, data, onSaved }) {
 
     /* ==================== SAVE RECEIPT ==================== */
     const save = async () => {
+        // ==============================
+        // VALIDATION
+        // ==============================
         if (type === "import" && !supplierId) {
             alert("Vui lòng chọn nhà cung cấp!");
             return;
@@ -114,16 +117,19 @@ export default function InventoryModal({ show, onClose, data, onSaved }) {
                 alert("Có dòng chưa chọn biến thể!");
                 return;
             }
-            if (!it.quantity || Number(it.quantity) <= 0) {
-                alert("Số lượng phải > 0");
+            if (Number(it.quantity) <= 0) {
+                alert("Số lượng phải > 0!");
                 return;
             }
-            if (type === "import" && (!it.unit_cost || Number(it.unit_cost) <= 0)) {
-                alert("Giá nhập phải > 0");
+            if (type === "import" && Number(it.unitCost) <= 0) {
+                alert("Giá nhập phải > 0!");
                 return;
             }
         }
 
+        // ==============================
+        // NORMALIZE ITEMS theo format BE yêu cầu
+        // ==============================
         const normalizedItems = items.map((it) => ({
             variantId: Number(it.variantId),
             quantity: Number(it.quantity),
@@ -136,23 +142,29 @@ export default function InventoryModal({ show, onClose, data, onSaved }) {
             note,
             supplierId: type === "import" ? supplierId : null,
             items: normalizedItems,
-            totalQuantity: normalizedItems.reduce((s, i) => s + i.quantity, 0)
+            totalQuantity: normalizedItems.reduce((sum, item) => sum + item.quantity, 0)
         };
 
+        console.log("payload gửi BE:", payload);
+
+        // ==============================
+        // CALL API
+        // ==============================
         try {
             if (data) {
-                await axios.put(`${API_BASE}/inventory/${data.receipt_id}`, payload);
+                await axios.put(`${API_BASE}/inventory/${data.receiptId}`, payload);
             } else {
                 await axios.post(`${API_BASE}/inventory`, payload);
             }
 
-            onSaved();
-            onClose();
+            onSaved?.();
+            onClose?.();
         } catch (err) {
             console.error("Lỗi lưu phiếu:", err);
             alert(err?.response?.data?.message || "Không thể lưu phiếu!");
         }
     };
+
 
     /* ==================== MAIN MODAL ==================== */
     if (!show) return null;
@@ -324,9 +336,9 @@ export default function InventoryModal({ show, onClose, data, onSaved }) {
                                                         <input
                                                             type="number"
                                                             className="form-control"
-                                                            value={item.unit_cost || ""}
+                                                            value={item.unitCost || ""}
                                                             onChange={(e) =>
-                                                                updateRow(i, "unit_cost", e.target.value)
+                                                                updateRow(i, "unitCost", e.target.value)
                                                             }
                                                             placeholder="0"
                                                         />

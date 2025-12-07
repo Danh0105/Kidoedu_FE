@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import InventoryModal from "./InventoryModal";
+import InventoryViewModal from "./InventoryViewModal";
 
 const API_BASE = process.env.REACT_APP_API_URL;
 
@@ -8,11 +9,12 @@ export default function InventoryManager() {
     const [list, setList] = useState([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
+    const [viewModal, setViewModal] = useState(false);
 
     const [showModal, setShowModal] = useState(false);
     const [selectedReceipt, setSelectedReceipt] = useState(null);
 
-    /* ======================= FETCH RECEIPTS ======================= */
+    /* ======================= FETCH LIST ======================= */
     const fetchList = async () => {
         setLoading(true);
 
@@ -20,7 +22,6 @@ export default function InventoryManager() {
             const res = await axios.get(`${API_BASE}/inventory`);
             const raw = Array.isArray(res.data) ? res.data : res.data?.data || [];
 
-            // Chuẩn camelCase FE theo đúng API response
             const formatted = raw.map((r) => ({
                 receiptId: r.receiptId,
                 receiptCode: r.receiptCode,
@@ -32,6 +33,7 @@ export default function InventoryManager() {
                 createdAt: r.createdAt,
                 updatedAt: r.updatedAt,
                 supplier: r.supplier || null,
+                items: r.items || []     // 👈 QUAN TRỌNG — Lấy items luôn
             }));
 
             setList(formatted);
@@ -46,7 +48,7 @@ export default function InventoryManager() {
         fetchList();
     }, []);
 
-    /* ======================= SEARCH FILTER ======================== */
+    /* ======================= SEARCH ========================= */
     const filteredList = useMemo(() => {
         const key = search.trim().toLowerCase();
         if (!key) return list;
@@ -58,7 +60,7 @@ export default function InventoryManager() {
         );
     }, [search, list]);
 
-    /* ======================= OPEN MODAL ========================== */
+    /* ======================= OPEN MODAL ======================= */
     const openModal = (item) => {
         setSelectedReceipt(item || null);
         setShowModal(true);
@@ -75,18 +77,22 @@ export default function InventoryManager() {
             alert("Không thể xoá phiếu!");
         }
     };
+    const openViewModal = (item) => {
+        setSelectedReceipt(item);
+        setViewModal(true);
+    };
 
-    /* ======================= RENDER UI ============================ */
+    /* ======================= RENDER UI ======================= */
     return (
         <div className="card shadow-sm">
             <div className="card-body">
 
                 {/* HEADER */}
                 <div className="d-flex justify-content-between mb-4">
-                    <h4 className="fw-bold">Quản lý phiếu nhập kho</h4>
+                    <h4 className="fw-bold">Quản lý phiếu nhập / xuất kho</h4>
 
                     <button className="btn btn-primary" onClick={() => openModal(null)}>
-                        + Tạo phiếu
+                        + Tạo phiếu mới
                     </button>
                 </div>
 
@@ -122,30 +128,42 @@ export default function InventoryManager() {
 
                             {!loading && filteredList.length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="text-center">Không có phiếu nào</td>
+                                    <td colSpan={6} className="text-center">
+                                        Không có phiếu nào
+                                    </td>
                                 </tr>
                             )}
 
                             {!loading &&
                                 filteredList.map((r) => (
                                     <tr key={r.receiptId}>
+
+                                        {/* CLICK MÃ PHIẾU = XEM CHI TIẾT */}
                                         <td>
-                                            {r.receiptCode || <span className="text-muted">—</span>}
+                                            <td>
+                                                <button
+                                                    className="btn btn-link p-0"
+                                                    onClick={() => openViewModal(r)}
+                                                    style={{ textDecoration: "underline" }}
+                                                >
+                                                    {r.receiptCode}
+                                                </button>
+                                            </td>
+
                                         </td>
 
-                                        <td>
-                                            {r.supplier?.supplierName || "Không có"}
-                                        </td>
+                                        {/* NCC */}
+                                        <td>{r.supplier?.supplierName || "—"}</td>
 
-                                        <td>
-                                            {new Date(r.receiptDate).toLocaleDateString("vi-VN")}
-                                        </td>
+                                        {/* DATE */}
+                                        <td>{new Date(r.receiptDate).toLocaleDateString("vi-VN")}</td>
 
-                                        <td>{r.note || ""}</td>
-
+                                        {/* TOTAL */}
                                         <td className="text-end">
                                             {Number(r.totalAmount).toLocaleString("vi-VN")} đ
                                         </td>
+
+                                        <td>{r.note || ""}</td>
 
                                         <td className="text-center">
                                             <button
@@ -173,10 +191,18 @@ export default function InventoryManager() {
                     <InventoryModal
                         show={showModal}
                         onClose={() => setShowModal(false)}
-                        data={selectedReceipt}
+                        data={selectedReceipt}    // 👈 Lấy từ list, không gọi API
                         onSaved={fetchList}
                     />
                 )}
+                {viewModal && (
+                    <InventoryViewModal
+                        show={viewModal}
+                        onClose={() => setViewModal(false)}
+                        data={selectedReceipt}
+                    />
+                )}
+
             </div>
         </div>
     );
