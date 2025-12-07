@@ -90,50 +90,66 @@ export default function Checkout() {
       return;
     }
 
+    if (!shippingInfo?.email) {
+      alert("⚠️ Thiếu email người dùng!");
+      return;
+    }
+
+    const email = shippingInfo.email.trim();
+
     try {
-      // shippingInfo đã lấy sẵn ở state
-      if (!shippingInfo || !shippingInfo.address) {
-        alert("⚠️ Thiếu thông tin địa chỉ nhận hàng!");
-        return;
-      }
-
-      // 🔹 Map danh sách sản phẩm → items
-
-
+      // Chuẩn hóa items gửi lên BE
       const items = products.map((p) => ({
-        variantId: p?.variant?.variantId ?? p?.variantId ?? undefined, // dùng undefined thay vì null
-        productId: p.productId ?? undefined,                            // không gửi nếu không có
+        variantId: p?.variant?.variantId ?? p?.variantId ?? undefined,
+        productId: p?.productId ?? undefined,
         quantity: p.quantity,
         pricePerUnit: Number(p.pricing ?? p.price),
         attributes: toAttrObj(p.selectedAttr),
       }));
 
-
       const payload = {
         username: shippingInfo.address.full_name,
-        email: shippingInfo.email,
+        email,
         address: shippingInfo.address,
-        items, // ✅ đưa danh sách items vào đây
+        items,
       };
 
-      // cookie shippingInfo có thể là 1 object hoặc mảng object (như bạn gửi mẫu)
-      let data = JSON.parse(saved);
-      if (!Array.isArray(data)) data = [data];
+      // 🔥 Gửi yêu cầu tạo user/order
+      const res = await axios.post(
+        "http://localhost:3000/users/register-individual",
+        payload
+      );
 
-      // lấy API từ bản ghi đang dùng (ví dụ theo địa chỉ mặc định)
-      const current = data.find(it => it.address?.is_default) || data[0];
-      const url = current.API || "http://localhost:3000/users/register-individual";
+      const data = res.data;
 
-      console.log("➡️ Payload gửi lên:", payload);
+      // ===============================
+      // 🔥 CASE 1 — EMAIL CHƯA VERIFY
+      // ===============================
+      if (data.order === null && data.message) {
+        console.warn("⛔ Email chưa xác thực:", email);
 
-      const res = await axios.post(url, payload);
-      navigate("/invoice", { state: { order: res.data } });
+        // Điều hướng sang trang chờ xác thực email
+        navigate("/verify-pending", {
+          state: {
+            email,
+            message: data.message,
+          },
+        });
+
+        return; // ❗ KHÔNG tạo order
+      }
+
+      // ===============================
+      // 🔥 CASE 2 — EMAIL ĐÃ VERIFY
+      // ===============================
+      navigate("/invoice", { state: { order: data } });
 
     } catch (err) {
       console.error("❌ Lỗi gửi đơn hàng:", err.response?.data || err);
       alert("Đã xảy ra lỗi khi gửi đơn hàng. Vui lòng thử lại!");
     }
   };
+
 
 
   // 💳 Thanh toán MoMo

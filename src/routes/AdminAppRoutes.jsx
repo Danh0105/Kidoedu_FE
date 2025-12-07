@@ -11,7 +11,7 @@ import OrderManagement from "../pages/admin/OrderManagement/OrderManagement";
 import Payment from "../pages/admin/Payment";
 import ReportsAnalytics from "../pages/admin/ReportsAnalytics";
 import UserManagement from "../pages/admin/UserManagement";
-import SystemSettings from "../pages/admin/SystemSettings";
+import SystemSettings from "../pages/admin/SystemSettings/SystemSettings";
 import Shipping from "../pages/admin/Shipping";
 import CouponManagement from "../pages/admin/CouponManagement";
 import PrivateRoute from "../components/user/PrivateRoute";

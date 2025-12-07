@@ -42,6 +42,7 @@ import PrivacyPolicyPage from "../pages/user/PoliciesandRegulations/PrivacyPolic
 import PoliciesPage from "../pages/user/PoliciesandRegulations/Overview";
 import Rental from "../pages/user/Rental";
 import CheckoutRental from "../pages/user/CheckoutRental";
+import VerifySuccess from "../pages/user/VerifySuccess";
 
 export default function AppRoutes() {
 
@@ -194,8 +195,9 @@ export default function AppRoutes() {
                 <Route path="/rental" element={<UserLayout />}>
                     <Route index element={<Rental />} />
                 </Route>
-                <Route path="/vtkc" element={<UserLayout />}>
-                    <Route index element={<VTKC />} />
+
+                <Route path="/verify-success" element={<UserLayout />}>
+                    <Route index element={<VerifySuccess />} />
                 </Route>
             </Routes>
         </BrowserRouter>
