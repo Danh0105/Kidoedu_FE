@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import logo from "../../assets/user/Logo.png";
 import '../../components/user/css/Footer.css'
 import axios from "axios";
+import ChatbotWidget from "../../components/user/ChatbotWidget";
 
 export default function Footer() {
     const [showScroll, setShowScroll] = useState(false);
@@ -478,7 +479,7 @@ export default function Footer() {
             <BannerBox id={6} label="D — Sticker Trái" className="sticker-left-u-h" />
             <BannerBox id={7} label="F — Sticker Trái nhỏ" className="sticker-left-a-h" />
             <BannerBox id={8} label="E — Sticker Phải" className="sticker-right-u-h" />
-
+            <ChatbotWidget />
 
         </footer >
 

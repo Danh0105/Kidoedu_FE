@@ -125,7 +125,6 @@ export default function Store({
                         limit: data.pagination?.limit ?? limit,
                     });
                 } else {
-                    // --- Danh sách sản phẩm mặc định ---
                     const data = await fetchAllProductsApi(baseParams, abortSignal);
 
                     setItems(data ?? []);
