@@ -108,16 +108,15 @@ export default function Store({
 
             try {
                 const baseParams = { page, limit };
-                if (selectedCatId) baseParams.category_id = selectedCatId;
+                if (selectedCatId !== null) baseParams.category_id = selectedCatId;
+
                 if (sort) baseParams.sort = sort;
 
-                // --- Tìm kiếm ---
                 if (debouncedQ.trim()) {
                     const data = await searchProductsApi(
                         { q: debouncedQ, ...baseParams },
                         abortSignal
                     );
-                    console.log("searchProductsApi", data);
                     setItems(data.items ?? []);
                     setMeta({
                         page: data.pagination?.page ?? page,
@@ -177,6 +176,13 @@ export default function Store({
         if (sort === "price_desc") copy.sort((a, b) => getPrice(b) - getPrice(a));
         return copy;
     }, [items, sort]);
+    // ======= Lọc theo danh mục trên FE ========
+    const filteredItems = useMemo(() => {
+        if (selectedCatId === null) return sortedItems;
+        return sortedItems.filter(
+            (prod) => prod.category?.categoryId === selectedCatId
+        );
+    }, [sortedItems, selectedCatId]);
 
     /* ====================== RENDER ====================== */
 
@@ -272,8 +278,8 @@ export default function Store({
 
                     {/* Product List */}
                     <div className="d-flex flex-wrap" style={{ width: "1120px", gap: "10px" }}>
-                        {sortedItems.length ? (
-                            sortedItems.map((prod) => (
+                        {filteredItems.length ? (
+                            filteredItems.map((prod) => (
                                 <div className="col" key={prod.productId} style={{ flex: "0 0 10%" }}>
                                     <Product prod={prod} status={prod?.status} />
                                 </div>
@@ -285,6 +291,7 @@ export default function Store({
                                 </p>
                             </div>
                         )}
+
                     </div>
 
                     {/* Pagination */}
@@ -420,7 +427,7 @@ export default function Store({
                             ))
                         )}
 
-                        {!loading && sortedItems.length > 0 && sortedItems.map((prod) => (
+                        {!loading && filteredItems.length > 0 && filteredItems.map((prod) => (
                             <div key={prod.productId} className="col">
                                 <div className="product-card">
                                     <Product prod={prod} status={prod?.status} />
@@ -428,7 +435,8 @@ export default function Store({
                             </div>
                         ))}
 
-                        {!loading && !sortedItems.length && (
+
+                        {!loading && !filteredItems.length && (
                             <div className="col-12">
                                 <div className="text-center text-muted py-4">Không có sản phẩm nào</div>
                             </div>
