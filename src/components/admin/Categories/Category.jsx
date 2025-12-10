@@ -96,6 +96,21 @@ export default function Category({ onChange }) {
       alert("Thêm danh mục thất bại!");
     }
   };
+  // ===== UPDATE =====
+  const handleUpdate = async (id, newName) => {
+    if (!newName.trim()) return alert("Tên danh mục không được để trống!");
+
+    try {
+      await axios.patch(`${process.env.REACT_APP_API_URL}/categories/${id}`, {
+        categoryName: newName,
+      });
+
+      await fetchRoots();
+    } catch (err) {
+      console.error(err);
+      alert("Cập nhật danh mục thất bại!");
+    }
+  };
 
   // ===== FILTER =====
   const filtered = useMemo(() => {
@@ -189,7 +204,9 @@ export default function Category({ onChange }) {
                   category={cat}
                   onDelete={handleDelete}
                   onSelect={onChange}
+                  onEdit={handleUpdate}
                 />
+
               ))}
             </div>
           )}

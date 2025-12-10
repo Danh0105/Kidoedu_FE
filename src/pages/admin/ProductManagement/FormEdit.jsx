@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import ImagesEdit from "./ImageEdit";
-import RichTextEditor from "../RichTextEditor";
-import CategoryEdit from "./CategoryEdit";
-import VariantFormEdit from "./VariantFormEdit";
-import AttributePanelEdit from "./AttributePanel";
+import ImagesEdit from "../../../components/admin/FormEdit/ImageEdit";
+import RichTextEditor from "../../../components/admin/RichTextEditor";
+import Category from "../../../components/admin/Categories/Category";
+import VariantFormEdit from "../../../components/admin/FormEdit/VariantFormEdit";
+import AttributePanelEdit from "../../../components/admin/FormEdit/AttributePanel";
 
 const MODAL_ID = "modalEditProduct";
 
@@ -287,7 +287,7 @@ export default function ModalEditProduct({ product, onUpdated, isOpen, onClosed 
                             <div className="col-lg-4 col-md-12">
                                 <ImagesEdit form={form} setForm={setForm} key={form.productId} />
                                 <div className="mb-3">
-                                    <CategoryEdit categoryId={categoryId} onChange={setCategoryId} />
+                                    <Category categoryId={categoryId} onChange={setCategoryId} />
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label">Trạng thái</label>

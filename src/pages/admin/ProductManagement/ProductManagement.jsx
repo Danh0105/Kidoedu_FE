@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import ModalLG from "./ModalLG";
+import ModalLG from "./FormCreate";
 import axios from "axios";
-import ModalEditProduct from "../../../components/admin/FormEdit/ModalEditProduct";
+import FormEdit from "./FormEdit";
 
 const PLACEHOLDER_IMG = "https://placehold.co/120x120?text=No+Image";
 
@@ -27,8 +27,8 @@ export default function ProductManagement() {
             );
             console.log("res.data.data", res.data.data);
 
-            setProducts(res.data.data || []); // mảng sản phẩm
-            setMeta(res.data.meta || null);   // thông tin phân trang
+            setProducts(res.data.data || []);
+            setMeta(res.data.meta || null);
         } catch (err) {
             console.error("Lỗi khi lấy sản phẩm:", err);
         }
@@ -386,7 +386,7 @@ export default function ProductManagement() {
                     </div>
                 </div>
             </div>
-            <ModalEditProduct
+            <FormEdit
                 product={editProduct}
                 isOpen={isOpen}
                 onClosed={() => {

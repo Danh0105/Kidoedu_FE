@@ -9,7 +9,6 @@ export default function ChatbotWidget() {
 
     const callMenu = async (key = "welcome") => {
         const res = await axios.post(`${process.env.REACT_APP_API_URL}/chatbot/menu`, { key });
-        console.log("res.data.text", res.data)
         setMessages(prev => [...prev, { from: "bot", text: res.data.text }]);
         setOptions(res.data.options);
     };

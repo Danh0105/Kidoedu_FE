@@ -1,12 +1,12 @@
 import React, { useRef, useState } from "react";
-import Category from "./Category";
-import Image from "./Image";
+import Category from "../../../components/admin/Categories/Category";
+import Image from "../../../components/admin/FormCreate/Image";
 import RichTextEditor from "../../../components/admin/RichTextEditor";
 import axios from "axios";
 import ReactQuill from "react-quill-new";
-import InventoryPanel from "./InventoryPanel";
-import AttributePanel from "./AttributePanel";
-import VariantForm from "./VariantForm";
+import InventoryPanel from "../../../components/admin/FormCreate/InventoryPanel";
+import AttributePanel from "../../../components/admin/FormCreate/AttributePanel";
+import VariantForm from "../../../components/admin/FormCreate/AttributePanel";
 
 // =========================================================================
 // HÀM CHUYỂN ĐỔI BITMASK CHUẨN (Thay thế numberToArray/arrayToNumber cũ)
