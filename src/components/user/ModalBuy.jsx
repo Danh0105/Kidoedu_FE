@@ -1,10 +1,9 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import InnerImageZoom from "react-inner-image-zoom";
 import Slider from "react-slick";
 import { NavLink } from "react-router-dom";
 import { CartContext } from "../../hooks/CartContext";
 import { makeCheckoutProduct } from "../../utils/productBuyHelper";
-
+import "../../components/user/css/ModalBuy.css";
 /* --------------------------- Helpers --------------------------- */
 
 const fmtVND = (n) =>
@@ -191,44 +190,49 @@ export default function ModalBuy({ show, onClose, product }) {
           {/* Body */}
           <div className="modal-body pt-0">
             <div className="row g-4">
+              <div className="col-12 col-md-6 d-flex flex-column">
+                {/* ====================== GALLERY ====================== */}
+                <div className="dmx-gallery position-relative">
 
-              {/* ---------------- GALLERY ---------------- */}
-              <div className="col-12 col-md-6">
-                <Slider {...mainSettings} ref={setNavMain}>
-                  {safeImages.map((src, idx) => (
-                    <div key={idx}>
-                      <div className="ratio ratio-1x1">
-                        <InnerImageZoom
+                  {/* SLIDER ẢNH LỚN */}
+                  <Slider {...mainSettings} asNavFor={navThumb} ref={setNavMain}>
+                    {safeImages.map((src, i) => (
+                      <div key={i} className="dmx-image-container">
+                        <img
                           src={process.env.REACT_APP_API_URL + src}
-                          zoomSrc={process.env.REACT_APP_API_URL + src}
-                          zoomType="hover"
-                          zoomScale={1.5}
-                          className="w-100 h-100"
-                          style={{ objectFit: "contain" }}
+                          alt={`Ảnh sản phẩm ${i + 1}`}
+                          className="dmx-main-image"
+                          onError={(e) => (e.currentTarget.src = "/placeholder-800x800.png")}
                         />
                       </div>
-                    </div>
-                  ))}
-                </Slider>
+                    ))}
+                  </Slider>
 
-                {safeImages.length > 1 && (
-                  <div className="mt-3">
-                    <Slider {...thumbSettings} ref={setNavThumb}>
-                      {safeImages.map((src, idx) => (
-                        <div key={idx} className="px-1">
-                          <div className="ratio ratio-1x1 border rounded">
-                            <img
-                              src={process.env.REACT_APP_API_URL + src}
-                              alt=""
-                              className="w-100 h-100"
-                              style={{ objectFit: "contain", cursor: "pointer" }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </Slider>
-                  </div>
-                )}
+                  {/* NÚT NEXT/PREV */}
+                  <button className="dmx-prev" onClick={() => navMain?.slickPrev()}>
+                    <i className="bi bi-chevron-left"></i>
+                  </button>
+
+                  <button className="dmx-next" onClick={() => navMain?.slickNext()}>
+                    <i className="bi bi-chevron-right"></i>
+                  </button>
+                </div>
+
+                {/* THUMBNAIL NHỎ DƯỚI */}
+                <div className="dmx-thumb-wrapper mt-3">
+                  <Slider {...thumbSettings} asNavFor={navMain} ref={setNavThumb}>
+                    {safeImages.map((src, i) => (
+                      <div key={i} className="dmx-thumb-item">
+                        <img
+                          src={process.env.REACT_APP_API_URL + src}
+                          alt={`Thumb ${i + 1}`}
+                          className="dmx-thumb-img"
+                          onError={(e) => (e.currentTarget.src = "/placeholder-800x800.png")}
+                        />
+                      </div>
+                    ))}
+                  </Slider>
+                </div>
               </div>
 
               {/* ---------------- INFO ---------------- */}

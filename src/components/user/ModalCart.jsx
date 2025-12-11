@@ -1,10 +1,8 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import InnerImageZoom from "react-inner-image-zoom";
 import Slider from "react-slick";
 import axios from "axios";
 import { CartContext } from "../../hooks/CartContext";
-import { jwtDecode } from "jwt-decode";
-import Cookies from "js-cookie";
+import "../../components/user/css/ModalBuy.css";
 import { addToCartHelper } from "../../utils/addToCartHelper";
 import { pickPricesFromVariant } from "../../utils/productBuyHelper";
 
@@ -18,7 +16,7 @@ const fmtVND = (n) =>
 // ===================================================================
 //                            COMPONENT
 // ===================================================================
-export default function ModalBuy({ show, onClose, product }) {
+export default function ModalCart({ show, onClose, product }) {
   // ------------------------ Prepare Data ------------------------
   const variants = product?.variants ?? [];
   const defaultVariant = variants[0] ?? null;
@@ -157,42 +155,48 @@ export default function ModalBuy({ show, onClose, product }) {
           <div className="modal-body pt-0">
             <div className="row g-4">
               {/* ---------------------- Gallery ---------------------- */}
-              <div className="col-12 col-md-6">
-                <Slider {...mainSettings} ref={setNavMain}>
-                  {safeImages.map((src, idx) => (
-                    <div key={idx}>
-                      <div className="ratio ratio-1x1">
-                        <InnerImageZoom
+              <div className="col-12 col-md-6 d-flex flex-column">
+                <div className="dmx-gallery position-relative">
+
+                  {/* SLIDER ẢNH LỚN */}
+                  <Slider {...mainSettings} asNavFor={navThumb} ref={setNavMain}>
+                    {safeImages.map((src, i) => (
+                      <div key={i} className="dmx-image-container">
+                        <img
                           src={process.env.REACT_APP_API_URL + src}
-                          zoomSrc={process.env.REACT_APP_API_URL + src}
-                          zoomType="hover"
-                          zoomScale={1.5}
-                          className="w-100 h-100"
-                          style={{ objectFit: "contain" }}
+                          alt={`Ảnh sản phẩm ${i + 1}`}
+                          className="dmx-main-image"
+                          onError={(e) => (e.currentTarget.src = "/placeholder-800x800.png")}
                         />
                       </div>
-                    </div>
-                  ))}
-                </Slider>
+                    ))}
+                  </Slider>
 
-                {safeImages.length > 1 && (
-                  <div className="mt-3">
-                    <Slider {...thumbSettings} ref={setNavThumb}>
-                      {safeImages.map((src, idx) => (
-                        <div key={idx} className="px-1">
-                          <div className="ratio ratio-1x1 border rounded">
-                            <img
-                              src={process.env.REACT_APP_API_URL + src}
-                              alt=""
-                              className="w-100 h-100"
-                              style={{ objectFit: "contain", cursor: "pointer" }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </Slider>
-                  </div>
-                )}
+                  {/* NÚT NEXT/PREV */}
+                  <button className="dmx-prev" onClick={() => navMain?.slickPrev()}>
+                    <i className="bi bi-chevron-left"></i>
+                  </button>
+
+                  <button className="dmx-next" onClick={() => navMain?.slickNext()}>
+                    <i className="bi bi-chevron-right"></i>
+                  </button>
+                </div>
+
+                {/* THUMBNAIL NHỎ DƯỚI */}
+                <div className="dmx-thumb-wrapper mt-3">
+                  <Slider {...thumbSettings} asNavFor={navMain} ref={setNavThumb}>
+                    {safeImages.map((src, i) => (
+                      <div key={i} className="dmx-thumb-item">
+                        <img
+                          src={process.env.REACT_APP_API_URL + src}
+                          alt={`Thumb ${i + 1}`}
+                          className="dmx-thumb-img"
+                          onError={(e) => (e.currentTarget.src = "/placeholder-800x800.png")}
+                        />
+                      </div>
+                    ))}
+                  </Slider>
+                </div>
               </div>
 
               {/* ---------------------- Info ---------------------- */}
