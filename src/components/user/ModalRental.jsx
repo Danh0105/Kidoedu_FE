@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import InnerImageZoom from "react-inner-image-zoom";
 import Slider from "react-slick";
 import { NavLink } from "react-router-dom";
 import { CartContext } from "../../hooks/CartContext";
