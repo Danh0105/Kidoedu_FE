@@ -308,7 +308,7 @@ export default function AttributePanel({
                                             <thead className="table-light">
                                                 <tr>
                                                     <th className="text-center" style={{ width: "40%" }}>
-                                                        Tên thuộc tính
+                                                        Thông số kĩ thuật
                                                     </th>
                                                     <th className="text-center" style={{ width: "40%" }}>
                                                         Giá trị

@@ -48,6 +48,13 @@ const SidebarMenu = () => {
                 isOpen={openIndex === 4}
                 onClick={() => handleToggle(4)}
             />
+            <MenuItem
+                to="/chatbotscripts"
+                icon="nav-icon bi bi-robot"
+                label="Kịch bản Chatbot"
+                isOpen={openIndex === 10}
+                onClick={() => handleToggle(10)}
+            />
 
             <MenuItem
                 to="/users"
@@ -103,6 +110,7 @@ const SidebarMenu = () => {
                 isOpen={openIndex === 9}
                 onClick={() => handleToggle(9)}
             />
+
         </ul>
     );
 };

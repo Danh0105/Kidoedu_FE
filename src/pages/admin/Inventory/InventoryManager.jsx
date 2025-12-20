@@ -74,7 +74,7 @@ export default function InventoryManager() {
             await axios.delete(`${API_BASE}/inventory/${receiptId}`);
             setList((prev) => prev.filter((x) => x.receiptId !== receiptId));
         } catch (err) {
-            alert("Không thể xoá phiếu!");
+            alert(err.response?.data.message);
         }
     };
     const openViewModal = (item) => {
@@ -153,10 +153,10 @@ export default function InventoryManager() {
                                         </td>
 
                                         {/* NCC */}
-                                        <td>{r.supplier?.supplierName || "—"}</td>
+                                        <td>{r.supplier?.supplierName || "Kho nội bộ"}</td>
 
                                         {/* DATE */}
-                                        <td>{new Date(r.receiptDate).toLocaleDateString("vi-VN")}</td>
+                                        <td>{new Date(r.createdAt).toLocaleDateString("vi-VN")}</td>
 
                                         {/* TOTAL */}
                                         <td className="text-end">

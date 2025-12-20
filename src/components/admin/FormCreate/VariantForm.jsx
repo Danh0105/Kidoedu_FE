@@ -5,6 +5,7 @@ import React, {
     useRef,
     useState,
 } from "react";
+import GenerateSKU from "../../../utils/GenerateSKU";
 
 /* -------------------------------------------------------------------------- */
 /*                                   HELPERS                                  */
@@ -209,7 +210,6 @@ function VariantForm({ productId, onChange }, ref) {
 
     return (
         <div className="p-2">
-            {/* BUTTON ADD */}
             <div className="d-flex justify-content-center mb-3">
                 <a
                     className="btn btn-outline-primary"
@@ -224,7 +224,6 @@ function VariantForm({ productId, onChange }, ref) {
                 </a>
             </div>
 
-            {/* FORM */}
             <div
                 className={`collapse ${isFirst ? "show" : ""}`}
                 id="variant-collapse"
@@ -234,27 +233,54 @@ function VariantForm({ productId, onChange }, ref) {
                     <h6 className="fw-bold text-primary mb-3">
                         {editingId ? "CẬP NHẬT BIẾN THỂ" : "TẠO BIẾN THỂ MỚI"}
                     </h6>
+                    <div className="col-md-6">
+                        <label className="form-label small fw-bold">Tên biến thể *</label>
+                        <input
+                            className={`form-control ${errors.variantName ? "is-invalid" : ""}`}
+                            value={variantName}
+                            onChange={(e) => setVariantName(e.target.value)}
+                        />
+                    </div>
+                    <div className="row ">
+                        <div className="row">
 
-                    <div className="row g-3">
-                        {/* NAME - SKU - BARCODE */}
-                        <div className="col-md-6">
-                            <label className="form-label small fw-bold">Tên biến thể *</label>
-                            <input
-                                className={`form-control ${errors.variantName ? "is-invalid" : ""}`}
-                                value={variantName}
-                                onChange={(e) => setVariantName(e.target.value)}
-                            />
+                            <div className="col-md-8">
+                                <label className="form-label small fw-bold">SKU</label>
+
+                                <div className="d-flex align-items-center gap-2">
+                                    <input
+                                        className="form-control flex-grow-1"
+                                        value={sku}
+                                        onChange={(e) => setSku(e.target.value)}
+                                        placeholder="Nhập SKU"
+                                    />
+
+                                    <a
+                                        type="a"
+                                        className="btn btn-sm btn-outline-primary"
+                                        style={{ width: "82px" }}
+                                        onClick={() => {
+                                            const auto = GenerateSKU(variantName);
+                                            setSku(auto);
+                                        }}
+                                    >
+                                        Tạo mã
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div className="col-md-4">
+                                <label className="form-label small fw-bold">Barcode</label>
+                                <input
+                                    className="form-control"
+                                    value={barcode}
+                                    onChange={(e) => setBarcode(e.target.value)}
+                                />
+                            </div>
                         </div>
 
-                        <div className="col-md-3">
-                            <label className="form-label small fw-bold">SKU</label>
-                            <input className="form-control" value={sku} onChange={(e) => setSku(e.target.value)} />
-                        </div>
 
-                        <div className="col-md-3">
-                            <label className="form-label small fw-bold">Barcode</label>
-                            <input className="form-control" value={barcode} onChange={(e) => setBarcode(e.target.value)} />
-                        </div>
+
 
                         {/* PRICE + PROMO */}
                         <div className="col-12">
@@ -330,7 +356,7 @@ function VariantForm({ productId, onChange }, ref) {
 
                         {/* ATTRIBUTES */}
                         <div className="col-12">
-                            <label className="form-label small fw-bold">Thuộc tính</label>
+                            <label className="form-label small fw-bold">Thông số kĩ thuật</label>
 
                             <div className="table-responsive border rounded bg-white">
                                 <table className="table table-sm mb-0">

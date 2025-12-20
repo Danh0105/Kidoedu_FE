@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import ImagesEdit from "../../../components/admin/FormEdit/ImageEdit";
+import ProductImages from "../../../components/admin/FormEdit/ProductImages";
 import RichTextEditor from "../../../components/admin/RichTextEditor";
 import Category from "../../../components/admin/Categories/Category";
 import VariantFormEdit from "../../../components/admin/FormEdit/VariantFormEdit";
-import AttributePanelEdit from "../../../components/admin/FormEdit/AttributePanel";
 
 const MODAL_ID = "modalEditProduct";
 
@@ -30,7 +29,6 @@ export default function ModalEditProduct({ product, onUpdated, isOpen, onClosed 
     const [price, setPrice] = useState("");
     const [variantsFromForm, setVariantsFromForm] = useState([]);
     const [categoryId, setCategoryId] = useState(null);
-    const [inventoryDraft, setInventoryDraft] = useState(null);
     const [statusEdu, setStatusEdu] = useState(0);
     const [origin, setOrigin] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +47,6 @@ export default function ModalEditProduct({ product, onUpdated, isOpen, onClosed 
         setPrice(product.price ?? "");
         setVariantsFromForm(product.variants ?? []);
         setCategoryId(product.category?.categoryId ?? null);
-        setInventoryDraft(product.inventory ?? null);
         setOrigin(product.origin ?? "");
         setStatusEdu(product.status ?? 0);
     };
@@ -71,7 +68,6 @@ export default function ModalEditProduct({ product, onUpdated, isOpen, onClosed 
         setPrice(product.price || "");
         setVariantsFromForm(product.variants || []);
         setCategoryId(product.category?.categoryId || null);
-        setInventoryDraft(product.inventory || null);
         setOrigin(product.origin || "");
         setStatusEdu(product.status || 0);
     }, [product]);
@@ -154,7 +150,6 @@ export default function ModalEditProduct({ product, onUpdated, isOpen, onClosed 
             };
         });
         formData.append("variants", JSON.stringify(processedVariants));
-        console.log([...formData.entries()]);
 
 
         // === GỌI API ===
@@ -268,16 +263,11 @@ export default function ModalEditProduct({ product, onUpdated, isOpen, onClosed 
                                 <div className="d-flex align-items-start border border-2">
                                     <div className="nav flex-column nav-pills w-25 ">
                                         <a className="nav-link active" data-bs-toggle="pill" data-bs-target="#variantsedit">Biến thể sản phẩm</a>
-                                        <a className="nav-link" data-bs-toggle="pill" data-bs-target="#attributesedit">Các thuộc tính</a>
                                     </div>
 
                                     <div className="tab-content w-75 p-2">
                                         <div className="tab-pane fade show active" id="variantsedit">
                                             <VariantFormEdit data={variantsFromForm} onChange={setVariantsFromForm} disabled={Number(form.price || product?.price) > 0} />
-                                        </div>
-
-                                        <div className="tab-pane fade" id="attributesedit">
-                                            <AttributePanelEdit variants={variantsFromForm} onVariantsChange={setVariantsFromForm} />
                                         </div>
                                     </div>
                                 </div>
@@ -285,17 +275,13 @@ export default function ModalEditProduct({ product, onUpdated, isOpen, onClosed 
 
                             {/* RIGHT */}
                             <div className="col-lg-4 col-md-12">
-                                <ImagesEdit form={form} setForm={setForm} key={form.productId} />
+                                <ProductImages form={form} setForm={setForm} />
                                 <div className="mb-3">
                                     <Category categoryId={categoryId} onChange={setCategoryId} />
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label">Trạng thái</label>
                                     <RenderStatusCheckboxes />
-                                </div>
-                                <div className="mb-3">
-                                    <label className="form-label">Giá chung (nếu không có biến thể)</label>
-                                    <input type="number" className="form-control" value={price} onChange={(e) => setPrice(e.target.value)} />
                                 </div>
                                 <div className="mb-3 text-start">
                                     <label className="form-label">Xuất xứ</label>

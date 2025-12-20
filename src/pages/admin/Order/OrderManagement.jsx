@@ -52,19 +52,19 @@ export default function OrderManager() {
             setOrders((prev) => prev.filter((o) => o.orderId !== id));
         } catch (err) {
             console.error("Lỗi xoá đơn:", err);
-            alert("Không thể xoá đơn hàng!");
+            alert(err.response?.data.message);
         }
     };
 
     const updateStatus = async (id, status) => {
         try {
-            await axios.put(`${API_BASE}/orders/${id}/status`, { status });
+            await axios.patch(`${API_BASE}/orders/${id}/status`, { status });
             setOrders((prev) =>
                 prev.map((o) => (o.orderId === id ? { ...o, status } : o))
             );
         } catch (err) {
-            console.error("Lỗi cập nhật trạng thái:", err);
-            alert("Không cập nhật được trạng thái đơn hàng!");
+            console.error(err.response?.data);
+            alert(err.response?.data.message);
         }
     };
 

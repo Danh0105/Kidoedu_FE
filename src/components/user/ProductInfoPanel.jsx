@@ -29,7 +29,6 @@ export default function ProductInfoPanel({
 
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(null);
-  const [selectedAttr, setSelectedAttr] = useState(null);
   const [activeVariant, setActiveVariant] = useState(null);
   const variants = product?.variants || [];
 
@@ -110,14 +109,9 @@ export default function ProductInfoPanel({
 
   const handleVariantSelect = (v) => {
     setSelectedVariant(v);
-    setSelectedAttr(null);
     onVariantChange?.(v);
   };
 
-  const handleAttrClick = (key, val) => {
-    const newKey = `${key}:${val}`;
-    setSelectedAttr((prev) => (prev === newKey ? null : newKey));
-  };
 
   const increase = () => setQuantity((n) => Math.min(999, n + 1));
   const decrease = () => setQuantity((n) => Math.max(1, n - 1));
@@ -155,7 +149,6 @@ export default function ProductInfoPanel({
       product,
       variant: active,
       quantity,
-      selectedAttr,
     });
     setSelectedProducts([checkoutItem]);
   };
@@ -273,53 +266,7 @@ export default function ProductInfoPanel({
             -{Math.round((basePrice ? (basePrice - displayPrice) / basePrice : 0) * 100)}%
           </span>
         </div>
-
-
       </div>
-      {/* Attributes */}
-      {selectedVariant && (
-        <div className="border rounded p-3 bg-light-subtle mb-3">
-          <div className="fw-semibold mb-2">
-            Thuộc tính của {active.variantName}
-          </div>
-
-          {Object.keys(attrs).length ? (
-            <div className="d-flex flex-wrap gap-2">
-              {Object.entries(attrs).flatMap(([key, values]) => {
-                const list = Array.isArray(values) ? values : [values];
-
-                return list.map((val, idx) => {
-                  const id = `attr-${key}-${idx}`;
-                  const attrKey = `${key}:${val}`;
-                  const checked = selectedAttr === attrKey;
-
-                  return (
-                    <React.Fragment key={id}>
-                      <input
-                        type="radio"
-                        id={id}
-                        name="attr-radio"
-                        className="btn-check"
-                        checked={checked}
-                        onChange={() => handleAttrClick(key, val)}
-                      />
-                      <label
-                        htmlFor={id}
-                        className={`btn btn-sm rounded-pill ${checked ? "btn-danger" : "btn-outline-secondary"
-                          }`}
-                      >
-                        {key}: {String(val)}
-                      </label>
-                    </React.Fragment>
-                  );
-                });
-              })}
-            </div>
-          ) : (
-            <small className="text-muted">Không có thuộc tính.</small>
-          )}
-        </div>
-      )}
 
       {/* SHORT DESCRIPTION */}
       <div className="feature-list-wrapper mb-3">
@@ -383,7 +330,6 @@ export default function ProductInfoPanel({
               product,
               variant: activeVariant,
               quantity,
-              selectedAttr,
               displayPrice,
               setCartCount,
               addToCartContext,

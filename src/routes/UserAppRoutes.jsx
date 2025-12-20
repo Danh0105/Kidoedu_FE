@@ -43,6 +43,7 @@ import PoliciesPage from "../pages/user/PoliciesandRegulations/Overview";
 import Rental from "../pages/user/Rental";
 import CheckoutRental from "../pages/user/CheckoutRental";
 import VerifySuccess from "../pages/user/VerifySuccess";
+import PaymentResult from "../pages/user/PaymentResult";
 
 export default function AppRoutes() {
 
@@ -198,6 +199,9 @@ export default function AppRoutes() {
 
                 <Route path="/verify-success" element={<UserLayout />}>
                     <Route index element={<VerifySuccess />} />
+                </Route>
+                <Route path="/payment-result" element={<UserLayout />}>
+                    <Route index element={<PaymentResult />} />
                 </Route>
             </Routes>
         </BrowserRouter>

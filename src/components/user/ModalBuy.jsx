@@ -89,13 +89,11 @@ export default function ModalBuy({ show, onClose, product }) {
 
   const hasPromo = promoPrice != null && (basePrice ?? promoPrice) > promoPrice;
 
-  const name = `${product?.productName || "Sản phẩm"}${activeVariant?.variantName ? ` - ${activeVariant.variantName}` : ""
-    }`;
+  const name = `${(product?.productName ?? "Sản phẩm")}${activeVariant?.variantName ? ` - ${activeVariant.variantName}` : ""}`;
+  const sku = activeVariant?.sku ?? product?.sku ?? `SKU-${product?.productId}`;
+  const categoryName = product?.category?.categoryName;
 
-  const sku = activeVariant?.sku || product?.sku || `SKU-${product?.productId}`;
-  const attrs = activeVariant?.attributes || {};
-  const variantId = activeVariant?.variantId ?? product?.productId;
-
+  const variant = activeVariant ?? {};
   // Ảnh sản phẩm
   const safeImages = useMemo(() => {
     const vImg = activeVariant?.imageUrl ?? activeVariant?.image ?? null;
@@ -189,10 +187,17 @@ export default function ModalBuy({ show, onClose, product }) {
 
           {/* Body */}
           <div className="modal-body pt-0">
+            {/* Title */}
+            <div className="d-flex justify-content-between align-items-start">
+              <h1 className="product-title fw-bold mb-1">{name}</h1>
+              <div className="stock-badge">
+                Còn {variant?.inventory?.stock_quantity}
+              </div>
+            </div>
             <div className="row g-4">
               <div className="col-12 col-md-6 d-flex flex-column">
                 {/* ====================== GALLERY ====================== */}
-                <div className="dmx-gallery position-relative">
+                <div className="dmx-gallery-buy position-relative">
 
                   {/* SLIDER ẢNH LỚN */}
                   <Slider {...mainSettings} asNavFor={navThumb} ref={setNavMain}>
@@ -237,10 +242,16 @@ export default function ModalBuy({ show, onClose, product }) {
 
               {/* ---------------- INFO ---------------- */}
               <div className="col-12 col-md-6 d-flex flex-column">
-
-                <h2 className="h5 mb-1">{name}</h2>
-                <p className="text-muted mb-2">Mã sản phẩm: #{variantId}</p>
-
+                {/* SKU / Category */}
+                <div className="d-flex flex-wrap gap-2 mb-3 small text-muted">
+                  <span className="badge bg-dark border">Mã: #{product?.productId}</span>
+                  <span className="badge bg-danger border">SKU: {sku}</span>
+                  {categoryName && (
+                    <span className="badge bg-primary-subtle border text-primary">
+                      {categoryName}
+                    </span>
+                  )}
+                </div>
                 {/* PRICE */}
                 <div className="d-flex align-items-baseline gap-2 mb-3">
                   {hasPromo ? (
@@ -284,47 +295,6 @@ export default function ModalBuy({ show, onClose, product }) {
                   </div>
                 )}
 
-                {/* ATTRIBUTES */}
-                {activeVariant && (
-                  <div className="border rounded p-3 bg-light-subtle mb-3">
-                    <div className="fw-semibold mb-2">Thuộc tính</div>
-
-                    {Object.keys(attrs).length ? (
-                      <div className="d-flex flex-wrap gap-2">
-                        {Object.entries(attrs).flatMap(([key, values]) => {
-                          const list = Array.isArray(values) ? values : [values];
-                          return list.map((val, idx) => {
-                            const keyVal = `${key}:${val}`;
-                            const checked = keyVal === selectedAttr;
-                            const id = `attr-${key}-${idx}`;
-
-                            return (
-                              <React.Fragment key={id}>
-                                <input
-                                  type="radio"
-                                  id={id}
-                                  name="attr-radio"
-                                  className="btn-check"
-                                  checked={checked}
-                                  onChange={() => toggleAttr(key, val)}
-                                />
-                                <label
-                                  htmlFor={id}
-                                  className={`btn btn-sm rounded-pill ${checked ? "btn-danger" : "btn-outline-secondary"
-                                    }`}
-                                >
-                                  {key}: {val}
-                                </label>
-                              </React.Fragment>
-                            );
-                          });
-                        })}
-                      </div>
-                    ) : (
-                      <small className="text-muted">Không có thuộc tính.</small>
-                    )}
-                  </div>
-                )}
 
                 {/* DESCRIPTION */}
                 <div className="mb-3">
@@ -350,9 +320,7 @@ export default function ModalBuy({ show, onClose, product }) {
                     </NavLink>
                   </div>
 
-                  <div className="mt-2 small text-muted">
-                    SKU: {sku}
-                  </div>
+
                 </div>
               </div>
 

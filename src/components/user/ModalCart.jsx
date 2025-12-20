@@ -28,7 +28,6 @@ export default function ModalCart({ show, onClose, product }) {
   const [quantity, setQuantity] = useState(1);
   const [navMain, setNavMain] = useState(null);
   const [navThumb, setNavThumb] = useState(null);
-  const [banners, setBanners] = useState([]);
 
   const { addToCartContext, setCartCount } = useContext(CartContext);
 
@@ -36,7 +35,6 @@ export default function ModalCart({ show, onClose, product }) {
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_API_URL}/banners/13`)
-      .then((res) => setBanners(res.data))
       .catch(() => { });
   }, []);
 
@@ -98,7 +96,6 @@ export default function ModalCart({ show, onClose, product }) {
 
   // ------------------------ Derived Data ------------------------
   const variant = selectedVariant ?? activeVariant ?? {};
-  const attrs = variant.attributes ?? {};
 
   const name = `${product?.productName ?? "Sản phẩm"}${variant?.variantName ? ` - ${variant.variantName}` : ""
     }`;
@@ -127,10 +124,6 @@ export default function ModalCart({ show, onClose, product }) {
     setSelectedAttr(null);
   };
 
-  const handleAttrClick = (key, val) => {
-    const attrKey = `${key}:${val}`;
-    setSelectedAttr((prev) => (prev === attrKey ? null : attrKey));
-  };
 
   const increase = () => setQuantity((n) => Math.min(999, n + 1));
   const decrease = () => setQuantity((n) => Math.max(1, n - 1));
@@ -153,10 +146,17 @@ export default function ModalCart({ show, onClose, product }) {
           </div>
 
           <div className="modal-body pt-0">
+            {/* Title */}
+            <div className="d-flex justify-content-between align-items-start">
+              <h1 className="product-title fw-bold mb-1">{name}</h1>
+              <div className="stock-badge">
+                Còn {variant?.inventory?.stock_quantity}
+              </div>
+            </div>
             <div className="row g-4">
               {/* ---------------------- Gallery ---------------------- */}
               <div className="col-12 col-md-6 d-flex flex-column">
-                <div className="dmx-gallery position-relative">
+                <div className="dmx-gallery-buy position-relative">
 
                   {/* SLIDER ẢNH LỚN */}
                   <Slider {...mainSettings} asNavFor={navThumb} ref={setNavMain}>
@@ -202,13 +202,7 @@ export default function ModalCart({ show, onClose, product }) {
               {/* ---------------------- Info ---------------------- */}
               <div className="col-md-6 d-flex flex-column">
                 <div className="bg-white p-3 rounded-4 shadow-sm position-relative">
-                  {/* Title */}
-                  <div className="d-flex justify-content-between align-items-start">
-                    <h1 className="product-title fw-bold mb-1">{name}</h1>
-                    <div className="stock-badge">
-                      Còn {variant?.inventory?.stock_quantity}
-                    </div>
-                  </div>
+
 
                   {/* SKU / Category */}
                   <div className="d-flex flex-wrap gap-2 mb-3 small text-muted">
@@ -220,7 +214,18 @@ export default function ModalCart({ show, onClose, product }) {
                       </span>
                     )}
                   </div>
-
+                  {/* PRICE */}
+                  <div className="d-flex align-items-baseline gap-2 mb-3">
+                    {hasPromo ? (
+                      <>
+                        <h4 className="text-danger fw-bold mb-0">{fmtVND(promoPrice * quantity)}</h4>
+                        <span className="text-muted text-decoration-line-through">{fmtVND(basePrice * quantity)}</span>
+                        <span className="badge bg-danger-subtle text-danger">Giảm giá</span>
+                      </>
+                    ) : (
+                      <h4 className="text-danger fw-bold mb-0">{fmtVND(finalPrice * quantity)}</h4>
+                    )}
+                  </div>
                   {/* Variants */}
                   {variants.length > 0 && (
                     <div className="mb-3">
@@ -253,36 +258,14 @@ export default function ModalCart({ show, onClose, product }) {
                     </div>
                   )}
 
-                  {/* PRICE */}
-                  <div className="rounded-3 p-3 mb-3 bg-light">
-                    <div className="d-flex align-items-baseline gap-3 flex-wrap">
-                      {hasPromo ? (
-                        <>
-                          <h3 className="text-danger fw-bold mb-0">
-                            {fmtVND(promoPrice * quantity)}
-                          </h3>
-                          <span className="text-muted text-decoration-line-through">
-                            {fmtVND(basePrice * quantity)}
-                          </span>
-                          <span className="badge bg-danger-subtle text-danger">
-                            Giảm giá
-                          </span>
-                        </>
-                      ) : (
-                        <h3 className="text-danger fw-bold mb-0">
-                          {fmtVND(displayPrice * quantity)}
-                        </h3>
-                      )}
 
-                      <span className="badge bg-success-subtle text-success border border-success ms-auto">
-                        Miễn phí vận chuyển
-                      </span>
-                    </div>
+                  {/* DESCRIPTION */}
+                  <div className="mb-3">
+                    <div dangerouslySetInnerHTML={{ __html: product?.shortDescription ?? "" }} />
                   </div>
-
                   {/* Quantity */}
-                  <div className="d-flex align-items-center gap-3 mb-3 flex-wrap">
-                    <div className="input-group" style={{ width: 150 }}>
+                  <div className="d-flex gap-2 w-100">
+                    <div className="input-group" style={{ width: 130 }}>
                       <button className="btn btn-outline-secondary" onClick={decrease}>
                         -
                       </button>
@@ -304,7 +287,7 @@ export default function ModalCart({ show, onClose, product }) {
                     </div>
 
                     <button
-                      className="btn btn-danger px-4"
+                      className="btn btn-danger px-2"
                       onClick={() =>
                         addToCartHelper({
                           product,

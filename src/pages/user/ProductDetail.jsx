@@ -2,11 +2,11 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import 'react-inner-image-zoom/lib/InnerImageZoom/styles.css';
+
 import { NavLink, useParams } from "react-router-dom";
 import axios from "axios";
 import ProductInfoPanel from "../../components/user/ProductInfoPanel";
-import { ProductSpecs } from "./ProductSpecs";
+import { ProductSpecs } from "../../components/user/ProductSpecs";
 import "../../components/user/css/ProductDetail.css";
 import { addToCartHelper } from "../../utils/addToCartHelper";
 import { CartContext } from "../../hooks/CartContext";
@@ -33,7 +33,7 @@ const CautionNotes = ({ notes, maxVisible = 6, title = "Lưu ý quan trọng" })
             .replace(/\r\n|\n|\t/g, " ")
             .replace(/\s{2,}/g, " ")
             .trim()
-            .split(/\s+[–|-]\s+|;(?=\s)|\u2022|\•|\.\s+(?=[A-ZÀ-ỹ0-9])/g)
+            .split(/\s+[–|-]\s+|;(?=\s)|\u2022|\.\s+(?=[A-ZÀ-ỹ0-9])/g)
             .map((s) => s.trim())
             .filter(Boolean);
 
@@ -95,18 +95,13 @@ export default function ProductDetail() {
     const [nav1, setNav1] = useState(null);
     const [nav2, setNav2] = useState(null);
     const [activeTab, setActiveTab] = useState("desc");
-    const [showModalCart, setShowModalCart] = useState(false);
-    const [cartPreview, setCartPreview] = useState(null);
     const [specs, setSpecs] = useState([]);
     const { addToCartContext, setCartCount } = useContext(CartContext);
+    const [mainImage, setMainImage] = useState(null);
 
     /* ===========================================================
        Lấy sản phẩm từ API (safe parsing)
        =========================================================== */
-    const activeVariant = React.useMemo(() => {
-        if (!Array.isArray(product?.variants) || product.variants.length === 0) return null;
-        return product.variants.find((v) => v?.isActive) ?? product.variants[0] ?? null;
-    }, [product]);
 
     useEffect(() => {
         if (!id) return;
@@ -174,17 +169,18 @@ export default function ProductDetail() {
                 const merged = [...new Set([...variantImages, ...prodImages])];
 
                 setImages(merged.length ? merged : [PLACEHOLDER]);
-
+                setMainImage((merged.length ? merged[0] : PLACEHOLDER));
                 /* =======================
                    4) Specs
                    ======================= */
                 const firstVariant = prod?.variants?.[0] ?? null;
+
+
                 const initialSpecs =
                     prod?.variants?.find(v => v?.isActive)?.specs ??
                     firstVariant?.specs ??
-                    prod?.specs ??
                     [];
-
+                console.log(initialSpecs);
                 setSpecs(Array.isArray(initialSpecs) ? [...initialSpecs] : []);
             } catch (err) {
                 console.error("Lỗi khi lấy sản phẩm:", err);
@@ -196,55 +192,7 @@ export default function ProductDetail() {
     }, [id]);
 
 
-    /* ===========================================================
-       Khi đổi biến thể → đổi ảnh và kéo theo specs
-       =========================================================== */
-    const handleVariantChange = (variant) => {
-        // bảo đảm variant có thể là id hoặc object
-        const variantObj = typeof variant === "object" ? variant : (product?.variants || []).find((v) => v?.id === variant || v?.variantId === variant) ?? null;
-
-        // 1) xử lý ảnh variant
-        const imgData = variantObj?.imageUrl ?? variantObj?.image ?? null;
-        let variantImages = [];
-
-        if (imgData) {
-            if (typeof imgData === "string") variantImages = [imgData];
-            else if (Array.isArray(imgData)) {
-                variantImages = imgData.map((i) => (typeof i === "string" ? i : i?.imageUrl ?? i?.url ?? null)).filter(Boolean);
-            } else if (typeof imgData === "object") {
-                const url = imgData.imageUrl ?? imgData.url ?? null;
-                if (url) variantImages = [url];
-            }
-        } else {
-            // fallback: add product images (do not remove existing)
-            const prodImages = Array.isArray(product?.images)
-                ? product.images.map((i) => (typeof i === "string" ? i : i?.image_url ?? i?.imageUrl ?? null)).filter(Boolean)
-                : [];
-            setImages((prev) => {
-                const merged = [...prev, ...prodImages];
-                return [...new Set(merged)];
-            });
-        }
-
-        if (variantImages.length > 0) {
-            setImages((prev) => {
-                const merged = [...variantImages, ...prev]; // ưu tiên ảnh variant lên trước
-                return [...new Set(merged)];
-            });
-        }
-
-        // 2) kéo theo specs (luôn đặt mảng)
-        const newSpecs = variantObj?.specs ?? product?.specs ?? [];
-        setSpecs(Array.isArray(newSpecs) ? [...newSpecs] : []);
-    };
-
     /* callback khi ProductInfoPanel load variants (chứa ảnh) */
-    const handleVariantsLoaded = (imgs) => {
-        if (!Array.isArray(imgs) || imgs.length === 0) return;
-        const list = imgs.map((i) => (typeof i === "string" ? i : i?.imageUrl ?? i?.url ?? null)).filter(Boolean);
-        if (list.length === 0) return;
-        setImages((prev) => [...new Set([...prev, ...list])]);
-    };
 
     const descHtml = product?.longDescription || "";
 
@@ -328,17 +276,17 @@ export default function ProductDetail() {
 
                         {/* ===== SLIDER ẢNH LỚN ===== */}
                         <Slider {...mainSettings} asNavFor={nav2} ref={setNav1}>
-                            {images.map((src, i) => (
+                            {[mainImage, ...images.filter(img => img !== mainImage)].map((src, i) => (
                                 <div key={i} className="dmx-image-container">
                                     <img
                                         src={process.env.REACT_APP_API_URL + src}
-                                        alt={`Ảnh sản phẩm ${i + 1}`}
                                         className="dmx-main-image"
                                         onError={(e) => (e.currentTarget.src = PLACEHOLDER)}
                                     />
                                 </div>
                             ))}
                         </Slider>
+
 
                         {/* Nút chuyển trái/phải */}
                         <button className="dmx-prev" onClick={() => nav1?.slickPrev()}>
@@ -399,6 +347,33 @@ export default function ProductDetail() {
                                 addToCartContext,
                             })
                         }
+                        onVariantChange={(variant) => {
+                            // 1. Cập nhật ảnh
+                            const imgs = [];
+
+                            if (variant.imageUrl) {
+                                if (typeof variant.imageUrl === "string") imgs.push(variant.imageUrl);
+                                else if (Array.isArray(variant.imageUrl))
+                                    imgs.push(...variant.imageUrl.filter(Boolean));
+                                else if (variant.imageUrl?.imageUrl)
+                                    imgs.push(variant.imageUrl.imageUrl);
+                            }
+
+                            // Nếu không có ảnh variant thì dùng ảnh sản phẩm
+                            if (imgs.length === 0) {
+                                imgs.push(...product.images.map(i => typeof i === "string" ? i : i.imageUrl));
+                            }
+
+                            if (imgs.length > 0) {
+                                setMainImage(imgs[0]);
+                            } else {
+                                setMainImage(product.images?.[0]?.imageUrl || product.images?.[0] || PLACEHOLDER);
+                            }
+
+
+                            // 2. Cập nhật specs
+                            setSpecs(variant.specs ?? []);
+                        }}
                     />
 
 
@@ -427,7 +402,7 @@ export default function ProductDetail() {
             {/* Tabs */}
             <div className="row mt-4">
                 <div className="col-12">
-                    <ul className="nav nav-tabs rounded-top overflow-auto">
+                    <ul className="nav nav-tabs rounded-top overflow-auto bg-success" style={{ border: 'none' }}>
                         {[
                             { key: "desc", label: "Chi tiết sản phẩm" },
                             { key: "specs", label: "Thông số kỹ thuật" },
@@ -436,7 +411,7 @@ export default function ProductDetail() {
                         ].map((tab) => (
                             <li key={tab.key} className="nav-item">
                                 <button
-                                    className={`nav-link ${activeTab === tab.key ? "active" : ""}`}
+                                    className={`nav-link  ${activeTab === tab.key ? "active" : "text-white"}`}
                                     onClick={() => setActiveTab(tab.key)}
                                 >
                                     {tab.label}

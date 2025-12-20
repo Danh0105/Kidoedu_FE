@@ -8,7 +8,6 @@ export default function SupplierCreateModal({ show, onClose, onSaved }) {
         supplierName: "",
         phone: "",
         email: "",
-        referenceCode: "",
         address: "",
         note: "",
     });
@@ -92,18 +91,8 @@ export default function SupplierCreateModal({ show, onClose, onSaved }) {
                                 />
                             </div>
 
-                            <div className="col-md-6">
-                                <label className="form-label fw-semibold">Mã / Số tham chiếu</label>
-                                <input
-                                    className="form-control"
-                                    placeholder="Tuỳ chọn"
-                                    value={form.referenceCode}
-                                    onChange={(e) => update("referenceCode", e.target.value)}
-                                />
-                            </div>
-
                             {/* ĐỊA CHỈ */}
-                            <div className="col-12">
+                            <div className="col-6">
                                 <label className="form-label fw-semibold">Địa chỉ</label>
                                 <input
                                     className="form-control"

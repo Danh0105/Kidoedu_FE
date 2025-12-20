@@ -81,9 +81,10 @@ export default function Checkout() {
   );
   const shippingFee = 0;
   const finalTotal = totalPrice + shippingFee;
-
-  // 🧾 Xử lý đặt hàng COD
-  const handleSubmit = async () => {
+  const buildOrderPayload = (paymentMethod) => {
+    if (!shippingInfo) {
+      throw new Error("Thiếu thông tin giao hàng");
+    }
     const saved = Cookies.get("shippingInfo");
 
     if (!saved) {
@@ -95,52 +96,47 @@ export default function Checkout() {
     }
 
     const email = shippingInfo.email.trim();
+    const items = products.map((p) => ({
+      variantId: p?.variant?.variantId ?? p?.variantId,
+      productId: p?.productId,
+      quantity: p.quantity,
+      pricePerUnit: Number(p.pricing ?? p.price),
+    }));
 
+    const payload = {
+      username: shippingInfo.address.full_name,
+      email,
+      address: shippingInfo.address,
+      items,
+      paymentMethod
+    };
+    const url = shippingInfo.API;
+    delete shippingInfo.API;
+    return {
+      payload,
+      url
+    };
+  };
+
+  // 🧾 Xử lý đặt hàng COD
+  const handleSubmit = async () => {
     try {
-      // Chuẩn hóa dữ liệu items gửi lên BE
-      const items = products.map((p) => ({
-        variantId: p?.variant?.variantId ?? p?.variantId,
-        productId: p?.productId,
-        quantity: p.quantity,
-        pricePerUnit: Number(p.pricing ?? p.price),
-        attributes: toAttrObj(p.selectedAttr),
-      }));
+      const payload = buildOrderPayload('cod');
 
-      const payload = {
-        username: shippingInfo.address.full_name,
-        email,
-        address: shippingInfo.address,
-        items,
-      };
+      const res = await axios.post(
+        `${payload.url}`,
+        payload.payload
+      );
 
-      const url = shippingInfo.API;
-      const res = await axios.post(url, payload);
-      const data = res.data;
-
-      // ===============================
-      // 🔥 CASE 1 — EMAIL CHƯA VERIFY
-      // ===============================
-      if (!data.order && data.message) {
-        console.warn("⛔ Email chưa xác thực:", email);
-
-        alert(
-          "📧 Vui lòng kiểm tra email của bạn để xác thực tài khoản trước khi hoàn tất đơn hàng!\n\n" +
-          `Email của bạn: ${email}`
-        );
-
-        return;
-      }
-
-      // ===============================
-      // 🔥 CASE 2 — EMAIL ĐÃ VERIFY
-      // ===============================
-      navigate("/invoice", { state: { order: data } });
+      // COD → order tạo xong là xong
+      navigate("/invoice", { state: { order: res.data } });
 
     } catch (err) {
-      console.error("❌ Lỗi gửi đơn hàng:", err.response?.data || err);
-      alert("Đã xảy ra lỗi khi gửi đơn hàng. Vui lòng thử lại!");
+      console.error("❌ Lỗi tạo đơn COD:", err.response?.data || err);
+      alert("Không thể tạo đơn hàng. Vui lòng thử lại!");
     }
   };
+
 
 
 
@@ -149,41 +145,33 @@ export default function Checkout() {
   // 💳 Thanh toán MoMo
   const handleMomoPayment = async () => {
     try {
-      const saved = Cookies.get("shippingInfo");
+      const payload = buildOrderPayload("momo");
 
-      if (!saved) {
-        alert("⚠️ Vui lòng nhập thông tin giao hàng trước khi thanh toán!");
-        return;
+      const orderRes = await axios.post(payload.url, payload.payload);
+      const order = orderRes.data.order ?? orderRes.data;
+
+      const momoRes = await axios.post(
+        `${process.env.REACT_APP_API_URL}/momo/create-payment`,
+        {
+          amount: Number(order.totalAmount),
+          orderId: order.orderId,
+        }
+      );
+      console.log(momoRes);
+
+      if (momoRes.data?.payUrl) {
+        window.location.href = momoRes.data.payUrl;
+      } else {
+        alert("Không thể tạo thanh toán MoMo");
       }
-
-      const shipping = JSON.parse(saved);
-      const orderId = `ORD-${Date.now()}`;
-
-      localStorage.setItem("pendingOrder", JSON.stringify({
-        orderId,
-        products,
-        shippingInfo: shipping,
-        method: "momo",
-      }));
-
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/momo/create-payment`, {
-        amount: finalTotal,
-        orderId,
-        items: products.map((p) => ({
-          id: p.data?.productId,
-          name: p?.productName,
-          qty: p.quantity,
-          price: p?.pricing || p?.price,
-        })),
-      });
-
-      if (res.data?.payUrl) window.location.href = res.data.payUrl;
-      else alert("❌ Không thể tạo thanh toán MoMo.");
-    } catch (error) {
-      console.error("Lỗi thanh toán MoMo:", error);
-      alert("Đã xảy ra lỗi khi kết nối MoMo.");
+    } catch (err) {
+      console.error("MoMo error:", err);
+      alert("Lỗi thanh toán MoMo");
     }
   };
+
+
+
 
   // 🔄 Chọn phương thức thanh toán
   const handleConfirm = (selectedMethod) => {
@@ -334,23 +322,7 @@ export default function Checkout() {
                           <span className="text-muted">{prd.variantName}</span>
                         </div>
 
-                        {/* Thông tin phiên bản */}
-                        {prd.variant && (
-                          <div className="text-muted small mt-1">
-                            {prd.variant.variantName
-                              ? (
-                                <>
-                                  <span className="fw-semibold text-secondary">
-                                    Phiên bản:
-                                  </span>{" "}
-                                  {prd.variant.variantName} {prd?.selectedAttr}
-                                </>
-                              )
-                              : prd.variant.attributes?.color
-                                ? `Màu sắc: ${prd.variant.attributes.color}`
-                                : ""}
-                          </div>
-                        )}
+
 
                         {/* Giá (hiển thị khi màn hình nhỏ) */}
                         <div className="d-sm-none mt-2">

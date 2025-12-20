@@ -6,8 +6,8 @@ export const api = axios.create({
     timeout: 15000,
 });
 
-export async function fetchAllProductsApi() {
-    const res = await api.get("/products");
+export async function fetchAllProductsApi(page, limit) {
+    const res = await api.get("/products", { page, limit });
     return res.data?.data || [];
 }
 

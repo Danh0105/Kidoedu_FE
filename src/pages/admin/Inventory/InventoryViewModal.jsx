@@ -2,6 +2,7 @@ import React from "react";
 
 export default function InventoryViewModal({ show, onClose, data }) {
     if (!show || !data) return null;
+    console.log(data);
 
     return (
         <div
@@ -46,7 +47,7 @@ export default function InventoryViewModal({ show, onClose, data }) {
                             <table className="table table-bordered table-hover table-sm mt-2">
                                 <thead className="table-light">
                                     <tr>
-                                        <th>Mã biến thể</th>
+                                        <th>Sản phẩm</th>
                                         <th>Số lượng</th>
                                         <th>Đơn giá</th>
                                         <th>Thành tiền</th>
@@ -55,11 +56,11 @@ export default function InventoryViewModal({ show, onClose, data }) {
 
                                 <tbody>
                                     {data.items?.map((it) => (
-                                        <tr key={it.itemId}>
-                                            <td>{it.variantId}</td>
+                                        <tr >
+                                            <td>{it.variant.product.productName} {it.variant.variantName}</td>
                                             <td>{it.quantity}</td>
                                             <td>{Number(it.unitCost).toLocaleString("vi-VN")} đ</td>
-                                            <td>{Number(it.lineTotal).toLocaleString("vi-VN")} đ</td>
+                                            <td>{Number(it.unitCost * it.quantity).toLocaleString("vi-VN")} đ</td>
                                         </tr>
                                     ))}
                                 </tbody>

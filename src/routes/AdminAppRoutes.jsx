@@ -6,8 +6,8 @@ import Login from "../pages/user/Login";
 // Pages - User
 import Dashboard from "../pages/admin/Dashboard";
 import AdminLayout from "../layouts/admin/Layout";
-import ProductManagement from "../pages/admin/ProductManagement/ProductManagement";
-import OrderManagement from "../pages/admin/OrderManagement/OrderManagement";
+import ProductManagement from "../pages/admin/Product/ProductManagement";
+import OrderManagement from "../pages/admin/Order/OrderManagement";
 import Payment from "../pages/admin/Payment";
 import ReportsAnalytics from "../pages/admin/ReportsAnalytics";
 import UserManagement from "../pages/admin/UserManagement";
@@ -16,8 +16,9 @@ import Shipping from "../pages/admin/Shipping";
 import CouponManagement from "../pages/admin/CouponManagement";
 import PrivateRoute from "../components/user/PrivateRoute";
 import PolicyManagerPage from "../pages/admin/policy/PolicyManagerPage";
-import InventoryManager from "../pages/admin/InventoryManagement/InventoryManager";
-import BannerManagement from "../pages/admin/BannerManagement/BannerManagement";
+import InventoryManager from "../pages/admin/Inventory/InventoryManager";
+import BannerManagement from "../pages/admin/Banner/BannerManagement";
+import ChatbotScriptManager from "../pages/admin/Chatbot";
 export default function AppRoutes() {
 
     return (
@@ -59,6 +60,9 @@ export default function AppRoutes() {
                 </Route>
                 <Route path="/banners" element={<AdminLayout title="Banner Manager" />}>
                     <Route index element={<BannerManagement />} />
+                </Route>
+                <Route path="/chatbotscripts" element={<AdminLayout title="Chatbot Script Manager" />}>
+                    <Route index element={<ChatbotScriptManager />} />
                 </Route>
             </Routes>
         </BrowserRouter >

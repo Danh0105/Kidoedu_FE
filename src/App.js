@@ -5,6 +5,7 @@ import AdminAppRoutes from "./routes/AdminAppRoutes";
 import useAutoLogout from "./hooks/useAutoLogout";
 import { CartProvider } from "./hooks/CartContext";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
 import LoadPage from "./hooks/LoadPage";
 function App() {
 

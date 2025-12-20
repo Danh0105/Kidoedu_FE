@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
-import ModalLG from "./FormCreate";
+import FormCreate from "./FormCreate";
 import axios from "axios";
 import FormEdit from "./FormEdit";
+import { fetchAllProductsApi, searchProductsApi } from "../../../services/Product";
+import FormInventory from "../../../components/admin/FormInventory";
+import { useDebounce } from "../../../hooks/useDebounce";
 
 const PLACEHOLDER_IMG = "https://placehold.co/120x120?text=No+Image";
 
@@ -16,27 +19,52 @@ export default function ProductManagement() {
             style: "currency",
             currency: "VND",
         }).format(Number(value || 0));
+    const [q, setQ] = useState("");
+    const debouncedQ = useDebounce(q, 500);
+
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(10);
 
     const fetchProducts = async (page = 1, limit = 10) => {
         try {
-            const res = await axios.get(
-                `${process.env.REACT_APP_API_URL}/products`,
-                {
-                    params: { page, limit },
-                }
-            );
-            console.log("res.data.data", res.data.data);
+            const params = { page, limit };
 
-            setProducts(res.data.data || []);
-            setMeta(res.data.meta || null);
+            let data;
+
+            if (debouncedQ.trim()) {
+                // 🔎 Search API
+                data = await searchProductsApi({ q: debouncedQ, ...params });
+                console.log(data);
+
+                setProducts(data.items ?? []);
+                setMeta({
+                    page: data.pagination?.page ?? 1,
+                    last_page: data.pagination?.pages ?? 1,
+                    total: data.pagination?.total ?? 0,
+                    limit: data.pagination?.limit ?? limit,
+                });
+            } else {
+                // 🔁 Normal fetch
+                data = await fetchAllProductsApi(page, limit);
+
+                setProducts(data ?? []);
+                setMeta({
+                    page: data.page ?? 1,
+                    last_page: data.last_page ?? 1,
+                    total: data.total ?? 0,
+                    limit: data.limit ?? limit,
+                });
+            }
         } catch (err) {
             console.error("Lỗi khi lấy sản phẩm:", err);
         }
     };
 
+
     useEffect(() => {
-        fetchProducts();
-    }, []);
+        fetchProducts(page, limit);
+    }, [page, debouncedQ]);
+
 
     // ✅ Tính priceRange theo từng productId
     const priceRangeByProductId = useMemo(() => {
@@ -151,7 +179,7 @@ export default function ProductManagement() {
                 </div>
             </div>
 
-            <ModalLG onProductAdded={handleProductAdded} />
+            <FormCreate onProductAdded={handleProductAdded} />
 
             <div className="card mb-4">
                 <div className="card-header row justify-content-between align-items-center">
@@ -164,54 +192,39 @@ export default function ProductManagement() {
                             type="search"
                             className="form-control w-50"
                             placeholder="Search..."
-                            aria-label="Search"
+                            value={q}
+                            onChange={(e) => {
+                                setQ(e.target.value);
+                                setPage(1);
+                            }}
                         />
+
                     </div>
 
                     {meta && (
-                        <div className="card-tools col-2">
-                            <ul className="pagination pagination-sm float-end mb-0">
-                                <li className="page-item">
-                                    <button
-                                        className="page-link"
-                                        onClick={() =>
-                                            meta.page > 1 &&
-                                            fetchProducts(meta.page - 1, meta.limit)
-                                        }
-                                    >
-                                        «
+                        <ul className="pagination pagination-sm float-end mb-0">
+                            <li className={`page-item ${meta.page <= 1 ? "disabled" : ""}`}>
+                                <button className="page-link" onClick={() => setPage(meta.page - 1)}>
+                                    «
+                                </button>
+                            </li>
+
+                            {[...Array(meta.last_page)].map((_, idx) => (
+                                <li key={idx} className={`page-item ${meta.page === idx + 1 ? "active" : ""}`}>
+                                    <button className="page-link" onClick={() => setPage(idx + 1)}>
+                                        {idx + 1}
                                     </button>
                                 </li>
-                                {[...Array(meta.last_page)].map((_, idx) => (
-                                    <li
-                                        key={idx}
-                                        className={`page-item ${meta.page === idx + 1 ? "active" : ""
-                                            }`}
-                                    >
-                                        <button
-                                            className="page-link"
-                                            onClick={() =>
-                                                fetchProducts(idx + 1, meta.limit)
-                                            }
-                                        >
-                                            {idx + 1}
-                                        </button>
-                                    </li>
-                                ))}
-                                <li className="page-item">
-                                    <button
-                                        className="page-link"
-                                        onClick={() =>
-                                            meta.page < meta.last_page &&
-                                            fetchProducts(meta.page + 1, meta.limit)
-                                        }
-                                    >
-                                        »
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
+                            ))}
+
+                            <li className={`page-item ${meta.page >= meta.last_page ? "disabled" : ""}`}>
+                                <button className="page-link" onClick={() => setPage(meta.page + 1)}>
+                                    »
+                                </button>
+                            </li>
+                        </ul>
                     )}
+
                 </div>
 
                 <div className="card-body p-0">
@@ -230,6 +243,7 @@ export default function ProductManagement() {
                                 <th className="align-middle">Tên sản phẩm</th>
                                 <th className="align-middle">Mã sản phẩm</th>
                                 <th className="">Giá</th>
+                                <th className="align-middle">Tồn kho</th>
                                 <th className="align-middle">Danh mục</th>
                                 <th className="align-middle">Ngày tạo</th>
                                 <th className="align-middle text-center">Actions</th>
@@ -239,10 +253,9 @@ export default function ProductManagement() {
                         <tbody>
                             {products.length > 0 ? (
                                 products.map((p) => {
-                                    // Ảnh đại diện: ưu tiên ảnh variant, sau đó ảnh sản phẩm, cuối cùng placeholder
                                     const thumb =
                                         p.images?.find(img => img.isPrimary)?.imageUrl ??
-                                        p.images?.[0]?.imageUrl ??
+                                        p.imageUrl ??
                                         PLACEHOLDER_IMG;
 
                                     // SKU / mã
@@ -313,6 +326,9 @@ export default function ProductManagement() {
                                             </td>
                                             <td>{sku}</td>
                                             <td>{displayedPrice}</td>
+                                            <td>
+                                                <FormInventory productId={p.productId} variants={p.variants} />
+                                            </td>
                                             <td>
                                                 {p.category?.categoryName ||
                                                     p.categoryName ||
@@ -390,8 +406,8 @@ export default function ProductManagement() {
                 product={editProduct}
                 isOpen={isOpen}
                 onClosed={() => {
-                    setIsOpen(false);       // 🔥 quan trọng
-                    setEditProduct(null);   // tránh retain sản phẩm cũ
+                    setIsOpen(false);
+                    setEditProduct(null);
                 }}
                 onUpdated={(updated) => {
                     if (!updated) return;
