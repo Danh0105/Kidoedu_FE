@@ -1,71 +1,107 @@
 import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-// ================== MOCK DATA (chưa mount endpoint) ==================
-const initialScript = {
-    welcome: {
-        key: "welcome",
-        text: "Xin chào! Bạn cần hỗ trợ gì từ KIDO?",
-        options: [
-            { key: "about", label: "ℹ️ Giới thiệu về KIDO", next: "about" },
-            { key: "contact", label: "📞 Liên hệ / Tư vấn 24/7", next: "contact" },
-        ],
-    },
-    about: {
-        key: "about",
-        text: "KIDO EDU là doanh nghiệp hoạt động đa lĩnh vực trong hệ sinh thái công nghệ – giáo dục – dịch vụ kỹ thuật số.",
-        options: [
-            { key: "why", label: "Tại sao chọn KIDO?", next: "welcome" },
-            { key: "back", label: "⬅️ Quay lại", backTo: "welcome" },
-        ],
-    },
-    contact: {
-        key: "contact",
-        text: "📞 Hotline: 0789-636-979\n📧 Email: lytran@ichiskill.edu.vn",
-        options: [{ key: "back", label: "⬅️ Quay lại", backTo: "welcome" }],
-    },
-};
+/* ================== API ================== */
+const api = axios.create({
+    baseURL: "http://localhost:3000/chatbot",
+});
 
-// ================== COMPONENT ==================
+/* ================== MAIN COMPONENT ================== */
 export default function ChatbotScriptManager() {
-    const [script, setScript] = useState(initialScript);
-    const [activeKey, setActiveKey] = useState("welcome");
-    const [previewKey, setPreviewKey] = useState("welcome");
+    const [script, setScript] = useState({});
+    const [activeKey, setActiveKey] = useState(null);
+    const [previewKey, setPreviewKey] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    /* ---------- Load nodes from backend ---------- */
+    useEffect(() => {
+        loadNodes();
+    }, []);
+
+    const loadNodes = async () => {
+        setLoading(true);
+        const res = await api.get("/nodes");
+
+        const mapped = {};
+        let startKey = null;
+
+        res.data.forEach((n) => {
+            mapped[n.key] = {
+                id: n.id,
+                key: n.key,
+                text: n.content,
+                isStart: n.isStart,
+                options: n.options.map((o) => ({
+                    id: o.id,
+                    label: o.label,
+                    next: o.nextNodeKey,
+                    sortOrder: o.sortOrder,
+                })),
+            };
+            if (n.isStart) startKey = n.key;
+        });
+
+        setScript(mapped);
+        setActiveKey(startKey || Object.keys(mapped)[0]);
+        setPreviewKey(startKey || Object.keys(mapped)[0]);
+        setLoading(false);
+    };
 
     const nodes = useMemo(() => Object.values(script), [script]);
     const activeNode = script[activeKey];
 
-    // ---------- Helpers ----------
-    const updateNode = (updated) => {
+    /* ---------- NODE CRUD ---------- */
+    const updateNode = async (updated) => {
         setScript((prev) => ({ ...prev, [updated.key]: updated }));
+
+        await api.put(`/nodes/${updated.id}`, {
+            content: updated.text,
+        });
     };
 
-    const addNode = () => {
+    const addNode = async () => {
         const key = prompt("Nhập key node mới:");
         if (!key || script[key]) return;
 
+        const res = await api.post("/nodes", {
+            key,
+            content: "",
+        });
+
         setScript((prev) => ({
             ...prev,
-            [key]: { key, text: "", options: [] },
+            [key]: {
+                id: res.data.id,
+                key,
+                text: "",
+                options: [],
+            },
         }));
+
         setActiveKey(key);
     };
 
-    const deleteNode = (key) => {
+    const deleteNode = async (key) => {
         if (!window.confirm("Xóa node này?")) return;
+
+        await api.delete(`/nodes/${script[key].id}`);
+
         setScript((prev) => {
             const clone = { ...prev };
             delete clone[key];
             return clone;
         });
-        setActiveKey("welcome");
+
+        setActiveKey(Object.keys(script)[0] || null);
     };
 
-    // ================== RENDER ==================
+    if (loading) return <div className="p-3">Loading...</div>;
+
     return (
         <div className="container-fluid py-3">
             <div className="row g-3">
-                {/* SIDEBAR */}
+                {/* ================= SIDEBAR ================= */}
                 <div className="col-3">
                     <div className="border rounded p-2 h-100">
                         <h6 className="fw-bold">📂 Node kịch bản</h6>
@@ -88,7 +124,7 @@ export default function ChatbotScriptManager() {
                     </div>
                 </div>
 
-                {/* EDITOR */}
+                {/* ================= EDITOR ================= */}
                 <div className="col-5">
                     {activeNode && (
                         <NodeEditor
@@ -100,12 +136,12 @@ export default function ChatbotScriptManager() {
                     )}
                 </div>
 
-                {/* PREVIEW */}
+                {/* ================= PREVIEW ================= */}
                 <div className="col-4">
                     <ChatbotPreview
                         script={script}
                         startKey={previewKey}
-                        onRestart={() => setPreviewKey("welcome")}
+                        onRestart={() => setPreviewKey(activeKey)}
                     />
                 </div>
             </div>
@@ -113,24 +149,52 @@ export default function ChatbotScriptManager() {
     );
 }
 
-// ================== NODE EDITOR ==================
+/* ================== NODE EDITOR ================== */
 function NodeEditor({ node, allKeys, onChange, onDelete }) {
-    const updateOption = (index, field, value) => {
-        const opts = [...node.options];
-        opts[index] = { ...opts[index], [field]: value };
-        onChange({ ...node, options: opts });
-    };
+    const updateOption = async (index, field, value) => {
+        const opt = node.options[index];
 
-    const addOption = () => {
-        onChange({
-            ...node,
-            options: [...node.options, { key: "", label: "", next: "" }],
+        const updatedOptions = node.options.map((o, i) =>
+            i === index ? { ...o, [field]: value } : o
+        );
+
+        onChange({ ...node, options: updatedOptions });
+
+        await api.put(`/options/${opt.id}`, {
+            label: field === "label" ? value : opt.label,
+            nextNodeKey: field === "next" ? value : opt.next,
         });
     };
 
-    const removeOption = (i) => {
-        const opts = node.options.filter((_, idx) => idx !== i);
-        onChange({ ...node, options: opts });
+    const addOption = async () => {
+        const res = await api.post("/options", {
+            nodeId: node.id,
+            label: "Option mới",
+            nextNodeKey: "",
+            sortOrder: node.options.length + 1,
+        });
+
+        onChange({
+            ...node,
+            options: [
+                ...node.options,
+                {
+                    id: res.data.id,
+                    label: res.data.label,
+                    next: res.data.nextNodeKey,
+                },
+            ],
+        });
+    };
+
+    const removeOption = async (i) => {
+        const opt = node.options[i];
+        await api.delete(`/options/${opt.id}`);
+
+        onChange({
+            ...node,
+            options: node.options.filter((_, idx) => idx !== i),
+        });
     };
 
     return (
@@ -156,34 +220,32 @@ function NodeEditor({ node, allKeys, onChange, onDelete }) {
                     className="form-control"
                     rows={4}
                     value={node.text}
-                    onChange={(e) => onChange({ ...node, text: e.target.value })}
+                    onChange={(e) =>
+                        onChange({ ...node, text: e.target.value })
+                    }
                 />
             </div>
 
             <h6>Options</h6>
             {node.options.map((opt, i) => (
-                <div key={i} className="row g-2 align-items-center mb-2">
-                    <div className="col-4">
+                <div key={opt.id} className="row g-2 align-items-center mb-2">
+                    <div className="col-5">
                         <input
                             className="form-control"
                             placeholder="Label"
                             value={opt.label}
-                            onChange={(e) => updateOption(i, "label", e.target.value)}
+                            onChange={(e) =>
+                                updateOption(i, "label", e.target.value)
+                            }
                         />
                     </div>
-                    <div className="col-3">
-                        <input
-                            className="form-control"
-                            placeholder="Key"
-                            value={opt.key}
-                            onChange={(e) => updateOption(i, "key", e.target.value)}
-                        />
-                    </div>
-                    <div className="col-4">
+                    <div className="col-5">
                         <select
                             className="form-select"
-                            value={opt.next || opt.backTo || ""}
-                            onChange={(e) => updateOption(i, "next", e.target.value)}
+                            value={opt.next || ""}
+                            onChange={(e) =>
+                                updateOption(i, "next", e.target.value)
+                            }
                         >
                             <option value="">-- Điều hướng --</option>
                             {allKeys.map((k) => (
@@ -193,9 +255,9 @@ function NodeEditor({ node, allKeys, onChange, onDelete }) {
                             ))}
                         </select>
                     </div>
-                    <div className="col-1">
+                    <div className="col-2">
                         <button
-                            className="btn btn-sm btn-outline-danger"
+                            className="btn btn-sm btn-outline-danger w-100"
                             onClick={() => removeOption(i)}
                         >
                             ✕
@@ -211,7 +273,7 @@ function NodeEditor({ node, allKeys, onChange, onDelete }) {
     );
 }
 
-// ================== PREVIEW ==================
+/* ================== CHATBOT PREVIEW ================== */
 function ChatbotPreview({ script, startKey, onRestart }) {
     const [current, setCurrent] = useState(startKey);
 
@@ -236,9 +298,9 @@ function ChatbotPreview({ script, startKey, onRestart }) {
             <div className="d-grid gap-2">
                 {node.options.map((opt) => (
                     <button
-                        key={opt.key}
+                        key={opt.id}
                         className="btn btn-outline-primary"
-                        onClick={() => setCurrent(opt.next || opt.backTo)}
+                        onClick={() => setCurrent(opt.next)}
                     >
                         {opt.label}
                     </button>

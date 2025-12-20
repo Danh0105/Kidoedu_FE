@@ -122,15 +122,7 @@ export default function ModalRental({ show, onClose, product, variantsWithPrices
                 <Slider {...mainSettings} ref={setNavMain}>
                   {(images.length ? images : ["/placeholder.png"]).map((src, idx) => (
                     <div key={idx} className="ratio ratio-1x1">
-                      <InnerImageZoom
-                        src={src}
-                        zoomSrc={src}
-                        zoomType="hover"
-                        zoomScale={1.5}
-                        alt={`Ảnh ${idx + 1}`}
-                        className="w-100 h-100"
-                        style={{ objectFit: "contain" }}
-                      />
+
                     </div>
                   ))}
                 </Slider>
