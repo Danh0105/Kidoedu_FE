@@ -7,7 +7,7 @@ export default function Invoice() {
   const location = useLocation();
   const { order } = location.state || {};
   const invoiceRef = useRef(null);
-  console.log(order);
+  console.log("order:", order);
 
   // 🔢 Tính tổng từ items, không cần order
   const subtotal = order.items.reduce((sum, item) => {
@@ -79,7 +79,7 @@ export default function Invoice() {
           {/* Order Info (dùng order nếu có, không có vẫn hiển thị được) */}
           <div className="mb-4">
             <h5 className="fw-bold">Thông tin đơn hàng</h5>
-            <p><strong>Mã đơn hàng:</strong> HD{order?.order.orderId || "—"}</p>
+            <p><strong>Mã đơn hàng:</strong> HD{order?.order?.orderId || order?.orderId || "—"}</p>
             <p><strong>Khách hàng:</strong> {order?.user?.username || "Khách vãng lai"}</p>
             <p>
               <strong>Ngày:</strong>{" "}
@@ -123,7 +123,7 @@ export default function Invoice() {
                               {item.variant && (
                                 <div className="text-muted small mt-1">
                                   {item.variant.variantName
-                                    ? `Phiên bản: ${item.variant.variantName} ${JSON.stringify(item.attributes) || ""}`
+                                    ? `Phiên bản: ${item.variant.variantName}`
                                     : ""}
                                 </div>
                               )}
@@ -153,7 +153,7 @@ export default function Invoice() {
                   <strong>Phí vận chuyển:</strong> {shippingFee.toLocaleString()} ₫
                 </p> */}
                 <h5 className="fw-bold text-danger">
-                  Tổng cộng: {order.order.subtotal.toLocaleString()} ₫
+                  Tổng cộng: {(order?.order?.subtotal || order?.subtotal).toLocaleString()} ₫
                 </h5>
               </div>
             </>

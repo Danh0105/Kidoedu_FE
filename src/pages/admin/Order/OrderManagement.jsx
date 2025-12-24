@@ -122,6 +122,27 @@ export default function OrderManager() {
         setShowExport(false);
         setExportOrder(null);
     };
+    const PAYMENT_STATUS_MAP = {
+        Pending: { label: "Chờ thanh toán", color: "warning" },
+        Paid: { label: "Đã thanh toán", color: "success" },
+        Failed: { label: "Thanh toán thất bại", color: "danger" },
+        Cancelled: { label: "Đã hủy", color: "secondary" },
+        Expired: { label: "Hết hạn", color: "dark" },
+    };
+    const PAYMENT_METHOD_MAP = {
+        momo: {
+            label: "MoMo",
+            icon: "https://homepage.momocdn.net/fileuploads/svg/momo-file-240411162904.svg",
+        },
+        vnpay: {
+            label: "VNPay",
+            icon: "https://stcd02206177151.cloud.edgevnpay.vn/assets/images/logo-icon/logo-primary.svg",
+        },
+        cod: {
+            label: "COD",
+            icon: "https://cdn-icons-png.flaticon.com/512/1041/1041872.png",
+        },
+    };
 
     /* ======================= RENDER ======================= */
     return (
@@ -153,10 +174,12 @@ export default function OrderManager() {
                             <tr>
                                 <th>Mã đơn</th>
                                 <th>Khách hàng</th>
-                                <th>Email</th>
-                                <th>SĐT</th>
+                                {/* <th>Email</th>
+                                <th>SĐT</th> */}
                                 <th>Ngày đặt</th>
                                 <th>Trạng thái</th>
+                                <th>Payment Method</th>
+                                <th>Payment Status</th>
                                 <th className="text-end">Tổng tiền</th>
                                 <th className="text-center">Thao tác</th>
                             </tr>
@@ -194,9 +217,9 @@ export default function OrderManager() {
 
 
                                         <td>{getCustomerName(o)}</td>
-                                        <td>{o.user?.email || ""}</td>
+                                        {/*                                         <td>{o.user?.email || ""}</td>
                                         <td>{o.shippingAddress?.phone_number || ""}</td>
-                                        <td>{formatDate(o.orderDate)}</td>
+ */}                                        <td>{formatDate(o.orderDate)}</td>
 
                                         <td>
                                             <select
@@ -212,6 +235,29 @@ export default function OrderManager() {
                                                     ))}
                                             </select>
                                         </td>
+
+                                        <td className="text-start fw-semibold align-middle">
+                                            <div className="d-flex align-items-center gap-2">
+                                                {PAYMENT_METHOD_MAP[o.paymentMethod]?.icon && (
+                                                    <img
+                                                        src={PAYMENT_METHOD_MAP[o.paymentMethod].icon}
+                                                        alt={o.paymentMethod}
+                                                        style={{ width: 24, height: 24, objectFit: "contain" }}
+                                                    />
+                                                )}
+                                                <span>
+                                                    {PAYMENT_METHOD_MAP[o.paymentMethod]?.label || "Không xác định"}
+                                                </span>
+                                            </div>
+                                        </td>
+
+
+                                        <td className="text-start fw-semibold ">
+                                            <span className={`align-middle badge bg-${PAYMENT_STATUS_MAP[o.paymentStatus]?.color || "dark"}`}>
+                                                {PAYMENT_STATUS_MAP[o.paymentStatus]?.label || "Không xác định"}
+                                            </span>
+                                        </td>
+
 
                                         <td className="text-end fw-semibold">
                                             {formatCurrency(o.totalAmount)}

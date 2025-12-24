@@ -187,6 +187,7 @@ export default function ProductImages({
                         <div className="text-center">
                             <i className="bi bi-image fs-1"></i>
                             <p className="mt-3 fs-5">Nhấp để upload hình ảnh sản phẩm</p>
+                            <p className="mt-3 fs-5">600x600 - 750x750</p>
                         </div>
                     </div>
                 )}

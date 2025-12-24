@@ -185,13 +185,13 @@ export default function Checkout() {
       momo: {
         id: "momo",
         label: "Thanh toán qua MoMo",
-        icon: "https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png",
+        icon: "https://homepage.momocdn.net/fileuploads/svg/momo-file-240411162904.svg",
       },
-      /* vnpay: {
+      vnpay: {
         id: "vnpay",
         label: "Thanh toán qua VNPay",
         icon: "https://stcd02206177151.cloud.edgevnpay.vn/assets/images/logo-icon/logo-primary.svg",
-      }, */
+      },
     };
     setOpt(methods[selectedMethod]);
   };
