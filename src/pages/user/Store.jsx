@@ -5,7 +5,6 @@ import axios from "axios";
 import "../../components/user/css/Store.css";
 import Product from "../../components/user/category/Product";
 import SidebarCategories from "../../components/user/SidebarCategories";
-import '../../components/user/css/Store.css'
 import {
     fetchAllProductsApi,
     searchProductsApi
@@ -188,7 +187,7 @@ export default function Store({
     /* ---------- DESKTOP: giữ nguyên layout của bạn ---------- */
     if (isDesktop) {
         return (
-            <div className="container bg-white" style={{ maxWidth: "80%" }}>
+            <div className="container bg-white">
                 {/* Sidebar */}
                 <SidebarCategories
                     roots={roots}
@@ -276,10 +275,10 @@ export default function Store({
                     {err && <div className="alert alert-danger">Lỗi: {err}</div>}
 
                     {/* Product List */}
-                    <div className="d-flex flex-wrap" style={{ width: "1120px", gap: "10px" }}>
+                    <div className="product-grid-fixed">
                         {filteredItems.length ? (
                             filteredItems.map((prod) => (
-                                <div className="col" key={prod.productId} style={{ flex: "0 0 10%" }}>
+                                <div className="col" key={prod.productId} >
                                     <Product prod={prod} status={prod?.status} />
                                 </div>
                             ))

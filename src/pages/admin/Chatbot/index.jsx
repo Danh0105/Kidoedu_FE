@@ -276,19 +276,50 @@ function NodeEditor({ node, allKeys, onChange, onDelete }) {
 /* ================== CHATBOT PREVIEW ================== */
 function ChatbotPreview({ script, startKey, onRestart }) {
     const [current, setCurrent] = useState(startKey);
+    const [history, setHistory] = useState([]);
 
-    useEffect(() => setCurrent(startKey), [startKey]);
+    useEffect(() => {
+        setCurrent(startKey);
+        setHistory([]);
+    }, [startKey]);
 
     const node = script[current];
     if (!node) return null;
+
+    const goNext = (nextKey) => {
+        if (!nextKey) return;
+        setHistory((h) => [...h, current]);
+        setCurrent(nextKey);
+    };
+
+    const goBack = () => {
+        setHistory((h) => {
+            if (h.length === 0) return h;
+            const prev = h[h.length - 1];
+            setCurrent(prev);
+            return h.slice(0, -1);
+        });
+    };
 
     return (
         <div className="border rounded p-3 h-100">
             <div className="d-flex justify-content-between align-items-center">
                 <h6 className="fw-bold">👁 Xem trước chatbot</h6>
-                <button className="btn btn-sm btn-outline-secondary" onClick={onRestart}>
-                    ⟳ Restart
-                </button>
+                <div className="d-flex gap-2">
+                    <button
+                        className="btn btn-sm btn-outline-secondary"
+                        onClick={goBack}
+                        disabled={history.length === 0}
+                    >
+                        ⬅ Trả lại
+                    </button>
+                    <button
+                        className="btn btn-sm btn-outline-secondary"
+                        onClick={onRestart}
+                    >
+                        ⟳ Restart
+                    </button>
+                </div>
             </div>
 
             <div className="alert alert-primary mt-3 white-space-pre-line">
@@ -300,12 +331,21 @@ function ChatbotPreview({ script, startKey, onRestart }) {
                     <button
                         key={opt.id}
                         className="btn btn-outline-primary"
-                        onClick={() => setCurrent(opt.next)}
+                        onClick={() => goNext(opt.next)}
+                        disabled={!opt.next}
                     >
                         {opt.label}
                     </button>
                 ))}
             </div>
+
+            {/* fallback nếu node cụt */}
+            {node.options.length === 0 && (
+                <div className="text-muted small mt-3 text-center">
+                    ⚠ Node này không có option. Dùng “Trả lại” hoặc “Restart”.
+                </div>
+            )}
         </div>
     );
 }
+

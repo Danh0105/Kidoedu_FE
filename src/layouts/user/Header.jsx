@@ -107,15 +107,19 @@ export default function Header() {
                 <header className="container d-flex justify-content-between align-items-center py-0 gap-3 pt-2 mb-2">
                     {/* Left: Logo + Menu */}
                     <div className="navbar-nav d-flex flex-row gap-3 justify-content-between align-items-center w-100 w-lg-auto">
-                        <Link to="/" className="d-inline-block">
-                            <img
-                                src={logo}
-                                alt="Logo công ty Gentech"
-                                className="img-fluid"
-                                style={{ width: 'clamp(72px, 10vw, 90px)', height: 'auto' }}
-                            />
-                        </Link>
 
+                        <div class="logo-wrap">
+                            <div class="white-motion"></div>
+                            <Link to="/" className="d-inline-block">
+                                <img
+                                    src={logo}
+                                    alt="Logo công ty Gentech"
+                                    className="img-fluid logo-img"
+                                    style={{ width: 'clamp(72px, 10vw, 90px)', height: 'auto' }}
+                                />
+
+                            </Link>
+                        </div>
                         {/* Nav (giữ nguyên cấu trúc) */}
                         <nav
 /*                             className={`navbar navbar-expand-lg sticky-lg-top ${scrolled ? 'bg-menu2' : ''} flex-grow-1`}

@@ -24,25 +24,31 @@ export default function OrderManager() {
     const [loading, setLoading] = useState(false);
     const [q, setQ] = useState(""); // search local
     const [showCreate, setShowCreate] = useState(false);
-
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(20);
+    const [meta, setMeta] = useState({ totalItems: 0, totalPages: 0 });
     /* ======================= API ======================= */
     const fetchOrders = async () => {
         setLoading(true);
         try {
-            const res = await axios.get(`${API_BASE}/orders`);
-            const list = Array.isArray(res.data)
-                ? res.data
-                : Array.isArray(res.data?.data)
-                    ? res.data.data
-                    : [];
+            const res = await axios.get(
+                `${API_BASE}/orders?page=${page}&limit=${limit}`
+            );
 
-            setOrders(list);
+            setOrders(res.data.data);
+            setMeta(res.data.meta);
         } catch (err) {
-            console.error("Lỗi tải đơn hàng:", err);
+            console.error(err);
         } finally {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchOrders();
+    }, [page]);
+
+
 
     const deleteOrder = async (id) => {
         if (!window.confirm("Bạn chắc chắn muốn xóa đơn hàng này?")) return;
@@ -68,9 +74,6 @@ export default function OrderManager() {
         }
     };
 
-    useEffect(() => {
-        fetchOrders();
-    }, []);
 
     /* ======================= FILTER ======================= */
 
@@ -169,6 +172,49 @@ export default function OrderManager() {
 
                 {/* Table */}
                 <div className="table-responsive">
+                    <nav aria-label="Page navigation example">
+                        <ul className="pagination justify-content-end">
+
+                            {/* Previous */}
+                            <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
+                                <button
+                                    className="page-link"
+                                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                                >
+                                    Previous
+                                </button>
+                            </li>
+
+                            {/* Page numbers */}
+                            {Array.from({ length: meta.totalPages }).map((_, i) => (
+                                <li
+                                    key={i}
+                                    className={`page-item ${page === i + 1 ? "active" : ""}`}
+                                >
+                                    <button
+                                        className="page-link"
+                                        onClick={() => setPage(i + 1)}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                </li>
+                            ))}
+
+                            {/* Next */}
+                            <li className={`page-item ${page === meta.totalPages ? "disabled" : ""}`}>
+                                <button
+                                    className="page-link"
+                                    onClick={() =>
+                                        setPage(p => Math.min(meta.totalPages, p + 1))
+                                    }
+                                >
+                                    Next
+                                </button>
+                            </li>
+
+                        </ul>
+                    </nav>
+
                     <table className="table align-middle table-hover">
                         <thead className="table-light">
                             <tr>
@@ -282,6 +328,51 @@ export default function OrderManager() {
                                 ))}
                         </tbody>
                     </table>
+                    {/* Pagination */}
+
+                    <nav aria-label="Page navigation example">
+                        <ul className="pagination justify-content-end">
+
+                            {/* Previous */}
+                            <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
+                                <button
+                                    className="page-link"
+                                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                                >
+                                    Previous
+                                </button>
+                            </li>
+
+                            {/* Page numbers */}
+                            {Array.from({ length: meta.totalPages }).map((_, i) => (
+                                <li
+                                    key={i}
+                                    className={`page-item ${page === i + 1 ? "active" : ""}`}
+                                >
+                                    <button
+                                        className="page-link"
+                                        onClick={() => setPage(i + 1)}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                </li>
+                            ))}
+
+                            {/* Next */}
+                            <li className={`page-item ${page === meta.totalPages ? "disabled" : ""}`}>
+                                <button
+                                    className="page-link"
+                                    onClick={() =>
+                                        setPage(p => Math.min(meta.totalPages, p + 1))
+                                    }
+                                >
+                                    Next
+                                </button>
+                            </li>
+
+                        </ul>
+                    </nav>
+
                 </div>
                 <OrderDetailModal
                     show={showModal}

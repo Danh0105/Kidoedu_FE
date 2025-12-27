@@ -17,37 +17,37 @@ export default function Menu() {
     return (
         <ul className="menu-container">
             <li>
-                <NavLink to="/" className={({ isActive }) => getClass(isActive)}>
+                <NavLink to="/" className={({ isActive }) => getClass(isActive)} style={{ textDecoration: "none" }}>
                     <Home size={18} /> Trang chủ
                 </NavLink>
             </li>
 
             <li>
-                <NavLink to="/store" className={({ isActive }) => getClass(isActive)}>
+                <NavLink to="/store" className={({ isActive }) => getClass(isActive)} style={{ textDecoration: "none" }}>
                     <Store size={18} /> Cửa hàng
                 </NavLink>
             </li>
 
             <li>
-                <NavLink to="/quotation" className={({ isActive }) => getClass(isActive)}>
+                <NavLink to="/quotation" className={({ isActive }) => getClass(isActive)} style={{ textDecoration: "none" }}>
                     <FileText size={18} /> Báo giá
                 </NavLink>
             </li>
 
             <li>
-                <NavLink to="/newproduct" className={({ isActive }) => getClass(isActive)}>
+                <NavLink to="/newproduct" className={({ isActive }) => getClass(isActive)} style={{ textDecoration: "none" }}>
                     <PackagePlus size={18} /> Sản phẩm mới
                 </NavLink>
             </li>
 
             <li>
-                <NavLink to="/featuredproducts" className={({ isActive }) => getClass(isActive)}>
+                <NavLink to="/featuredproducts" className={({ isActive }) => getClass(isActive)} style={{ textDecoration: "none" }}>
                     <Star size={18} /> Nổi bật
                 </NavLink>
             </li>
 
             <li>
-                <NavLink to="/about" className={({ isActive }) => getClass(isActive)}>
+                <NavLink to="/about" className={({ isActive }) => getClass(isActive)} style={{ textDecoration: "none" }}>
                     <Info size={18} /> Giới thiệu
                 </NavLink>
             </li>

@@ -119,7 +119,7 @@ export default function Product({ prod }) {
     return (
         <div
             className="card nav-link p-2 position-relative shadow-sm border-0 rounded-4"
-            style={{ width: 268, overflow: "hidden" }}
+            style={{ width: "100%", overflow: "hidden" }}
             onMouseLeave={() => setHovered(false)}
         >
             {/* Ribbon góc */}

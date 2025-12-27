@@ -62,3 +62,42 @@
   height: 100%;
   object-fit: cover;
 }
+
+.logo-wrap {
+  position: relative;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Nền trắng chuyển động */
+.white-motion {
+  position: absolute;
+  width: 140%;
+  height: 60%;
+  background: linear-gradient(120deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.9) 50%,
+      rgba(255, 255, 255, 0) 100%);
+  animation: slide-bg 6s linear infinite;
+  filter: blur(6px);
+}
+
+@keyframes slide-bg {
+  from {
+    transform: translateX(-40%);
+  }
+
+  to {
+    transform: translateX(40%);
+  }
+}
+
+/* Logo nổi lên */
+.logo-img {
+  position: relative;
+  z-index: 2;
+  height: 42px;
+}

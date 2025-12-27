@@ -170,6 +170,39 @@ export default function Checkout() {
     }
   };
 
+  // 💳 Thanh toán VNPay
+  const handleVnpayPayment = async () => {
+    try {
+      const payload = buildOrderPayload("vnpay");
+
+      // 1️⃣ Tạo order
+      const orderRes = await axios.post(payload.url, payload.payload);
+      const order = orderRes.data.order ?? orderRes.data;
+
+      // 2️⃣ Tạo link VNPay
+      const vnpayRes = await axios.post(
+        `${process.env.REACT_APP_API_URL}/vnpay/create-payment`,
+        {
+          amount: Number(order.totalAmount),
+          orderId: order.orderId,
+          orderDescription: `Thanh toán đơn hàng #${order.orderId}`,
+          orderType: 'billpayment',
+          language: 'vn',
+          bankCode: 'NCB',
+        }
+      );
+      console.log(vnpayRes);
+      if (vnpayRes.data?.payUrl) {
+        window.location.href = vnpayRes.data.payUrl;
+      } else {
+        throw new Error("VNPay payUrl missing");
+      }
+    } catch (err) {
+      console.error("VNPay error:", err);
+      alert("Lỗi thanh toán VNPay");
+    }
+  };
+
 
 
 
@@ -404,7 +437,12 @@ export default function Checkout() {
           </small>
           <button
             className="btn btn-danger px-4 w-sm-auto"
-            onClick={method === "momo" ? handleMomoPayment : handleSubmit}
+            onClick={() => {
+              if (method === "momo") return handleMomoPayment();
+              if (method === "vnpay") return handleVnpayPayment();
+              return handleSubmit(); // COD
+            }}
+
           >
             Đặt hàng
           </button>

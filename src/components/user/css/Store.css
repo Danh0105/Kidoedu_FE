@@ -1,6 +1,11 @@
 /* ==========================================================
    PRODUCT CARD — MOBILE FIRST, CLEAN + OPTIMIZED
    ========================================================== */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
 
 /* Khung tổng */
 .product-card {
@@ -142,4 +147,21 @@
     .product-card>* {
         width: 100% !important;
     }
+}
+
+.product-grid-fixed {
+    display: grid;
+
+    /* 👇 card tối thiểu 280px, tối đa 360px */
+    grid-template-columns: repeat(4, minmax(280px, 360px));
+
+    gap: 16px;
+
+    /* 👇 căn giữa khi còn ít sản phẩm */
+    justify-content: center;
+}
+
+/* đảm bảo card chiếm full cột */
+.product-col {
+    width: 100%;
 }
