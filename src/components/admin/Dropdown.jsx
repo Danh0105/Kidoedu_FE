@@ -16,7 +16,7 @@ export default class Dropdown extends Component {
                         </div>
                     </li>
                     <li>
-                        <div class="d-flex justify-content-evenly">
+                        <div className="d-flex justify-content-evenly">
                             <button className='btn btn-light border-2' style={{ width: "140px" }}>Trở lại</button>
                             <button className='btn btn-danger' style={{ width: "140px" }}>Xác nhận</button>
                         </div>

@@ -1,15 +1,15 @@
 .modern-carousel {
     width: 100%;
     max-width: 1200px;
+    max-height: 450px;
     margin: auto;
-    margin-bottom: 30px;
+    padding-left: 2px;
 }
 
 .carousel-frame {
     position: relative;
     width: 100%;
     height: clamp(250px, 34vw, 450px);
-    border-radius: 24px;
     overflow: hidden;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }

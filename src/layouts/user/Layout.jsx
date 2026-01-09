@@ -3,7 +3,7 @@ import Header from './Header';
 import Content from './Content';
 import Footer from './Footer';
 import axios from 'axios';
-
+import '../../components/user/css/Layout.css';
 export default function Layout() {
   const [bgImage, setBgImage] = useState("");
 
@@ -31,13 +31,9 @@ export default function Layout() {
   }, []);
   return (
     <div
+      className="banner-bg-move"
       style={{
         backgroundImage: `url("${process.env.REACT_APP_API_URL}${banners.imageUrl}")`,
-        backgroundSize: "cover",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center",
-        minHeight: "100vh",
-        transition: "0.3s",
       }}
     >
       <Header />

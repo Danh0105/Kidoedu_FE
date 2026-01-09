@@ -3,9 +3,10 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
-import Content from './Content';
 
 import React, { Component } from 'react'
+import Content from './Content';
+
 
 export default class Layout extends Component {
     render() {
@@ -15,6 +16,8 @@ export default class Layout extends Component {
                 <Sidebar />
                 <Content />
                 <Footer />
+
+
             </div></div>
         )
     }

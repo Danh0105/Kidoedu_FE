@@ -13,10 +13,10 @@ export default function Navigation() {
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0 ">
                         <Menu />
                     </ul>
-                    <div class="d-flex flex-row-reverse">
-                        <div class="p-2"><FontAwesomeIcon icon={faFacebook} /></div>
-                        <div class="p-2"><FontAwesomeIcon icon={faSquareInstagram} /> </div>
-                        <div class="p-2"><FontAwesomeIcon icon={faTiktok} /></div>
+                    <div className="d-flex flex-row-reverse">
+                        <div className="p-2"><FontAwesomeIcon icon={faFacebook} /></div>
+                        <div className="p-2"><FontAwesomeIcon icon={faSquareInstagram} /> </div>
+                        <div className="p-2"><FontAwesomeIcon icon={faTiktok} /></div>
                     </div>
                 </div>
             </div>

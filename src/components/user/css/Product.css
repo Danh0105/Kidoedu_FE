@@ -11,8 +11,11 @@
     justify-content: center;
     padding: 8px;
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
-    transition: transform .25s ease, box-shadow .25s ease;
+    transition:
+        transform .35s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow .35s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
 
 /* Hiệu ứng hover */
 .product-image-wrapper:hover {
@@ -49,4 +52,17 @@
     width: 100%;
     max-width: 360px;
     margin: 0 auto;
+}
+
+.product-skeleton .placeholder {
+    background-color: #e9ecef;
+    border-radius: 8px;
+}
+
+.product-skeleton .btn.placeholder {
+    height: 38px;
+}
+
+.product-skeleton .ratio .placeholder {
+    border-radius: 12px;
 }

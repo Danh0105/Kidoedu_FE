@@ -4,69 +4,47 @@ import SupplierCreateModal from "./SupplierCreateModal";
 
 const API_BASE = process.env.REACT_APP_API_URL;
 
-export default function InventoryModal({ show, onClose, data, onSaved }) {
+export default function InventoryModal({
+    show,
+    onClose,
+    data,
+    products = [],
+    suppliers = [],
+    onSaved }) {
     const [type, setType] = useState("import");
     const [date, setDate] = useState("");
     const [note, setNote] = useState("");
     const [items, setItems] = useState([]);
     const [supplierId, setSupplierId] = useState(null);
 
-    const [suppliers, setSuppliers] = useState([]);
-    const [products, setProducts] = useState([]);
+
 
     const [showSupplierModal, setShowSupplierModal] = useState(false);
 
-    /* ==================== FETCH SUPPLIERS + PRODUCTS ==================== */
-    const fetchData = async () => {
-        try {
-            const [sRes, pRes] = await Promise.all([
-                axios.get(`${API_BASE}/suppliers`),
-                axios.get(`${API_BASE}/products`)
-            ]);
-
-            setSuppliers(
-                Array.isArray(sRes.data)
-                    ? sRes.data
-                    : Array.isArray(sRes.data?.data)
-                        ? sRes.data.data
-                        : []
-            );
-
-            setProducts(Array.isArray(pRes.data?.data) ? pRes.data.data : []);
-        } catch (err) {
-            console.error("Lỗi tải suppliers/products:", err);
-        }
-    };
-
     useEffect(() => {
-        fetchData();
-    }, []);
+        if (!data) return;
+        if (!products.length) return;
 
-    /* ==================== LOAD WHEN EDIT ==================== */
-    useEffect(() => {
-        if (data) {
-            setType(data.type);
-            setDate(data.date?.split("T")[0] || "");
-            setNote(data.note || "");
-            setSupplierId(data.supplierId || null);
-            setItems(
-                data.items?.map((i) => ({
-                    productId: i.productId,
-                    productName: i.productName,
-                    variantId: i.variantId,
-                    variantName: i.variantName,
-                    quantity: i.quantity,
-                    unitCost: Number(i.unitCost)
-                })) || []
-            );
-        } else {
-            setType("import");
-            setDate(new Date().toISOString().split("T")[0]);
-            setNote("");
-            setSupplierId(null);
-            setItems([]);
-        }
-    }, [data]);
+        setType(data.type || "import");
+        setDate(data.date);
+        setNote(data.note || "");
+        setSupplierId(data.supplierId || null);
+
+        setItems(
+            data.items.map((i) => ({
+                productId: i.productId,
+                productName: i.productName,
+                variantId: i.variantId,
+                variantName: i.variantName,
+                quantity: i.quantity,
+                unitCost: Number(i.unitCost),
+            }))
+        );
+    }, [data, products]);
+
+
+
+
 
     /* ==================== ADD ROW ==================== */
     const addRow = () => {
@@ -152,7 +130,7 @@ export default function InventoryModal({ show, onClose, data, onSaved }) {
         // ==============================
         try {
             if (data) {
-                await axios.put(`${API_BASE}/inventory/${data.receiptId}`, payload);
+                await axios.patch(`${API_BASE}/inventory/${data.receiptId}`, payload);
             } else {
                 await axios.post(`${API_BASE}/inventory`, payload);
             }
@@ -383,7 +361,7 @@ export default function InventoryModal({ show, onClose, data, onSaved }) {
             <SupplierCreateModal
                 show={showSupplierModal}
                 onClose={() => setShowSupplierModal(false)}
-                onSaved={() => fetchData()}
+                onSaved={onSaved}
             />
         </>
     );

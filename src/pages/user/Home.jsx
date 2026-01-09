@@ -13,6 +13,9 @@ import {
 } from "../../services/Category";
 import fetchBannersApi from "../../services/Banner";
 import { fetchAllProductsApi } from "../../services/Product";
+import useInViewOnce from "../../hooks/useInViewOnce";
+import { useRef } from "react";
+import AnimateCard from "../../components/user/AnimateCard";
 // ======================= Helpers =======================
 const pickRibbonsFromStatus = (raw) => {
     const s = Number(raw ?? 0);
@@ -113,6 +116,13 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     const [showModalBuy, setShowModalBuy] = useState(false);
     const [buyProduct, setBuyProduct] = useState(null);
 
+    const newSectionRef = useRef(null);
+    const featuredSectionRef = useRef(null);
+
+    const showNewSection = useInViewOnce(newSectionRef);
+    const showFeaturedSection = useInViewOnce(featuredSectionRef);
+
+    const scrollRef = useRef(null);
     // Stable axios instance
     const api = useMemo(
         () =>
@@ -304,7 +314,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
             rootCats.find((r) => String(r._id) === String(hoverCatId))?._name ||
             "Danh mục";
         return (
-            <div className="ps-3 w-100">
+            <div className="ps-3 w-100" style={{ minHeight: "450px" }}>
                 <div
                     className="card border-0 shadow-sm rounded-4"
                     style={{
@@ -380,21 +390,21 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                         : items.length > 0
                             ? items.map((prod) => {
                                 const ribbons = pickRibbonsFromStatus(prod?.status);
+
                                 return (
-                                    <div className="col position-relative" key={prod.productId}>
+                                    <AnimateCard
+                                        key={prod.productId}
+                                        className="col position-relative"
+                                    >
                                         {ribbons.map((rb, i) => (
-                                            <Ribbon
-                                                key={i}
-                                                text={rb.text}
-                                                position={rb.position}
-                                                className={rb.className}
-                                            />
+                                            <Ribbon key={i} {...rb} />
                                         ))}
+
                                         <ProductHome
                                             prod={prod}
                                             onBuy={() => handleBuy(prod.productId)}
                                         />
-                                    </div>
+                                    </AnimateCard>
                                 );
                             })
                             : (
@@ -413,7 +423,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
         // 3) Mặc định → Carousel
         return (
-            <div className="flex-grow-1 ps-3 w-100">
+            <div className=" w-100" >
                 <Carousel />
             </div>
         );
@@ -429,7 +439,10 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                     onMouseLeave={handleLeaveAll}
                 >
                     <CategorySidebar />
-                    <div style={{ overflowY: "auto", flex: 1 }}>
+                    <div
+                        ref={scrollRef}
+                        style={{ overflowY: "auto", flex: 1 }}
+                    >
                         <ContentArea />
                     </div>
                 </div>
@@ -455,7 +468,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                 />
 
                 {/* Sản phẩm mới */}
-                <section className="my-5">
+                <section className="my-5" ref={newSectionRef}>
                     <div className="text-center mb-4">
                         <h2 className="fw-bold" style={{ fontSize: "2rem" }}>
                             🆕 Sản phẩm mới
@@ -471,15 +484,31 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                         />
                     </div>
                     <div className="row justify-content-center">
-                        {(showAllNew ? newProducts : newProducts.slice(0, 4)).map((p) => (
-                            <ProductCard key={p.productId} p={p} banners={frameproductN} />
-                        ))}
-                        {!newProducts.length && (
-                            <p className="text-center text-muted">
-                                Đang cập nhật sản phẩm...
-                            </p>
+                        {showNewSection ? (
+                            (showAllNew ? newProducts : newProducts.slice(0, 4)).map((p) => (
+
+                                <ProductCard
+                                    key={p.productId}
+                                    p={p}
+                                    banners={frameproductN}
+                                    className={`col-12 col-sm-6 col-md-4 col-lg-3 mb-4 appear ${showNewSection ? "is-visible" : ""}`}
+                                />
+                            ))
+                        ) : (
+                            Array.from({ length: 4 }).map((_, i) => (
+                                <div key={i} className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                                    <div className="card placeholder-glow h-100">
+                                        <div className="placeholder w-100" style={{ height: 220 }} />
+                                        <div className="card-body">
+                                            <span className="placeholder col-8" />
+                                            <span className="placeholder col-5 mt-2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
                         )}
                     </div>
+
                     {newProducts.length > 4 && (
                         <div className="text-center mt-3">
                             <button
@@ -493,7 +522,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                 </section>
 
                 {/* Sản phẩm nổi bật */}
-                <section className="my-5">
+                <section className="my-5" ref={featuredSectionRef}>
                     <div className="text-center mb-4">
                         <h2 className="fw-bold" style={{ fontSize: "2rem" }}>
                             ⭐ Sản phẩm nổi bật
@@ -509,17 +538,32 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                         />
                     </div>
                     <div className="row justify-content-center">
-                        {(showAllFeatured ? featuredProducts : featuredProducts.slice(0, 4)).map(
-                            (p) => (
-                                <ProductCard key={p.productId} p={p} banners={frameproductP} />
+                        {showFeaturedSection ? (
+                            (showAllFeatured ? featuredProducts : featuredProducts.slice(0, 4)).map(
+                                (p) => (
+                                    <ProductCard
+                                        key={p.productId}
+                                        p={p}
+                                        banners={frameproductP}
+                                        className={`col-12 col-sm-6 col-md-4 col-lg-3 mb-4 appear ${showFeaturedSection ? "is-visible" : ""}`}
+                                    />
+                                )
                             )
-                        )}
-                        {!featuredProducts.length && (
-                            <p className="text-center text-muted">
-                                Đang cập nhật sản phẩm...
-                            </p>
+                        ) : (
+                            Array.from({ length: 4 }).map((_, i) => (
+                                <div key={i} className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                                    <div className="card placeholder-glow h-100">
+                                        <div className="placeholder w-100" style={{ height: 220 }} />
+                                        <div className="card-body">
+                                            <span className="placeholder col-8" />
+                                            <span className="placeholder col-5 mt-2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
                         )}
                     </div>
+
                     {featuredProducts.length > 4 && (
                         <div className="text-center mt-3">
                             <button

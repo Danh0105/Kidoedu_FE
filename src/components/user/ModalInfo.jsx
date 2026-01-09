@@ -5,8 +5,10 @@ export default function ModalInfo({ onUpdate }) {
   const [citys, setCitys] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
-  const [shippingInfo, setShippingInfo] = useState(null);
+  const [shippingInfo, setShippingInfo] = useState([]);
   const [defaultAddress, setDefaultAddresss] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+
   const [form, setForm] = useState({
     full_name_personal: "",
     full_name_business: "",
@@ -103,30 +105,106 @@ export default function ModalInfo({ onUpdate }) {
     setForm({ ...form, district: districtName, ward: "" });
     fetchWards(districtId);
   };
+  // ====== Utils tạo dữ liệu giả ======
+  const generateFakeName = () => {
+    const names = ["Nguyễn Văn A", "Trần Thị B", "Lê Văn C", "Phạm Thị D"];
+    return names[Math.floor(Math.random() * names.length)];
+  };
+
+  const generateFakeEmail = () => {
+    return `guest_${Date.now()}@noemail.local`;
+  };
 
   const handleWardChange = (e) => {
     const wardId = e.target.value;
     const wardName = wards.find((w) => w.id === wardId)?.full_name || "";
     setForm({ ...form, ward: wardName });
   };
+  const validateForm = () => {
+    const requiredFields = activeTab === "personal"
+      ? [
+        "phone_number_personal",
+        "street",
+        "city",
+        "district",
+        "ward",
+      ]
+      : [
+        "companyName",
+        "taxId",
+        "full_name_business",
+        "phone_number_buiness",
+        "street",
+        "city",
+        "district",
+        "ward",
+      ];
+
+    for (const field of requiredFields) {
+      if (!form[field] || form[field].trim() === "") {
+        alert("Vui lòng nhập đầy đủ các trường bắt buộc");
+        return false;
+      }
+    }
+
+    return true;
+  };
+  const handleEdit = (item) => {
+    setEditingId(item.id);
+
+    setForm({
+      full_name_personal: item.fullName || "",
+      full_name_business: item.address?.full_name || "",
+      phone_number_personal: item.address?.phone_number || "",
+      phone_number_buiness: item.address?.phone_number || "",
+      email_personal: item.email || "",
+      email_business: item.businessEmail || "",
+      street: item.address?.street || "",
+      city: item.address?.city || "",
+      district: item.address?.district || "",
+      ward: item.address?.ward || "",
+      dateOfBirth: item.dateOfBirth || "",
+      companyName: item.companyName || "",
+      taxId: item.taxId || "",
+    });
+
+    setDefaultAddresss(item.address?.is_default || false);
+
+    // mở collapse
+    const el = document.getElementById("1760319218204");
+    if (el && !el.classList.contains("show")) {
+      el.classList.add("show");
+    }
+
+    setActiveTab(item.companyName ? "business" : "personal");
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
 
     try {
       let url = "";
       let payload = {};
 
       if (activeTab === "personal") {
+        const finalName =
+          form.full_name_personal?.trim() || generateFakeName();
+
+        const finalEmail =
+          form.email_personal?.trim() || generateFakeEmail();
+
         url = `${process.env.REACT_APP_API_URL}/users/register-individual`;
+
         payload = {
           id: Date.now(),
-          username: form.email_personal.split("@")[0],
-          email: form.email_personal,
-          fullName: form.full_name_personal,
-          dateOfBirth: form.dateOfBirth,
+          username: finalEmail.split("@")[0],
+          email: finalEmail,
+          fullName: finalName,
+          dateOfBirth: form.dateOfBirth || null,
           address: {
-            full_name: form.full_name_personal,
+            full_name: finalName,
             phone_number: form.phone_number_personal,
             street: form.street,
             ward: form.ward,
@@ -136,17 +214,26 @@ export default function ModalInfo({ onUpdate }) {
           },
           API: url,
         };
-      } else if (activeTab === "business") {
+      }
+      else {
+        const finalName =
+          form.full_name_business?.trim() || generateFakeName();
+
+        const finalEmail =
+          form.email_business?.trim() || generateFakeEmail();
+
         url = `${process.env.REACT_APP_API_URL}/users/register-business`;
+
         payload = {
+          url,
           id: Date.now(),
-          username: form.email_business.split("@")[0],
-          email: form.email_business,
+          username: finalEmail.split("@")[0],
+          email: finalEmail,
           companyName: form.companyName,
           taxId: form.taxId,
-          businessEmail: form.email_business,
+          businessEmail: finalEmail,
           address: {
-            full_name: form.full_name_business,
+            full_name: finalName,
             phone_number: form.phone_number_buiness,
             street: form.street,
             ward: form.ward,
@@ -157,18 +244,35 @@ export default function ModalInfo({ onUpdate }) {
           API: url,
         };
       }
-      let list = shippingInfo || [];
-      list.push(payload)
-      Cookies.set('shippingInfo', JSON.stringify(list), { expires: 7 });
+
+
+      let list = [...shippingInfo];
+
+      if (editingId) {
+        list = list.map((item) =>
+          item.id === editingId ? payload : item
+        );
+      } else {
+
+        list.push(payload);
+      }
+
+      setShippingInfo(list);
+      Cookies.set("shippingInfo", JSON.stringify(list), { expires: 7 });
+
       if (onUpdate) {
         onUpdate(payload);
       }
+
+      setEditingId(null);
+      resetForm();
 
       alert("Cập nhật thành công!");
     } catch (error) {
       alert("Cập nhật thất bại!");
     }
   };
+
   useEffect(() => {
 
     const saved = Cookies.get("shippingInfo");
@@ -283,12 +387,12 @@ export default function ModalInfo({ onUpdate }) {
             ></button>
           </div>
           <div className="p-2 d-flex justify-content-center">
-            <button class="btn btn-outline-success rounded-0 " type="button" data-bs-toggle="collapse" data-bs-target="#1760319218204" aria-expanded="false" aria-controls="collapseExample">
+            <button className="btn btn-outline-success rounded-0 " type="button" data-bs-toggle="collapse" data-bs-target="#1760319218204" aria-expanded="false" aria-controls="collapseExample">
               Thêm địa chỉ mới
             </button>
           </div>
-          <div class="collapse rounded-0" id="1760319218204">
-            <div class="card card-body rounded-0">
+          <div className="collapse rounded-0" id="1760319218204">
+            <div className="card card-body rounded-0">
               <div className="modal-body">
                 <form
                   onSubmit={handleSubmit}
@@ -301,24 +405,24 @@ export default function ModalInfo({ onUpdate }) {
                       <select
                         name="city"
                         onChange={handleCityChange}
-                        className="w-full p-2 border rounded-xl"
+                        className="w-full p-2 border rounded-xl text-danger"
                         required
                       >
-                        <option value="">Chọn Tỉnh/Thành phố</option>
+                        <option value="">Chọn Tỉnh/Thành phố*</option>
                         {citys.map((city) => (
                           <option key={city.id} value={city.id}>
                             {city.full_name}
                           </option>
                         ))}
                       </select>
-                      {/* Select Phường/Xã */}
+
                       <select
                         name="ward"
                         onChange={handleWardChange}
-                        className="w-full p-2 border rounded-xl"
+                        className="w-full p-2 border rounded-xl text-danger"
                         required
                       >
-                        <option value="">Chọn Phường/Xã</option>
+                        <option value="">Chọn Phường/Xã*</option>
                         {wards.map((w) => (
                           <option key={w.id} value={w.id}>
                             {w.full_name}
@@ -328,29 +432,29 @@ export default function ModalInfo({ onUpdate }) {
 
                     </div>
 
-                    <div className="d-flex flex-column gap-3 w-50">
+                    <div className="d-flex flex-column gap-3 w-50 ">
 
-                      {/* Select Quận/Huyện */}
                       <select
                         name="district"
                         onChange={handleDistrictChange}
-                        className="w-full p-2 border rounded-xl"
+                        className="w-full p-2 border rounded-xl text-danger"
                         required
                       >
-                        <option value="">Chọn Quận/Huyện</option>
+                        <option value="">Chọn Quận/Huyện*</option>
                         {districts.map((d) => (
                           <option key={d.id} value={d.id}>
                             {d.full_name}
                           </option>
                         ))}
                       </select>
+
                       <input
                         type="text"
                         name="street"
-                        placeholder="Số nhà, đường"
+                        placeholder="Số nhà, đường*"
                         value={form.street}
                         onChange={handleChange}
-                        className="w-full p-2 border rounded-xl"
+                        className="w-full p-2 border rounded-xl text-danger"
                         required
                       />
                     </div>
@@ -387,7 +491,7 @@ export default function ModalInfo({ onUpdate }) {
                     </div>
                   </nav>
 
-                  <div class="tab-content" id="nav-tabContent">
+                  <div className="tab-content" id="nav-tabContent">
                     {/* person */}
                     <div
                       className={`tab-pane fade ${activeTab === "personal" ? "show active" : ""}`}
@@ -404,7 +508,7 @@ export default function ModalInfo({ onUpdate }) {
                             value={form.full_name_personal}
                             onChange={handleChange}
                             className="w-full p-2 border rounded-xl"
-                            required
+
                           />
                           <input
                             type="email"
@@ -413,7 +517,7 @@ export default function ModalInfo({ onUpdate }) {
                             value={form.email_personal}
                             onChange={handleChange}
                             className="w-full p-2 border rounded-xl"
-                            required
+
                           />
                         </div>
                         <div className="d-flex flex-column gap-3 w-50">
@@ -424,17 +528,19 @@ export default function ModalInfo({ onUpdate }) {
                             value={form.dateOfBirth}
                             onChange={handleChange}
                             className="w-full p-2 border rounded-xl"
-                            required
+
                           />
                           <input
                             type="tel"
                             name="phone_number_personal"
-                            placeholder="Số điện thoại"
+                            placeholder="Số điện thoại *"
                             value={form.phone_number_personal}
                             onChange={handleChange}
-                            className="w-full p-2 border rounded-xl"
-                            required
+                            className={`w-full p-2 border rounded-xl ${!form.phone_number_personal ? "text-danger border-danger" : "text-dark"
+                              }`}
+                            required={activeTab === "personal"}
                           />
+
                         </div>
                       </div>
                     </div>
@@ -453,7 +559,7 @@ export default function ModalInfo({ onUpdate }) {
                           value={form.companyName}
                           onChange={handleChange}
                           className="w-full p-2 border rounded-xl"
-                          required
+
                         />
                         <input
                           type="text"
@@ -462,7 +568,7 @@ export default function ModalInfo({ onUpdate }) {
                           value={form.taxId}
                           onChange={handleChange}
                           className="w-full p-2 border rounded-xl"
-                          required
+
                         />
                         <input
                           type="text"
@@ -471,7 +577,7 @@ export default function ModalInfo({ onUpdate }) {
                           value={form.email_business}
                           onChange={handleChange}
                           className="w-full p-2 border rounded-xl"
-                          required
+
                         />
 
                       </div>
@@ -483,7 +589,7 @@ export default function ModalInfo({ onUpdate }) {
                           value={form.full_name_business}
                           onChange={handleChange}
                           className="w-full p-2 border rounded-xl"
-                          required
+
                         />
                         <input
                           type="text"
@@ -492,21 +598,31 @@ export default function ModalInfo({ onUpdate }) {
                           value={form.phone_number_buiness}
                           onChange={handleChange}
                           className="w-full p-2 border rounded-xl"
-                          required
+                          required={activeTab === "business"}
+
                         />
                       </div>
                     </div>
                   </div>
-                  <div className="modal-footer">
+                  <div className="modal-footer d-flex justify-content-between">
+                    {/* Nút xóa form */}
                     <button
                       type="button"
-                      className="btn btn-secondary"
-                      data-bs-dismiss="modal"
-                      onClick={handleSubmit}
+                      className="btn btn-warning"
+                      onClick={resetForm}
                     >
-                      Lưu thông tin
+                      Xóa thông tin
+                    </button>
+
+                    {/* Nút lưu */}
+                    <button
+                      type="submit"
+                      className="btn btn-success"
+                    >
+                      {editingId ? "Cập nhật" : "Lưu thông tin"}
                     </button>
                   </div>
+
                 </form>
               </div>
             </div>
@@ -536,23 +652,28 @@ export default function ModalInfo({ onUpdate }) {
                     )}
                   </div>
                   <div className="col">
-                    <input class="form-check-input border-danger" type="radio" name="radioDefault" id="radioDefault1" onChange={() => onchangeAddress(s.id)} />
+                    <input className="form-check-input border-danger" type="radio" name="radioDefault" id="radioDefault1" onChange={() => onchangeAddress(s.id)} />
                   </div>
                   <div className="col-md-6">
                     {s.address.is_default == true ?
                       (
-                        <span className="badge bg-light text-danger border border-danger me-2 d-none d-sm-inline">
+                        <span className="btn btn-outline-danger me-2 disabled" type="button">
                           Mặc định
                         </span>
                       ) : (
 
-                        <button class="btn btn-outline-success  me-2" type="button" onClick={() => handleSetDefault(s.id)}>
+                        <button className="btn btn-outline-success  me-2 " type="button" onClick={() => handleSetDefault(s.id)}>
                           Chọn làm mặc định
                         </button>
                       )
                     }
-
-                    <button class="btn btn-outline-danger " type="button" onClick={() => handleDelete(s.id)}>
+                    <button
+                      className="btn btn-outline-primary me-2"
+                      onClick={() => handleEdit(s)}
+                    >
+                      Sửa
+                    </button>
+                    <button className="btn btn-outline-danger " type="button" onClick={() => handleDelete(s.id)}>
                       X
                     </button>
                   </div>

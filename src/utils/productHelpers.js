@@ -9,7 +9,6 @@ export const ensureNumber = (v) => {
 };
 
 export const extractPrices = (p) => {
-    console.log("ppppppppppp", p);
 
     const prices = [];
 
@@ -28,13 +27,11 @@ export const extractPrices = (p) => {
             endAt: p[1]?.endAt || null
         });
     }
-    console.log("ppppppppppricespp", prices);
 
     return prices;
 };
 
 export const buildVariantsPayload = (variants = []) => {
-    console.log("variants2222222", variants)
     return variants.map(v => ({
         variantName: v.variantName?.trim(),
         sku: v.sku?.trim(),

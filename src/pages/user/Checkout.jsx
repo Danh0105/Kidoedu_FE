@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { CartContext } from "../../hooks/CartContext";
 import ModalInfo from "../../components/user/ModalInfo";
 import ModalPayment from "../../components/user/ModalPayment";
+import logoMomo from "../../assets/user/logo2.svg";
 // đặt trong Checkout.jsx (trên cùng file)
 const toAttrObj = (raw) => {
   if (!raw) return {};
@@ -49,10 +50,11 @@ export default function Checkout() {
     label: "Thanh toán khi nhận hàng (COD)",
     icon: "https://cdn-icons-png.flaticon.com/512/1041/1041872.png",
   });
+  const [vietQrBase64, setVietQrBase64] = useState(null);
+  const [showQrModal, setShowQrModal] = useState(false);
 
   // Lấy thông tin sản phẩm và shipping từ cookie
   useEffect(() => {
-    console.log("selectedProducts", selectedProducts);
     if (selectedProducts?.length) setProducts(selectedProducts);
     const saved = Cookies.get("shippingInfo");
     if (saved) {
@@ -64,7 +66,6 @@ export default function Checkout() {
           data = [data];
         }
 
-        // ✅ Lấy địa chỉ mặc định
         const defaultAddress = data.find(item => item.address?.is_default === true);
         setShippingInfo(defaultAddress || data[0]); // fallback: nếu chưa có mặc định
       } catch (err) {
@@ -157,7 +158,6 @@ export default function Checkout() {
           orderId: order.orderId,
         }
       );
-      console.log(momoRes);
 
       if (momoRes.data?.payUrl) {
         window.location.href = momoRes.data.payUrl;
@@ -191,7 +191,6 @@ export default function Checkout() {
           bankCode: 'NCB',
         }
       );
-      console.log(vnpayRes);
       if (vnpayRes.data?.payUrl) {
         window.location.href = vnpayRes.data.payUrl;
       } else {
@@ -202,7 +201,37 @@ export default function Checkout() {
       alert("Lỗi thanh toán VNPay");
     }
   };
+  // 💳 Thanh toán VietQR
+  const handleBankPayment = async () => {
+    try {
+      const payload = buildOrderPayload("vietqr");
 
+      // 1️⃣ Tạo order
+      const orderRes = await axios.post(payload.url, payload.payload);
+      const order = orderRes.data.order ?? orderRes.data;
+
+      // 2️⃣ Gọi backend NestJS sinh VietQR
+      const qrRes = await axios.post(
+        `${process.env.REACT_APP_API_URL}/vietqr/generate`,
+        {
+          orderId: order.orderId,
+          amount: Number(order.totalAmount),
+          purpose: `Thanh toan don hang #${order.orderId}`,
+        }
+      );
+
+      if (!qrRes.data?.data?.base64QRCode) {
+        throw new Error("QR data missing");
+      }
+
+      setVietQrBase64(qrRes.data.data.base64QRCode);
+      setShowQrModal(true);
+
+    } catch (err) {
+      console.error("VietQR error:", err);
+      alert("Không thể tạo mã QR ngân hàng");
+    }
+  };
 
 
 
@@ -218,12 +247,17 @@ export default function Checkout() {
       momo: {
         id: "momo",
         label: "Thanh toán qua MoMo",
-        icon: "https://homepage.momocdn.net/fileuploads/svg/momo-file-240411162904.svg",
+        icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZcQPC-zWVyFOu9J2OGl0j2D220D49D0Z7BQ&s",
       },
       vnpay: {
         id: "vnpay",
         label: "Thanh toán qua VNPay",
         icon: "https://stcd02206177151.cloud.edgevnpay.vn/assets/images/logo-icon/logo-primary.svg",
+      },
+      bank: {
+        id: "bank",
+        label: "Thanh toán Ngân hàng (VietQR)",
+        icon: "https://play-lh.googleusercontent.com/22cJzF0otG-EmmQgILMRTWFPnx0wTCSDY9aFaAmOhHs30oNHxi63KcGwUwmbR76Msko",
       },
     };
     setOpt(methods[selectedMethod]);
@@ -390,6 +424,34 @@ export default function Checkout() {
           </tbody>
         </table>
       </div>
+      {showQrModal && (
+        <div className="modal fade show d-block" tabIndex="-1">
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content p-3">
+              <h5 className="fw-bold text-center mb-3">
+                Quét mã QR để thanh toán
+              </h5>
+
+              <img
+                src={`data:image/png;base64,${vietQrBase64}`}
+                alt="VietQR"
+                className="img-fluid mx-auto d-block"
+              />
+
+              <p className="text-center text-muted mt-3">
+                Sử dụng app ngân hàng hỗ trợ VietQR
+              </p>
+
+              <button
+                className="btn btn-outline-secondary w-100 mt-2"
+                onClick={() => setShowQrModal(false)}
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ========== Tổng kết + Thanh toán ========== */}
       <div className="container bg-white rounded-3 shadow-sm my-3 p-3">
@@ -440,6 +502,7 @@ export default function Checkout() {
             onClick={() => {
               if (method === "momo") return handleMomoPayment();
               if (method === "vnpay") return handleVnpayPayment();
+              if (method === "bank") return handleBankPayment();
               return handleSubmit(); // COD
             }}
 

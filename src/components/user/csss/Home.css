@@ -42,3 +42,44 @@
     background: transparent !important;
 
 }
+
+/* ===== Animation xuất hiện card (không ảnh hưởng layout) ===== */
+.appear {
+    opacity: 0;
+    transform: translateY(32px) scale(0.95);
+    transition:
+        opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+
+
+/* Khi visible */
+.appear.is-visible {
+    opacity: 1;
+    transform:
+        translateY(0) scale(1);
+}
+
+
+/* Respect user prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    .appear {
+        transition: none;
+        transform: none;
+        opacity: 1;
+    }
+}
+
+.fly-up {
+    opacity: 0;
+    transform: translateY(32px) scale(0.95);
+    transition:
+        opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fly-up.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}

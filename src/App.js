@@ -1,30 +1,25 @@
-
-import React from "react";
+import { Routes, Route } from "react-router-dom";
 import UserAppRoutes from "./routes/UserAppRoutes";
 import AdminAppRoutes from "./routes/AdminAppRoutes";
 import useAutoLogout from "./hooks/useAutoLogout";
 import { CartProvider } from "./hooks/CartContext";
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-
 import LoadPage from "./hooks/LoadPage";
-function App() {
 
+function App() {
+  useAutoLogout(); // ❗ hook KHÔNG render JSX
 
   return (
+    <LoadPage>
+      <CartProvider>
+        <Routes>
+          {/* USER */}
+          <Route path="/*" element={<UserAppRoutes />} />
 
-    <React.StrictMode>
-      {/*  <MobileBlocker /> */}
-      <LoadPage>
-        {useAutoLogout()}
-        <CartProvider>
-          <UserAppRoutes />
-        </CartProvider>
-
-        <AdminAppRoutes />
-      </LoadPage>
-    </React.StrictMode>
-
-
+          {/* ADMIN */}
+          <Route path="/admin/*" element={<AdminAppRoutes />} />
+        </Routes>
+      </CartProvider>
+    </LoadPage>
   );
 }
 

@@ -1,0 +1,46 @@
+/* option màu */
+.opt-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.opt-confirmed {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.opt-shipping {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.opt-completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.opt-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* select đổi màu theo trạng thái đang chọn */
+.status-Pending {
+    background-color: #fff3cd;
+}
+
+.status-Confirmed {
+    background-color: #d1ecf1;
+}
+
+.status-Shipping {
+    background-color: #cce5ff;
+}
+
+.status-Completed {
+    background-color: #d4edda;
+}
+
+.status-Cancelled {
+    background-color: #f8d7da;
+}

@@ -1,0 +1,18 @@
+.banner-bg-move {
+    min-height: 100vh;
+    background-repeat: repeat-x;
+    /* 🔥 quan trọng */
+    background-size: cover;
+    background-position: 0% 50%;
+    animation: bg-move-x 30s linear infinite;
+}
+
+@keyframes bg-move-x {
+    from {
+        background-position: 0% 50%;
+    }
+
+    to {
+        background-position: 100% 50%;
+    }
+}

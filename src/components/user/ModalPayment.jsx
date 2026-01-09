@@ -1,4 +1,5 @@
 import { useState } from "react";
+import logoMomo from "../../assets/user/logo2.svg";
 
 export default function ModalPayment({ show, onClose, onConfirm }) {
   const [paymentMethod, setPaymentMethod] = useState("cod");
@@ -19,12 +20,17 @@ export default function ModalPayment({ show, onClose, onConfirm }) {
     {
       id: "momo",
       label: "Thanh toán qua MoMo",
-      icon: "https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png",
+      icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZcQPC-zWVyFOu9J2OGl0j2D220D49D0Z7BQ&s",
     },
     {
       id: "vnpay",
       label: "Thanh toán qua VNPay",
       icon: "https://stcd02206177151.cloud.edgevnpay.vn/assets/images/logo-icon/logo-primary.svg",
+    },
+    {
+      id: "bank",
+      label: "Thanh toán qua VietQR",
+      icon: "https://play-lh.googleusercontent.com/22cJzF0otG-EmmQgILMRTWFPnx0wTCSDY9aFaAmOhHs30oNHxi63KcGwUwmbR76Msko",
     },
   ];
 

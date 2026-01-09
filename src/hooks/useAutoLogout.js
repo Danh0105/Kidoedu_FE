@@ -1,39 +1,37 @@
 import { useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useModalManager } from "./ModalContext";
 
-const AUTO_LOGOUT_DELAY = 10 * 60 * 1000; // 10 phút
+const AUTO_LOGOUT_DELAY = 5 * 60 * 1000;
 
 export default function useAutoLogout() {
   const timerId = useRef(null);
-  const BASENAME = '';
+  const navigate = useNavigate();
+
+  // ✅ GỌI HOOK TRỰC TIẾP – KHÔNG ĐIỀU KIỆN
+  const { closeAllModals } = useModalManager();
 
   const resetTimer = useCallback(() => {
-    if (timerId.current) {
-      clearTimeout(timerId.current);
-    }
+    if (timerId.current) clearTimeout(timerId.current);
 
     timerId.current = setTimeout(() => {
-      const token = localStorage.getItem("Authorization");
+      const token = localStorage.getItem("access_token");
       if (token) {
-        localStorage.removeItem("Authorization");
-        localStorage.removeItem("role");
-        window.location.href = `${BASENAME}/`;
+        localStorage.removeItem("access_token");
+
+        closeAllModals();
+        navigate("/", { replace: true });
       }
     }, AUTO_LOGOUT_DELAY);
-  }, []);
+  }, [navigate, closeAllModals]);
 
   useEffect(() => {
     const events = ["mousemove", "keydown", "scroll", "click"];
-
-    for (let event of events) {
-      window.addEventListener(event, resetTimer);
-    }
-
-    resetTimer(); // khởi tạo lần đầu
+    events.forEach(e => window.addEventListener(e, resetTimer));
+    resetTimer();
 
     return () => {
-      for (let event of events) {
-        window.removeEventListener(event, resetTimer);
-      }
+      events.forEach(e => window.removeEventListener(e, resetTimer));
       clearTimeout(timerId.current);
     };
   }, [resetTimer]);

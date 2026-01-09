@@ -8,7 +8,7 @@ export default function Date() {
       </label>
       <div className=' w-100'>
 
-        <div class="d-flex flex-column w-100 align-items-center gap-3">
+        <div className="d-flex flex-column w-100 align-items-center gap-3">
           <div className="input-group w-100 mb-1 d-flex align-items-center">
             <span className="w-25" style={{ fontSize: "15px" }}>
               Từ ngày

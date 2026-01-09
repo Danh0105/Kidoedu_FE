@@ -276,21 +276,25 @@ export default function Store({
 
                     {/* Product List */}
                     <div className="product-grid-fixed">
-                        {filteredItems.length ? (
+                        {loading ? (
+                            Array.from({ length: limit }).map((_, i) => (
+                                <div className="col" key={`sk-${i}`}>
+                                    <Product /> {/* ← Product không có prop => skeleton */}
+                                </div>
+                            ))
+                        ) : filteredItems.length ? (
                             filteredItems.map((prod) => (
-                                <div className="col" key={prod.productId} >
-                                    <Product prod={prod} status={prod?.status} />
+                                <div className="col" key={prod.productId}>
+                                    <Product prod={prod} />
                                 </div>
                             ))
                         ) : (
                             <div className="col">
-                                <p className="text-muted mb-0">
-                                    {loading ? "Đang tải dữ liệu…" : "Không có sản phẩm nào"}
-                                </p>
+                                <p className="text-muted mb-0">Không có sản phẩm nào</p>
                             </div>
                         )}
-
                     </div>
+
 
                     {/* Pagination */}
                     {meta?.last_page > 1 && (

@@ -2,7 +2,9 @@ import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import OrderDetailModal from "./OrderDetailModal";
 import ExportSlipModal from "./ExportSlipModal";
-import CreateOrderModal from "./CreateOrderModal"
+import CreateOrderModal from "./CreateOrderModal";
+import "../../../components/admin/css/statusSelect.css";
+import { hasPermission } from "../../../utils/permission";
 const API_BASE = process.env.REACT_APP_API_URL;
 
 /* ======================= Helpers ======================= */
@@ -268,18 +270,21 @@ export default function OrderManager() {
  */}                                        <td>{formatDate(o.orderDate)}</td>
 
                                         <td>
-                                            <select
-                                                value={o.status}
-                                                className="form-select form-select-sm"
-                                                onChange={(e) =>
-                                                    updateStatus(o.orderId, e.target.value)
-                                                }
-                                            >
-                                                {["Pending", "Confirmed", "Shipping",
-                                                    "Completed", "Cancelled"].map((st) => (
-                                                        <option key={st} value={st}>{st}</option>
-                                                    ))}
-                                            </select>
+                                            {hasPermission(["order.update"]) ? (
+                                                <select
+                                                    className="form-select status-select"
+                                                    value={o.status}
+                                                    onChange={(e) => updateStatus(o.orderId, e.target.value)}
+                                                >
+                                                    <option value="Pending" className="opt-pending">Pending</option>
+                                                    <option value="Confirmed" className="opt-confirmed">Confirmed</option>
+                                                    <option value="Shipping" className="opt-shipping">Shipping</option>
+                                                    <option value="Completed" className="opt-completed">Completed</option>
+                                                    <option value="Cancelled" className="opt-cancelled">Cancelled</option>
+                                                </select>
+                                            ) : (
+                                                <span>{o.status}</span>
+                                            )}
                                         </td>
 
                                         <td className="text-start fw-semibold align-middle">
@@ -317,12 +322,14 @@ export default function OrderManager() {
                                                 Phiếu XK
                                             </button>
 
-                                            <button
-                                                className="btn btn-sm btn-outline-danger"
-                                                onClick={() => deleteOrder(o.orderId)}
-                                            >
-                                                Xoá
-                                            </button>
+                                            {hasPermission(["order.delete"]) && (
+                                                <button
+                                                    className="btn btn-sm btn-danger"
+                                                    onClick={() => deleteOrder(o.orderId)}
+                                                >
+                                                    Xoá
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}

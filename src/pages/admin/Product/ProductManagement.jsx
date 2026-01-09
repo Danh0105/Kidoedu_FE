@@ -5,6 +5,7 @@ import FormEdit from "./FormEdit";
 import { fetchAllProductsApi, searchProductsApi } from "../../../services/Product";
 import FormInventory from "../../../components/admin/FormInventory";
 import { useDebounce } from "../../../hooks/useDebounce";
+import { hasPermission } from "../../../utils/permission";
 
 const PLACEHOLDER_IMG = "https://placehold.co/120x120?text=No+Image";
 
@@ -168,14 +169,16 @@ export default function ProductManagement() {
                 </div>
 
                 <div>
-                    <button
-                        type="button"
-                        className="btn btn-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#exampleModal"
-                    >
-                        Thêm sản phẩm
-                    </button>
+                    {hasPermission(["product.create"]) && (
+                        <button
+                            type="button"
+                            className="btn btn-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#exampleModal"
+                        >
+                            Thêm sản phẩm
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -337,21 +340,25 @@ export default function ProductManagement() {
                                             </td>
                                             <td>{createdLabel}</td>
                                             <td className="text-center">
-                                                <button
-                                                    className="btn btn-primary btn-sm me-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modalEditProduct"
-                                                    onClick={() => { setEditProduct(p); setIsOpen(true); }}
-                                                >
-                                                    Edit
-                                                </button>
+                                                {hasPermission(["product.update"]) && (
+                                                    <button
+                                                        className="btn btn-info btn-sm me-2"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalEditProduct"
+                                                        onClick={() => { setEditProduct(p); setIsOpen(true); }}
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                )}
 
-                                                <button
-                                                    className="btn btn-danger btn-sm"
-                                                    onClick={() => handleDelete(p?.productId)}
-                                                >
-                                                    Delete
-                                                </button>
+                                                {hasPermission(["product.delete"]) && (
+                                                    <button
+                                                        className="btn btn-danger btn-sm"
+                                                        onClick={() => handleDelete(p?.productId)}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                )}
                                             </td>
                                         </tr>
                                     );

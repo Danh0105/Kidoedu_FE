@@ -108,8 +108,8 @@ export default function Header() {
                     {/* Left: Logo + Menu */}
                     <div className="navbar-nav d-flex flex-row gap-3 justify-content-between align-items-center w-100 w-lg-auto">
 
-                        <div class="logo-wrap">
-                            <div class="white-motion"></div>
+                        <div className="logo-wrap">
+                            <div className="white-motion"></div>
                             <Link to="/" className="d-inline-block">
                                 <img
                                     src={logo}

@@ -116,35 +116,35 @@ export default function Footer() {
                                     <h6 className="footer-heading">Chính sách</h6>
                                     <ul className="list-unstyled small mb-0">
                                         <li>
-                                            <Link class="text-decoration-none" to="/PriceInfoPage" >THÔNG TIN VỀ GIÁ SẢN PHẨM</Link>
+                                            <Link className="text-decoration-none" to="/PriceInfoPage" >THÔNG TIN VỀ GIÁ SẢN PHẨM</Link>
                                         </li>
                                         <li>
-                                            <Link class="text-decoration-none" to="/PaymentPolicyPage">
+                                            <Link className="text-decoration-none" to="/PaymentPolicyPage">
                                                 Chính sách thanh toán
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link class="text-decoration-none" to="/ShippingPolicyPage">
+                                            <Link className="text-decoration-none" to="/ShippingPolicyPage">
                                                 Chính sách vận chuyển
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link class="text-decoration-none" to="/InspectionPolicyPage">
+                                            <Link className="text-decoration-none" to="/InspectionPolicyPage">
                                                 Chính sách kiểm hàng
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link class="text-decoration-none" to="/ReturnsRefundsPolicyPage">
+                                            <Link className="text-decoration-none" to="/ReturnsRefundsPolicyPage">
                                                 Chính sách đổi trả và hoàn tiền
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link class="text-decoration-none" to="/PrivacyPolicyPage">
+                                            <Link className="text-decoration-none" to="/PrivacyPolicyPage">
                                                 Chính sách bảo mật thông tin
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link class="text-decoration-none" to="/overview">
+                                            <Link className="text-decoration-none" to="/overview">
                                                 CHÍNH SÁCH VÀ QUY ĐỊNH
                                             </Link>
                                         </li>
@@ -155,28 +155,28 @@ export default function Footer() {
                                     <h6 className="footer-heading">Chính sách</h6>
                                     <ul className="list-unstyled small mb-0">
                                         <li>
-                                            <Link class="text-decoration-none" to="/PaymentPolicyPage" >Chính sách thanh toán</Link>
+                                            <Link className="text-decoration-none" to="/PaymentPolicyPage" >Chính sách thanh toán</Link>
                                         </li>
                                         <li>
-                                            <Link class="text-decoration-none" to="/ComplaintHandlingPolicyPage">
+                                            <Link className="text-decoration-none" to="/ComplaintHandlingPolicyPage">
                                                 Chính sách xử lý khiếu nại
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link class="text-decoration-none" to="/ShippingPolicyPage">
+                                            <Link className="text-decoration-none" to="/ShippingPolicyPage">
                                                 Chính sách vận chuyển
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link class="text-decoration-none" to="/MaintenancePolicyPage">
+                                            <Link className="text-decoration-none" to="/MaintenancePolicyPage">
                                                 Chính sách bảo trì
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link class="text-decoration-none" to="/ReturnPolicyPage">Chính sách đổi trả hàng</Link>
+                                            <Link className="text-decoration-none" to="/ReturnPolicyPage">Chính sách đổi trả hàng</Link>
                                         </li>
                                         <li>
-                                            <Link class="text-decoration-none" to="/PrivacyPolicyPage">
+                                            <Link className="text-decoration-none" to="/PrivacyPolicyPage">
                                                 Chính sách bảo mật thông tin
                                             </Link>
                                         </li>
@@ -188,18 +188,18 @@ export default function Footer() {
                                     <h6 className="footer-heading">Dịch vụ khách hàng</h6>
                                     <ul className="list-unstyled small mb-0">
                                         <li>
-                                            <Link class="text-decoration-none" to="/PaymentPolicy">Điều khoản thanh toán</Link>
+                                            <Link className="text-decoration-none" to="/PaymentPolicy">Điều khoản thanh toán</Link>
                                         </li>
                                         <li>
-                                            <Link class="text-decoration-none" to="/ContactFeedbackPage">Liên hệ góp ý</Link>
+                                            <Link className="text-decoration-none" to="/ContactFeedbackPage">Liên hệ góp ý</Link>
                                         </li>
                                         <li>
-                                            <Link class="text-decoration-none" to="/ReturnPolicyGuide">
+                                            <Link className="text-decoration-none" to="/ReturnPolicyGuide">
                                                 Hướng dẫn đổi trả hàng
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link class="text-decoration-none" to="/warrantypolicy">Bảo hành sản phẩm</Link>
+                                            <Link className="text-decoration-none" to="/warrantypolicy">Bảo hành sản phẩm</Link>
                                         </li>
                                     </ul>
                                 </div> */}
@@ -353,22 +353,22 @@ export default function Footer() {
                         </div>
                     )}
                 </div>
-                <a href="tel:0789 636 979" class="hotline-bubble" aria-label="Gọi ngay">
-                    <i class="bi bi-telephone-fill"></i>
-                    <span class="hotline-tip">Gọi 0789 636 979</span>
+                <a href="tel:0789 636 979" className="hotline-bubble" aria-label="Gọi ngay">
+                    <i className="bi bi-telephone-fill"></i>
+                    <span className="hotline-tip">Gọi 0789 636 979</span>
                 </a>
 
-                <div class="hotline-banner">
-                    <div class="hotline-icon">
-                        <i class="bi bi-phone"></i>
+                <div className="hotline-banner">
+                    <div className="hotline-icon">
+                        <i className="bi bi-phone"></i>
                     </div>
 
-                    <div class="hotline-text">
+                    <div className="hotline-text">
                         <div>Hotline - Zalo</div>
-                        <strong class="shine">0789 636 979</strong>
+                        <strong className="shine">0789 636 979</strong>
                     </div>
 
-                    <a class="zalo-badge" href="https://zalo.me/0789 636 979" target="_blank" aria-label="Chat Zalo"></a>
+                    <a className="zalo-badge" href="https://zalo.me/0789 636 979" target="_blank" aria-label="Chat Zalo"></a>
                 </div>
             </div>
 
@@ -453,24 +453,24 @@ export default function Footer() {
                         <FontAwesomeIcon icon={faArrowUp} />
                     </div>
                 )}
-                <a href="tel:0789 636 979" class="hotline-bubble" aria-label="Gọi ngay">
-                    <i class="bi bi-telephone-fill"></i>
-                    <span class="hotline-tip">Gọi 0789 636 979</span>
+                <a href="tel:0789 636 979" className="hotline-bubble" aria-label="Gọi ngay">
+                    <i className="bi bi-telephone-fill"></i>
+                    <span className="hotline-tip">Gọi 0789 636 979</span>
                 </a>
                 {/* Hotline banner (hidden on md+) */}
-                <a class="hotline-banner " href="https://zalo.me/0789636979">
-                    <div class="hotline-icon">
-                        <i class="bi bi-phone"></i>
+                <a className="hotline-banner " href="https://zalo.me/0789636979">
+                    <div className="hotline-icon">
+                        <i className="bi bi-phone"></i>
                     </div>
 
-                    <div class="hotline-info d-flex flex-column">
-                        <span class="label">Hotline - Zalo</span>
-                        <strong class="phone-number">0789 636 979</strong>
+                    <div className="hotline-info d-flex flex-column">
+                        <span className="label">Hotline - Zalo</span>
+                        <strong className="phone-number">0789 636 979</strong>
                     </div>
 
-                    <a class="zalo-btn" href="https://zalo.me/0789636979" target="_blank" aria-label="Chat Zalo">
+                    <div className="zalo-btn" target="_blank" aria-label="Chat Zalo">
 
-                    </a>
+                    </div>
                 </a>
 
 

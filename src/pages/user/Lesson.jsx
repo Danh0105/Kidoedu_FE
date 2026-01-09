@@ -7,7 +7,7 @@ import ROBOT from '../../assets/user/ROBOT.png'
 export default function Lesson() {
     return (
         <div className='container-xxl'>
-            <div class="d-flex">
+            <div className="d-flex">
                 <div>
                     <div className='p-2 border border-2 rounded'>
                         <div className='mt-2 mb-2'>
@@ -21,69 +21,35 @@ export default function Lesson() {
                         </div>
                     </div>
                 </div>
-                <div class="p-2 flex-fill">
-                    <div class="container text-center overflow-auto" style={{ maxHeight: "710px" }}>
-                        <div class="row">
-                            <div class="col">
-                                <div class="col">
+                <div className="p-2 flex-fill">
+                    <div className="container text-center overflow-auto" style={{ maxHeight: "710px" }}>
+                        <div className="row">
+                            <div className="col">
+                                <div className="col">
                                     <Product
                                         name="Module GPS+BDS ATGM336H"
                                         content="Module GPS BDS ATGM336H định vị có thiết kế nhỏ gọn sử dụng IC chính SoC GNSS AT6558 thế hệ thứ 4"
                                     />
                                 </div>
                             </div>
-                            <div class="col">
-                                <div class="col">
+                            <div className="col">
+                                <div className="col">
                                     <Product
                                         name="Module GPS+BDS ATGM336H"
                                         content="Module GPS BDS ATGM336H định vị có thiết kế nhỏ gọn sử dụng IC chính SoC GNSS AT6558 thế hệ thứ 4"
                                     />
                                 </div>
                             </div>
-                            <div class="col">
-                                <div class="col">
+                            <div className="col">
+                                <div className="col">
                                     <Product
                                         name="Module GPS+BDS ATGM336H"
                                         content="Module GPS BDS ATGM336H định vị có thiết kế nhỏ gọn sử dụng IC chính SoC GNSS AT6558 thế hệ thứ 4"
                                     />
                                 </div>
                             </div>
-                            <div class="col">
-                                <div class="col">
-                                    <Product
-                                        name="Module GPS+BDS ATGM336H"
-                                        content="Module GPS BDS ATGM336H định vị có thiết kế nhỏ gọn sử dụng IC chính SoC GNSS AT6558 thế hệ thứ 4"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mt-1">
-                            <div class="col">
-                                <div class="col">
-                                    <Product
-                                        name="Module GPS+BDS ATGM336H"
-                                        content="Module GPS BDS ATGM336H định vị có thiết kế nhỏ gọn sử dụng IC chính SoC GNSS AT6558 thế hệ thứ 4"
-                                    />
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="col">
-                                    <Product
-                                        name="Module GPS+BDS ATGM336H"
-                                        content="Module GPS BDS ATGM336H định vị có thiết kế nhỏ gọn sử dụng IC chính SoC GNSS AT6558 thế hệ thứ 4"
-                                    />
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="col">
-                                    <Product
-                                        name="Module GPS+BDS ATGM336H"
-                                        content="Module GPS BDS ATGM336H định vị có thiết kế nhỏ gọn sử dụng IC chính SoC GNSS AT6558 thế hệ thứ 4"
-                                    />
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="col">
+                            <div className="col">
+                                <div className="col">
                                     <Product
                                         name="Module GPS+BDS ATGM336H"
                                         content="Module GPS BDS ATGM336H định vị có thiết kế nhỏ gọn sử dụng IC chính SoC GNSS AT6558 thế hệ thứ 4"
@@ -91,33 +57,67 @@ export default function Lesson() {
                                 </div>
                             </div>
                         </div>
-                        <div class="row mt-1">
-                            <div class="col">
-                                <div class="col">
+                        <div className="row mt-1">
+                            <div className="col">
+                                <div className="col">
                                     <Product
                                         name="Module GPS+BDS ATGM336H"
                                         content="Module GPS BDS ATGM336H định vị có thiết kế nhỏ gọn sử dụng IC chính SoC GNSS AT6558 thế hệ thứ 4"
                                     />
                                 </div>
                             </div>
-                            <div class="col">
-                                <div class="col">
+                            <div className="col">
+                                <div className="col">
                                     <Product
                                         name="Module GPS+BDS ATGM336H"
                                         content="Module GPS BDS ATGM336H định vị có thiết kế nhỏ gọn sử dụng IC chính SoC GNSS AT6558 thế hệ thứ 4"
                                     />
                                 </div>
                             </div>
-                            <div class="col">
-                                <div class="col">
+                            <div className="col">
+                                <div className="col">
                                     <Product
                                         name="Module GPS+BDS ATGM336H"
                                         content="Module GPS BDS ATGM336H định vị có thiết kế nhỏ gọn sử dụng IC chính SoC GNSS AT6558 thế hệ thứ 4"
                                     />
                                 </div>
                             </div>
-                            <div class="col">
-                                <div class="col">
+                            <div className="col">
+                                <div className="col">
+                                    <Product
+                                        name="Module GPS+BDS ATGM336H"
+                                        content="Module GPS BDS ATGM336H định vị có thiết kế nhỏ gọn sử dụng IC chính SoC GNSS AT6558 thế hệ thứ 4"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="row mt-1">
+                            <div className="col">
+                                <div className="col">
+                                    <Product
+                                        name="Module GPS+BDS ATGM336H"
+                                        content="Module GPS BDS ATGM336H định vị có thiết kế nhỏ gọn sử dụng IC chính SoC GNSS AT6558 thế hệ thứ 4"
+                                    />
+                                </div>
+                            </div>
+                            <div className="col">
+                                <div className="col">
+                                    <Product
+                                        name="Module GPS+BDS ATGM336H"
+                                        content="Module GPS BDS ATGM336H định vị có thiết kế nhỏ gọn sử dụng IC chính SoC GNSS AT6558 thế hệ thứ 4"
+                                    />
+                                </div>
+                            </div>
+                            <div className="col">
+                                <div className="col">
+                                    <Product
+                                        name="Module GPS+BDS ATGM336H"
+                                        content="Module GPS BDS ATGM336H định vị có thiết kế nhỏ gọn sử dụng IC chính SoC GNSS AT6558 thế hệ thứ 4"
+                                    />
+                                </div>
+                            </div>
+                            <div className="col">
+                                <div className="col">
                                     <Product
                                         name="Module GPS+BDS ATGM336H"
                                         content="Module GPS BDS ATGM336H định vị có thiết kế nhỏ gọn sử dụng IC chính SoC GNSS AT6558 thế hệ thứ 4"
@@ -128,7 +128,7 @@ export default function Lesson() {
                         <nav aria-label="Page navigation example">
                             <ul className="pagination justify-content-center">
                                 <li className="page-item disabled">
-                                    <a href="/" className="page-link" tabindex="-1" aria-disabled="true">Previous</a>
+                                    <a href="/" className="page-link" tabIndex="-1" aria-disabled="true">Previous</a>
 
                                 </li>
                                 <li className="page-item"><a className="page-link" href="/">1</a></li>

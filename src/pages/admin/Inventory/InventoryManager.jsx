@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import InventoryModal from "./InventoryModal";
 import InventoryViewModal from "./InventoryViewModal";
+import { hasPermission } from "../../../utils/permission";
 
 const API_BASE = process.env.REACT_APP_API_URL;
 
@@ -10,43 +11,61 @@ export default function InventoryManager() {
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
     const [viewModal, setViewModal] = useState(false);
+    const [products, setProducts] = useState([]);
+    const [suppliers, setSuppliers] = useState([]);
 
     const [showModal, setShowModal] = useState(false);
     const [selectedReceipt, setSelectedReceipt] = useState(null);
 
     /* ======================= FETCH LIST ======================= */
-    const fetchList = async () => {
-        setLoading(true);
-
+    const fetchAllData = async () => {
         try {
-            const res = await axios.get(`${API_BASE}/inventory`);
-            const raw = Array.isArray(res.data) ? res.data : res.data?.data || [];
+            const [inventoryRes, productRes, supplierRes] = await Promise.all([
+                axios.get(`${API_BASE}/inventory`),
+                axios.get(`${API_BASE}/products`),
+                axios.get(`${API_BASE}/suppliers`)
+            ]);
 
-            const formatted = raw.map((r) => ({
-                receiptId: r.receiptId,
-                receiptCode: r.receiptCode,
-                receiptDate: r.receiptDate,
-                supplierId: r.supplierId,
-                referenceNo: r.referenceNo,
-                note: r.note,
-                totalAmount: r.totalAmount,
-                createdAt: r.createdAt,
-                updatedAt: r.updatedAt,
-                supplier: r.supplier || null,
-                items: r.items || []     // 👈 QUAN TRỌNG — Lấy items luôn
-            }));
+            // inventory
+            const raw = Array.isArray(inventoryRes.data)
+                ? inventoryRes.data
+                : inventoryRes.data?.data || [];
 
-            setList(formatted);
+            setList(
+                raw.map((r) => ({
+                    receiptId: r.receiptId,
+                    receiptCode: r.receiptCode,
+                    createdAt: r.createdAt,
+                    note: r.note,
+                    totalAmount: r.totalAmount,
+                    supplier: r.supplier || null,
+                    items: r.items || [],
+                }))
+            );
+
+            // products + variants
+            setProducts(
+                Array.isArray(productRes.data?.data)
+                    ? productRes.data.data
+                    : productRes.data || []
+            );
+
+            // suppliers
+            setSuppliers(
+                Array.isArray(supplierRes.data?.data)
+                    ? supplierRes.data.data
+                    : supplierRes.data || []
+            );
+
         } catch (err) {
-            console.error("Lỗi tải phiếu kho:", err);
-        } finally {
-            setLoading(false);
+            console.error("Lỗi tải dữ liệu:", err);
         }
     };
 
     useEffect(() => {
-        fetchList();
+        fetchAllData();
     }, []);
+
 
     /* ======================= SEARCH ========================= */
     const filteredList = useMemo(() => {
@@ -61,8 +80,33 @@ export default function InventoryManager() {
     }, [search, list]);
 
     /* ======================= OPEN MODAL ======================= */
-    const openModal = (item) => {
-        setSelectedReceipt(item || null);
+    const openModal = (receipt) => {
+        if (!receipt) {
+            setSelectedReceipt(null);
+            setShowModal(true);
+            return;
+        }
+
+        const normalized = {
+            receiptId: receipt.receiptId,
+            type: "import", // nếu BE chưa trả type
+            date: receipt.createdAt?.split("T")[0],
+            note: receipt.note || "",
+            supplierId: receipt.supplier?.supplierId || null,
+
+            items: receipt.items.map((i) => ({
+                productId: i.variant.product.productId,
+                productName: i.variant.product.productName,
+
+                variantId: i.variantId,
+                variantName: i.variant.variantName,
+
+                quantity: i.quantity,
+                unitCost: Number(i.unitCost),
+            })),
+        };
+
+        setSelectedReceipt(normalized);
         setShowModal(true);
     };
 
@@ -91,9 +135,14 @@ export default function InventoryManager() {
                 <div className="d-flex justify-content-between mb-4">
                     <h4 className="fw-bold">Quản lý phiếu nhập / xuất kho</h4>
 
-                    <button className="btn btn-primary" onClick={() => openModal(null)}>
-                        + Tạo phiếu mới
-                    </button>
+                    {hasPermission(["inventory.create"]) && (
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => openModal(null)}
+                        >
+                            + Tạo phiếu mới
+                        </button>
+                    )}
                 </div>
 
                 {/* SEARCH */}
@@ -139,18 +188,18 @@ export default function InventoryManager() {
                                     <tr key={r.receiptId}>
 
                                         {/* CLICK MÃ PHIẾU = XEM CHI TIẾT */}
-                                        <td>
-                                            <td>
-                                                <button
-                                                    className="btn btn-link p-0"
-                                                    onClick={() => openViewModal(r)}
-                                                    style={{ textDecoration: "underline" }}
-                                                >
-                                                    {r.receiptCode}
-                                                </button>
-                                            </td>
 
+                                        <td>
+                                            <button
+                                                className="btn btn-link p-0"
+                                                onClick={() => openViewModal(r)}
+                                                style={{ textDecoration: "underline" }}
+                                            >
+                                                {r.receiptCode}
+                                            </button>
                                         </td>
+
+
 
                                         {/* NCC */}
                                         <td>{r.supplier?.supplierName || "Kho nội bộ"}</td>
@@ -166,19 +215,24 @@ export default function InventoryManager() {
                                         <td>{r.note || ""}</td>
 
                                         <td className="text-center">
-                                            <button
-                                                className="btn btn-sm btn-outline-primary me-2"
-                                                onClick={() => openModal(r)}
-                                            >
-                                                Sửa
-                                            </button>
+                                            {hasPermission(["inventory.update"]) && (
+                                                <button
+                                                    className="btn btn-sm btn-outline-secondary me-2"
+                                                    onClick={() => openModal(r)}
+                                                >
+                                                    Sửa
+                                                </button>
+                                            )}
+                                            {hasPermission(["inventory.delete"]) && (
 
-                                            <button
-                                                className="btn btn-sm btn-outline-danger"
-                                                onClick={() => deleteItem(r.receiptId)}
-                                            >
-                                                Xoá
-                                            </button>
+
+                                                <button
+                                                    className="btn btn-sm btn-outline-danger"
+                                                    onClick={() => deleteItem(r.receiptId)}
+                                                >
+                                                    Xoá
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}
@@ -191,8 +245,10 @@ export default function InventoryManager() {
                     <InventoryModal
                         show={showModal}
                         onClose={() => setShowModal(false)}
-                        data={selectedReceipt}    // 👈 Lấy từ list, không gọi API
-                        onSaved={fetchList}
+                        data={selectedReceipt}
+                        products={products}
+                        suppliers={suppliers}
+                        onSaved={fetchAllData}
                     />
                 )}
                 {viewModal && (
