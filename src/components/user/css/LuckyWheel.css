@@ -1,0 +1,25 @@
+.wheel-wrapper {
+    position: relative;
+    width: 320px;
+    margin: auto;
+}
+
+.pointer {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    z-index: 10;
+}
+
+.wheel {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    border: 6px solid #f44336;
+    background: conic-gradient(#f44336 0deg 90deg,
+            #ff9800 90deg 180deg,
+            #4caf50 180deg 270deg,
+            #9e9e9e 270deg 360deg);
+}

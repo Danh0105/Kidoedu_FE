@@ -249,6 +249,7 @@ export default function ProductManagement() {
                                 <th className="align-middle">Tồn kho</th>
                                 <th className="align-middle">Danh mục</th>
                                 <th className="align-middle">Ngày tạo</th>
+                                <th className="align-middle">Người tạo</th>
                                 <th className="align-middle text-center">Actions</th>
                             </tr>
                         </thead>
@@ -339,6 +340,7 @@ export default function ProductManagement() {
                                                     "—"}
                                             </td>
                                             <td>{createdLabel}</td>
+                                            <td>{p.createdBy.username}</td>
                                             <td className="text-center">
                                                 {hasPermission(["product.update"]) && (
                                                     <button

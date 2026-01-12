@@ -72,7 +72,7 @@ const SidebarMenu = () => {
             )}
 
             {/* Chatbot */}
-            {hasPermission(["chatbot.read"]) && (
+            {hasPermission(["chatbot.create"]) && (
                 <MenuItem
                     to="/admin/chatbotscripts"
                     icon="nav-icon bi bi-robot"

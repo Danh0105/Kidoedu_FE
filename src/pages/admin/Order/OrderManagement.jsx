@@ -19,6 +19,13 @@ const buildOrderCode = (id) =>
 
 const getCustomerName = (o) =>
     o.user?.fullName || o.user?.username || "Khách lẻ";
+const ROW_STATUS_CLASS = {
+    Pending: "table-warning",
+    Confirmed: "table-info",
+    Shipping: "table-primary",
+    Completed: "table-success",
+    Cancelled: "table-danger",
+};
 
 /* ======================= Component ======================= */
 export default function OrderManager() {
@@ -29,6 +36,9 @@ export default function OrderManager() {
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(20);
     const [meta, setMeta] = useState({ totalItems: 0, totalPages: 0 });
+    const [statusFilter, setStatusFilter] = useState("");
+    const [paymentStatusFilter, setPaymentStatusFilter] = useState("");
+
     /* ======================= API ======================= */
     const fetchOrders = async () => {
         setLoading(true);
@@ -80,14 +90,26 @@ export default function OrderManager() {
     /* ======================= FILTER ======================= */
 
     const filteredOrders = useMemo(() => {
-        const key = q.trim().toLowerCase();
-        if (!key) return orders;
+        return orders.filter((o) => {
+            // Search
+            const key = q.trim().toLowerCase();
+            const matchSearch =
+                !key ||
+                buildOrderCode(o.orderId).toLowerCase().includes(key) ||
+                getCustomerName(o).toLowerCase().includes(key);
 
-        return orders.filter((o) =>
-            buildOrderCode(o.orderId).toLowerCase().includes(key) ||
-            getCustomerName(o).toLowerCase().includes(key)
-        );
-    }, [q, orders]);
+            // Status
+            const matchStatus =
+                !statusFilter || o.status === statusFilter;
+
+            // Payment Status
+            const matchPaymentStatus =
+                !paymentStatusFilter || o.paymentStatus === paymentStatusFilter;
+
+            return matchSearch && matchStatus && matchPaymentStatus;
+        });
+    }, [orders, q, statusFilter, paymentStatusFilter]);
+
 
     /* ======================= Order Detail ======================= */
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -163,18 +185,62 @@ export default function OrderManager() {
                     >
                         + Tạo đơn hàng
                     </button>
-                    <input
-                        className="form-control"
-                        style={{ width: 260 }}
-                        placeholder="Tìm kiếm đơn hàng"
-                        value={q}
-                        onChange={(e) => setQ(e.target.value)}
-                    />
+
+                    <div className="d-flex gap-2 align-items-center">
+                        <input
+                            className="form-control"
+                            style={{ width: 260 }}
+                            placeholder="Tìm kiếm đơn hàng"
+                            value={q}
+                            onChange={(e) => setQ(e.target.value)}
+                        />
+
+                        <select
+                            className="form-select"
+                            style={{ width: 180 }}
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                        >
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="Shipping">Shipping</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+
+                        <select
+                            className="form-select"
+                            style={{ width: 200 }}
+                            value={paymentStatusFilter}
+                            onChange={(e) => setPaymentStatusFilter(e.target.value)}
+                        >
+                            <option value="">Tất cả thanh toán</option>
+                            <option value="Pending">Chờ thanh toán</option>
+                            <option value="Paid">Đã thanh toán</option>
+                            <option value="Failed">Thất bại</option>
+                            <option value="Cancelled">Đã hủy</option>
+                            <option value="Expired">Hết hạn</option>
+                        </select>
+                        <button
+                            className="btn btn-outline-secondary"
+                            onClick={() => {
+                                setQ("");
+                                setStatusFilter("");
+                                setPaymentStatusFilter("");
+                            }}
+                        >
+                            Reset
+                        </button>
+
+                    </div>
+
                 </div>
 
                 {/* Table */}
                 <div className="table-responsive">
                     <nav aria-label="Page navigation example">
+
                         <ul className="pagination justify-content-end">
 
                             {/* Previous */}
@@ -252,7 +318,11 @@ export default function OrderManager() {
 
                             {!loading &&
                                 filteredOrders.map((o) => (
-                                    <tr key={o.orderId}>
+                                    <tr
+                                        key={o.orderId}
+                                        className={ROW_STATUS_CLASS[o.status] || ""}
+                                    >
+
                                         <td>
                                             <button
                                                 className="btn btn-link p-0 fw-semibold"

@@ -39,8 +39,9 @@ const PLACEHOLDER_IMG = "https://placehold.co/600x600?text=No+Image";
 export default function Checkout() {
   const navigate = useNavigate();
   const { selectedProducts } = useContext(CartContext);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [pendingOrder, setPendingOrder] = useState(false);
 
-  // STATE
   const [products, setProducts] = useState([]);
   const [shippingInfo, setShippingInfo] = useState(null);
   const [showModalPayment, setShowModalPayment] = useState(false);
@@ -123,7 +124,7 @@ export default function Checkout() {
   const handleSubmit = async () => {
     try {
       const payload = buildOrderPayload('cod');
-
+      console.log("payload", payload)
       const res = await axios.post(
         `${payload.url}`,
         payload.payload
@@ -201,16 +202,14 @@ export default function Checkout() {
       alert("Lỗi thanh toán VNPay");
     }
   };
-  // 💳 Thanh toán VietQR
   const handleBankPayment = async () => {
     try {
       const payload = buildOrderPayload("vietqr");
 
-      // 1️⃣ Tạo order
       const orderRes = await axios.post(payload.url, payload.payload);
       const order = orderRes.data.order ?? orderRes.data;
 
-      // 2️⃣ Gọi backend NestJS sinh VietQR
+
       const qrRes = await axios.post(
         `${process.env.REACT_APP_API_URL}/vietqr/generate`,
         {
@@ -263,7 +262,21 @@ export default function Checkout() {
     setOpt(methods[selectedMethod]);
   };
 
-  // 🧱 RENDER
+  const handlePlaceOrder = () => {
+    if (!shippingInfo) {
+      setPendingOrder(true);
+      setShowAddressModal(true);
+      return;
+    }
+
+
+    // ✅ Đã có địa chỉ → xử lý theo phương thức thanh toán
+    if (method === "momo") return handleMomoPayment();
+    if (method === "vnpay") return handleVnpayPayment();
+    if (method === "bank") return handleBankPayment();
+    return handleSubmit(); // COD
+  };
+
   return (
     <div className="checkout-page">
       {/* ========== Thông tin giao hàng ========== */}
@@ -306,13 +319,34 @@ export default function Checkout() {
               )}
               <a
                 href="#"
-                className="text-primary text-decoration-none"
-                data-bs-toggle="modal"
-                data-bs-target="#staticBackdrop"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowAddressModal(true);
+                }}
+                className="text-decoration-none"
               >
                 Thay đổi
               </a>
-              <ModalInfo onUpdate={setShippingInfo} />
+
+              {showAddressModal && (
+                <ModalInfo
+                  onUpdate={(addr) => {
+                    setShippingInfo(addr);
+                    setShowAddressModal(false);
+
+                    if (pendingOrder) {
+                      setPendingOrder(false);
+                      setTimeout(handlePlaceOrder, 0);
+                    }
+                  }}
+                  onClose={() => setShowAddressModal(false)}
+                />
+              )}
+
+
+
+
+
             </div>
           </div>
         ) : (
@@ -321,12 +355,30 @@ export default function Checkout() {
             <a
               href="#"
               className="text-primary text-decoration-none"
-              data-bs-toggle="modal"
-              data-bs-target="#staticBackdrop"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowAddressModal(true);
+              }}
             >
               Thêm ngay
             </a>
-            <ModalInfo onUpdate={setShippingInfo} />
+            {showAddressModal && (
+              <ModalInfo
+                onUpdate={(addr) => {
+                  setShippingInfo(addr);
+                  setShowAddressModal(false);
+
+                  if (pendingOrder) {
+                    setPendingOrder(false);
+                    setTimeout(handlePlaceOrder, 0);
+                  }
+                }}
+                onClose={() => setShowAddressModal(false)}
+              />
+            )}
+
+
+
           </div>
         )}
       </div>
@@ -461,12 +513,17 @@ export default function Checkout() {
             <img src={opt.icon} alt={opt.label} width={36} height={36} className="me-0 me-sm-2" />
             <span className="fw-semibold me-2">{opt.label}</span>
             <a
+              className="text-decoration-none"
               href="#"
-              className="text-primary fw-bold"
-              onClick={() => setShowModalPayment(true)}
+              onClick={(e) => {
+                e.preventDefault();
+                setShowModalPayment(true);
+
+              }}
             >
               Thay đổi
             </a>
+
             <ModalPayment
               show={showModalPayment}
               onClose={() => setShowModalPayment(false)}
@@ -499,16 +556,11 @@ export default function Checkout() {
           </small>
           <button
             className="btn btn-danger px-4 w-sm-auto"
-            onClick={() => {
-              if (method === "momo") return handleMomoPayment();
-              if (method === "vnpay") return handleVnpayPayment();
-              if (method === "bank") return handleBankPayment();
-              return handleSubmit(); // COD
-            }}
-
+            onClick={handlePlaceOrder}
           >
             Đặt hàng
           </button>
+
         </div>
       </div>
     </div>
