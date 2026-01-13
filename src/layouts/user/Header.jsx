@@ -102,12 +102,11 @@ export default function Header() {
             <div className='d-flex w-100 justify-content-center' >
                 <BannerBox label="B — Main Slider" className="top-promo" />
             </div>
-            <div className={`sticky-lg-top ${scrolled ? 'bg-menu2 shadow-sm' : 'bg-menu1'}`}>
+            <div className={`sticky-lg-top ${scrolled ? 'bg-menu2 shadow-sm pt-2' : 'bg-menu1'}`}>
 
-                <header className="container d-flex justify-content-between align-items-center py-0 gap-3 pt-2 mb-2">
+                <header className="container d-flex justify-content-between align-items-center py-0 gap-3  mb-2">
                     {/* Left: Logo + Menu */}
                     <div className="navbar-nav d-flex flex-row gap-3 justify-content-between align-items-center w-100 w-lg-auto">
-
                         <div className="logo-wrap">
                             <div className="white-motion"></div>
                             <Link to="/" className="d-inline-block">
@@ -117,9 +116,9 @@ export default function Header() {
                                     className="img-fluid logo-img"
                                     style={{ width: 'clamp(72px, 10vw, 90px)', height: 'auto' }}
                                 />
-
                             </Link>
                         </div>
+
                         {/* Nav (giữ nguyên cấu trúc) */}
                         <nav
 /*                             className={`navbar navbar-expand-lg sticky-lg-top ${scrolled ? 'bg-menu2' : ''} flex-grow-1`}
@@ -135,7 +134,7 @@ export default function Header() {
 
                                 {/* Desktop: menu bình thường */}
                                 <div className="collapse navbar-collapse show d-none d-lg-block" id="navbarsExample09">
-                                    <ul className="navbar-nav me-auto mb-2 mb-lg-0 p-2 header-menu-scroll">
+                                    <ul className="navbar-nav me-auto mb-lg-0 p-2 header-menu-scroll">
                                         <Menu />
                                     </ul>
                                 </div>

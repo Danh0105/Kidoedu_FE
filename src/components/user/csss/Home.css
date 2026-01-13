@@ -83,3 +83,88 @@
     opacity: 1;
     transform: translateY(0) scale(1);
 }
+
+.bg-product-new {
+    position: relative;
+    background-image: url('https://png.pngtree.com/background/20221123/original/pngtree-vietnamese-new-year-tet-2023-background-watermelon-auspicious-festival-picture-image_1964934.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 48px 0;
+    overflow: hidden;
+    border-top-left-radius: 110px;
+    border-top-right-radius: 110px;
+}
+
+.bg-product-new::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 245, 220, 0.88);
+    z-index: 0;
+}
+
+.bg-product-new>* {
+    position: relative;
+    z-index: 1;
+}
+
+
+.bg-product-featured {
+    position: relative;
+    background-image: url('https://cdn.sforum.vn/sforum/wp-content/uploads/2022/12/hinh-nen-powerpoint-tet-6-4.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    padding: 48px 0 56px;
+    border-top-left-radius: 110px;
+    border-top-right-radius: 110px;
+
+    overflow: hidden;
+}
+
+.bg-product-featured::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 245, 220, 0.9);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.bg-product-featured::after {
+    content: "";
+    position: absolute;
+    top: -36px;
+    left: -10%;
+    right: -10%;
+    height: 72px;
+
+    background: radial-gradient(ellipse at top,
+            rgba(255, 220, 150, 0.55),
+            transparent 70%);
+
+    filter: blur(10px);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.bg-product-featured>* {
+    position: relative;
+    z-index: 1;
+}
+
+.bg-img-np {
+    background-image: url('../../../assets/user/new-product.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    min-height: 96px;
+    padding: 16px 32px;
+    display: inline-block;
+}
+
+.lig {
+    max-height: 120px;
+}

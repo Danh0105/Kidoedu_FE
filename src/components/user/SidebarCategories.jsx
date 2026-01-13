@@ -7,7 +7,8 @@ import React, {
 } from "react";
 import { Search, X, ChevronDown, Check, Layers } from "lucide-react";
 import "../../styles/user/SidebarCategories.css";
-
+import framecateL from '../../assets/user/framecatL.png';
+import framecateR from '../../assets/user/framecatR.png';
 /* --------------------- NORMALIZE CATEGORY --------------------- */
 const normalizeNode = (node) => ({
   id: node.categoryId ?? node.category_id ?? node.id,
@@ -98,7 +99,12 @@ export default function SidebarCategories({
           </div>
         )}
       </div>
-
+      <div className="framecateL">
+        <img src={framecateL} alt="" className="imageL" />
+      </div>
+      <div className="framecateR">
+        <img src={framecateR} alt="" className="imageR  " />
+      </div>
       {!filtered.length ? (
         <div className="empty-state">Không tìm thấy danh mục nào</div>
       ) : (

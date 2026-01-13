@@ -24,11 +24,37 @@
 
 .bg-menu1 {
   position: relative;
-  background: url("https://oenix.vn/wp-content/uploads/2021/12/PHONG-NEN-GIANG-SINH-scaled.jpg") center / cover no-repeat;
+  background: url("https://ichiskill.com/assets/images/bg-vsc_02.png") center / cover no-repeat;
   /* Cho menu lên trên overlay */
   z-index: 0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
+.bg-menu1::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom,
+      rgba(231, 231, 231, 0.25),
+      rgba(219, 216, 216, 0.05));
+  z-index: 1;
+  pointer-events: none;
+}
+
+.bg-menu1>* {
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 768px) {
+  .bg-menu1::before {
+    height: 60px;
+    top: -20px;
+    opacity: 0.75;
+  }
+}
 
 
 .bg-menu1>* {

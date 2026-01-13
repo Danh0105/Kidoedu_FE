@@ -23,6 +23,31 @@
     position: relative;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
+
+
+}
+
+.framecateL {
+    position: absolute;
+    transform: translateY(-50%);
+    margin-top: 30px;
+    margin-left: -16px;
+}
+
+.imageL {
+    max-height: 129px;
+    z-index: 0;
+}
+
+.framecateR {
+    position: absolute;
+    transform: translateY(-50%);
+    right: -7px;
+    top: 44px;
+}
+
+.imageR {
+    max-height: 260px;
 }
 
 /* --- 1. Top Bar (Search) --- */
@@ -82,6 +107,7 @@
 .active-filter-badge {
     display: inline-flex;
     align-items: center;
+    z-index: 1;
     gap: 8px;
     padding: 6px 12px;
     background: var(--primary-light);

@@ -12,7 +12,7 @@ const trimText = (s = "", max = 50) =>
   s.length > max ? s.slice(0, max) + "..." : s;
 
 export default function ProductHome({ prod }) {
-
+  console.log(prod)
 
   // Skeleton khi chưa có prod (không đổi UX: vẫn là card)
   if (!prod) {
@@ -32,18 +32,15 @@ export default function ProductHome({ prod }) {
 
   const id = prod.productId;
   const name = prod.productName ?? "";
-  const desc = prod.shortDescription ?? "";
-  const price = prod.price ?? 0;
-  const firstImage =
-    prod?.images?.[0]?.image_url      // trường hợp API detail trả mảng images
-    || prod?.image_url                // trường hợp API list/search trả image_url
-    || PLACEHOLDER_IMG;
+  const basePrice = prod.basePrice;
+  const promoPrice = prod.promoPrice;
+  const firstImage = prod.imageUrl;
 
   return (
     <div className="card nav-link mb-2 p-2">
       <Link to={`/productdetail/${id}`} className="nav-link p-0">
         <img
-          src={firstImage}
+          src={`${process.env.REACT_APP_API_URL}${firstImage}`}
           alt={name || "product"}
           className="card-img-top object-fit-contain"
           onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMG; }}
@@ -56,6 +53,23 @@ export default function ProductHome({ prod }) {
             {trimText(name, 35)}
           </Link>
         </h5>
+        <div className="d-flex flex-column align-items-center">
+          {promoPrice ? (
+            <>
+              <span className="text-muted text-decoration-line-through small">
+                {formatCurrency(basePrice)}
+              </span>
+              <span className="fs-5 fw-bold text-danger">
+                {formatCurrency(promoPrice)}
+              </span>
+            </>
+          ) : (
+            <span className="fs-5 fw-bold text-danger">
+              {formatCurrency(basePrice)}
+            </span>
+          )}
+        </div>
+
       </div>
     </div>
   );

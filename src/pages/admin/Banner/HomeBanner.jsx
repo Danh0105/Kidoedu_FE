@@ -77,7 +77,7 @@ export default function HomeBanner() {
     return (
         <div
             className="layout-page "
-            /*     onClick={() => openUploadFor()} */
+
             style={{
                 backgroundImage: `url("${API}${backgroundBanner?.imageUrl}")`,
                 backgroundSize: "cover",
@@ -87,6 +87,7 @@ export default function HomeBanner() {
                 transition: "0.3s",
             }}
         >
+
             {/* Input upload ảnh */}
             <input
                 type="file"
@@ -317,6 +318,7 @@ export default function HomeBanner() {
                     </div>
                 </article>
             </div>
-        </div>
+            <button onClick={() => openUploadFor(9)} >cập nhật ảnh body </button>
+        </div >
     );
 }

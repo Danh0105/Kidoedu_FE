@@ -1,0 +1,42 @@
+/* Backdrop */
+.vietqr-backdrop {
+    background: rgba(0, 0, 0, 0.45);
+}
+
+/* Modal box */
+.vietqr-bank-modal {
+    border-radius: 16px;
+    padding: 12px;
+}
+
+/* VietQR logo */
+.vietqr-logo {
+    height: 36px;
+}
+
+/* QR wrapper */
+.vietqr-qr-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+/* Bank row */
+.vietqr-bank-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Name */
+.vietqr-name {
+    font-weight: 700;
+    font-size: 16px;
+    margin-top: 8px;
+}
+
+/* Account */
+.vietqr-account {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 8px;
+}

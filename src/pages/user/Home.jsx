@@ -16,6 +16,9 @@ import { fetchAllProductsApi } from "../../services/Product";
 import useInViewOnce from "../../hooks/useInViewOnce";
 import { useRef } from "react";
 import AnimateCard from "../../components/user/AnimateCard";
+import light from "../../assets/user/lightdecor.png"
+import light1 from "../../assets/user/lightdecor1.png"
+
 // ======================= Helpers =======================
 const pickRibbonsFromStatus = (raw) => {
     const s = Number(raw ?? 0);
@@ -92,7 +95,6 @@ function pickPricesFromVariant(variant) {
 }
 
 // ======================= Component =======================
-const PLACEHOLDER_IMG = "https://placehold.co/120x120?text=No+Image";
 
 export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     // ---- State
@@ -402,7 +404,6 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
                                         <ProductHome
                                             prod={prod}
-                                            onBuy={() => handleBuy(prod.productId)}
                                         />
                                     </AnimateCard>
                                 );
@@ -468,20 +469,31 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                 />
 
                 {/* Sản phẩm mới */}
-                <section className="my-5" ref={newSectionRef}>
-                    <div className="text-center mb-4">
-                        <h2 className="fw-bold" style={{ fontSize: "2rem" }}>
-                            🆕 Sản phẩm mới
-                        </h2>
-                        <div
-                            style={{
-                                height: 3,
-                                width: 80,
-                                backgroundColor: "hsl(0,75%,60%)",
-                                margin: "10px auto",
-                                borderRadius: 3,
-                            }}
-                        />
+                <section className="my-5 bg-product-new p-2 " ref={newSectionRef}>
+                    <div className="d-flex justify-content-between">
+                        <div>
+                            <img className="lig" src={light} alt="Đèn lồng ngày tết" />
+                        </div>
+                        <div>
+                            <div className="bg-img-np">
+                                <h2 className="fw-bold " style={{ fontSize: "2rem" }}>
+                                    🆕 Sản phẩm mới
+                                </h2>
+                            </div>
+
+                            <div
+                                style={{
+                                    height: 3,
+                                    width: 80,
+                                    backgroundColor: "hsl(0,75%,60%)",
+                                    margin: "10px auto",
+                                    borderRadius: 3,
+                                }}
+                            />
+                        </div>
+                        <div>
+                            <img className="lig" src={light} alt="Đèn lồng ngày tết" />
+                        </div>
                     </div>
                     <div className="row justify-content-center">
                         {showNewSection ? (
@@ -522,20 +534,32 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                 </section>
 
                 {/* Sản phẩm nổi bật */}
-                <section className="my-5" ref={featuredSectionRef}>
-                    <div className="text-center mb-4">
-                        <h2 className="fw-bold" style={{ fontSize: "2rem" }}>
-                            ⭐ Sản phẩm nổi bật
-                        </h2>
-                        <div
-                            style={{
-                                height: 3,
-                                width: 80,
-                                backgroundColor: "hsl(0,75%,60%)",
-                                margin: "10px auto",
-                                borderRadius: 3,
-                            }}
-                        />
+                <section className="my-5 bg-product-featured p-2" ref={featuredSectionRef}>
+
+                    <div className="d-flex justify-content-between">
+                        <div>
+                            <img className="lig" src={light1} alt="Đèn lồng ngày tết" />
+                        </div>
+                        <div>
+                            <div className="bg-img-np">
+                                <h2 className="fw-bold " style={{ fontSize: "2rem" }}>
+                                    ⭐ Sản phẩm nổi bật
+                                </h2>
+                            </div>
+
+                            <div
+                                style={{
+                                    height: 3,
+                                    width: 80,
+                                    backgroundColor: "hsl(0,75%,60%)",
+                                    margin: "10px auto",
+                                    borderRadius: 3,
+                                }}
+                            />
+                        </div>
+                        <div>
+                            <img className="lig" src={light1} alt="Đèn lồng ngày tết" />
+                        </div>
                     </div>
                     <div className="row justify-content-center">
                         {showFeaturedSection ? (
@@ -591,8 +615,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 function ProductCard({ p, banners }) {
     const ribbons = (pickRibbonsFromStatus?.(p?.status) || []).slice(0, 3);
     const imgSrc = p.images?.find(img => img.isPrimary)?.imageUrl ??
-        p.images?.[0]?.imageUrl ??
-        PLACEHOLDER_IMG;
+        p.images?.[0]?.imageUrl
 
     // Tóm tắt giá từ variants nếu có
     const {
