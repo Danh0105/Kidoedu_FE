@@ -340,7 +340,7 @@ export default function ProductManagement() {
                                                     "—"}
                                             </td>
                                             <td>{createdLabel}</td>
-                                            <td>{p.createdBy.username}</td>
+                                            <td>{p?.createdBy?.username}</td>
                                             <td className="text-center">
                                                 {hasPermission(["product.update"]) && (
                                                     <button

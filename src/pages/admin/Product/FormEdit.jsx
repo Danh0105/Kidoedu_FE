@@ -14,6 +14,19 @@ const STATUS_OPTIONS_BITMASK = [
     { label: "Nổi bật", val: 2, color: "success" },
     { label: "Hiển thị", val: 4, color: "danger" },
 ];
+function base64ToFile(base64, filename) {
+    const arr = base64.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+
+    while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+
+    return new File([u8arr], filename, { type: mime });
+}
 
 // ================= MODAL COMPONENT =================
 export default function ModalEditProduct({ product, onUpdated, isOpen, onClosed }) {
@@ -118,6 +131,21 @@ export default function ModalEditProduct({ product, onUpdated, isOpen, onClosed 
             formData.append("images", JSON.stringify(oldProductImages));
         }
 
+        form.images.forEach((img, index) => {
+            // Ảnh mới từ base64
+            if (!img.file && img.src?.startsWith("data:image")) {
+                const file = base64ToFile(
+                    img.src,
+                    `product_${Date.now()}_${index}.png`
+                );
+                formData.append("newImages", file);
+            }
+
+            // Ảnh mới từ input file
+            if (img.file instanceof File) {
+                formData.append("newImages", img.file);
+            }
+        });
 
         form.images
             .filter(img => img.file instanceof File)
@@ -150,6 +178,13 @@ export default function ModalEditProduct({ product, onUpdated, isOpen, onClosed 
             };
         });
         formData.append("variants", JSON.stringify(processedVariants));
+        console.log(
+            form.images.map(img => ({
+                hasFile: img.file instanceof File,
+                isPrimary: img.isPrimary,
+                src: img.src?.slice(0, 30)
+            }))
+        );
 
 
         // === GỌI API ===
@@ -164,9 +199,9 @@ export default function ModalEditProduct({ product, onUpdated, isOpen, onClosed 
 
             onUpdated(res.data.data);
             alert("Cập nhật thành công!");
-
-            const modalEl = document.getElementById("btnCloseModalEdit");
-            modalEl.click();
+            /* 
+                        const modalEl = document.getElementById("btnCloseModalEdit");
+                        modalEl.click(); */
 
         } catch (err) {
             alert("Lỗi: " + (err.response?.data?.message || err.message));
@@ -301,9 +336,10 @@ export default function ModalEditProduct({ product, onUpdated, isOpen, onClosed 
 
                     <div className="modal-footer">
                         <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="button" className="btn btn-primary" disabled={isLoading} onClick={handleSubmit}>
+                        {/*  <button type="button" className="btn btn-primary" disabled={isLoading} onClick={handleSubmit}>
                             {isLoading ? "Đang lưu..." : "Lưu thay đổi"}
-                        </button>
+                        </button> */}
+                        <button type="button" className="btn btn-primary" onClick={handleSubmit}>Lưu thay đổi</button>
                     </div>
                 </div>
             </div>
