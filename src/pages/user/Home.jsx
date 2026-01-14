@@ -242,7 +242,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     // ======================= UI bits =======================
     const SkeletonCard = () => (
         <div
-            className="card border-0 shadow-sm rounded-4 overflow-hidden p-2 placeholder-glow"
+            className="card border-0 shadow-sm rounded-4 overflow-hidden p-2"
             style={{ maxWidth: 300 }}
         >
             <div

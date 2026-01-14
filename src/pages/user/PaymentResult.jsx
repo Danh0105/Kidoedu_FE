@@ -34,7 +34,7 @@ export default function PaymentResult() {
                     setTimeout(() => {
                         clearInterval(timer);
                         navigate("/invoice", { state: { order: res.data } });
-                    }, 3000);
+                    }, 100000);
                 })
                 .catch(() => {
                     setStatus("error");
