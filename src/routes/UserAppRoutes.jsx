@@ -30,7 +30,6 @@ import ContactFeedbackPage from "../pages/user/customerSupport/ContactFeedbackPa
 import ComplaintHandlingPolicyPage from "../pages/user/policy/ComplaintHandlingPolicyPage";
 import MaintenancePolicyPage from "../pages/user/policy/MaintenancePolicyPage";
 import PaymentPolicyPage from "../pages/user/PoliciesandRegulations/PaymentPolicyPage";
-import VTKC from "../pages/user/VTKC";
 
 import ReturnPolicyPage from "../pages/user/policy/ReturnPolicyPage";
 import ShippingPolicyPage from "../pages/user/PoliciesandRegulations/ShippingPolicyPage";

@@ -1,4 +1,4 @@
-.product-frame {
+bg-img-npbg-img-np.product-frame {
     position: relative;
     width: 100%;
     aspect-ratio: 1 / 1;
@@ -156,7 +156,8 @@
 }
 
 .bg-img-np {
-    background-image: url('../../../assets/user/new-product.png');
+    /*     background-image: url('../../../assets/user/new-product.png');
+ */
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
@@ -167,4 +168,8 @@
 
 .lig {
     max-height: 120px;
+}
+
+.image-sale {
+    max-width: 1110px;
 }
