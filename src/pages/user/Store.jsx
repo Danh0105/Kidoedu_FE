@@ -43,6 +43,8 @@ function ProductSkeleton() {
     );
 }
 
+
+
 export default function Store({
     apiBase = process.env.REACT_APP_API_URL,
     pageSizeOptions = [6, 12, 24, 48],
@@ -431,8 +433,19 @@ export default function Store({
 
                         {!loading && filteredItems.length > 0 && filteredItems.map((prod) => (
                             <div key={prod.productId} className="col">
-                                <div className="product-card">
+                                {/* <div className="product-card">
                                     <Product prod={prod} status={prod?.status} />
+                                </div> */}
+                                <div
+                                    className="product-card d-flex"
+                                    style={{
+                                        minHeight: window.innerWidth < 576 ? 520 : "auto",
+                                        overflow: "visible"
+                                    }}
+                                >
+                                    <div className="w-100 d-flex flex-column">
+                                        <Product prod={prod} status={prod?.status} />
+                                    </div>
                                 </div>
                             </div>
                         ))}

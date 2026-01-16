@@ -143,9 +143,18 @@ export default function Product({ prod }) {
             <AnimateCard scrollRootRef={scrollRef} className="col position-relative">
                 <div
                     className="card nav-link p-2 position-relative shadow-sm border-0 rounded-4"
-                    style={{ width: "100%", overflow: "hidden" }}
+                    style={{ width: "100%", overflow: "hidden", height: "500px" }}
                     onMouseLeave={() => setHovered(false)}
                 >
+                    {/* <div
+                    className="card nav-link p-2 position-relative shadow-sm border-0 rounded-4 d-flex flex-column"
+                    style={{
+                        width: "100%",
+                        minHeight: window.innerWidth < 576 ? 560 : "auto",
+                        overflow: "hidden"
+                    }}
+                    onMouseLeave={() => setHovered(false)}
+                > */}
                     {/* Ribbon góc */}
                     {ribbon.map((rb, i) => (
                         <span
@@ -196,17 +205,21 @@ export default function Product({ prod }) {
                         className="d-flex gap-2 justify-content-center"
                         style={{
                             position: "absolute",
+                            
+                            top: 420,
                             left: 8,
                             right: 8,
-                            bottom: hovered ? 220 : -48,
+                            marginTop: 12,              
+                            bottom: "auto",             
                             background: "rgba(255,255,255,.92)",
                             backdropFilter: "blur(4px)",
                             borderRadius: 12,
                             padding: 8,
                             boxShadow: "0 6px 18px rgba(0,0,0,.12)",
-                            transition: "bottom .25s ease",
-                            zIndex: 2,
+                            transition: "top .25s ease",
+                            zIndex: 9999,
                         }}
+
                     >
                         <button className="btn btn-sm btn-outline-secondary">Xem nhanh</button>
                         <button className="btn btn-sm btn-outline-secondary">So sánh</button>
@@ -256,7 +269,7 @@ export default function Product({ prod }) {
 
                         <div className="d-flex justify-content-between gap-2">
                             <button onClick={handleAddToCart} className="btn btn-danger">
-                                Thêm vào giỏ
+                                Thêm vào giỏ hàng
                             </button>
                             <button onClick={handleBuy} className="btn btn-primary">
                                 Mua ngay
@@ -282,7 +295,6 @@ export default function Product({ prod }) {
                                 }}
                             />
                         </div>
-
 
                     </div>
                 </div>
