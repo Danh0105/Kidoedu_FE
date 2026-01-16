@@ -196,6 +196,7 @@ export default function Product({ prod }) {
                         className="d-flex gap-2 justify-content-center"
                         style={{
                             position: "absolute",
+                            
                             left: 8,
                             right: 8,
                             bottom: hovered ? 220 : -48,
