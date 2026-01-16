@@ -30,7 +30,7 @@ export default function Product({ prod }) {
     const ribbon = pickRibbonFromStatus(status);
     const { ref, visible } = useAppearOnScroll();
     const scrollRef = useRef(null);
-
+    console.log("prod", prod)
     const firstImage =
         prod?.images?.find(img => img.isPrimary)?.imageUrl ||
         prod?.imageUrl;
