@@ -1,15 +1,13 @@
 import { ChevronRight, Cpu, Layers } from "lucide-react";
 
-// const SubcategoryPanel = (rootCats, hoverCatId, childrenOfHover, setSelectedCatId, setShowHoverPanel, setHoverCatId) => {
 const SubcategoryPanel = ({
-    rootCats,
+    rootCats = [],
     hoverCatId,
-    childrenOfHover,
+    childrenOfHover = [],
     setSelectedCatId,
     setShowHoverPanel,
     setHoverCatId,
 }) => {
-   // console.log("Rendering SubcategoryPanel", { rootCats });
     const title =
         rootCats.find((r) => String(r._id) === String(hoverCatId))?._name ||
         "Danh mục";

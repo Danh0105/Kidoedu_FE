@@ -16,8 +16,6 @@ export default class Layout extends Component {
                 <Sidebar />
                 <Content />
                 <Footer />
-
-
             </div></div>
         )
     }
