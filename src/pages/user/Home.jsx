@@ -22,6 +22,7 @@ import sale from '../../assets/user/bannersale.png'
 import ProductCard from '../../components/user/HomePage/ProductCard'
 import CategorySidebar from "../../components/user/HomePage/CategorySidebar";
 import ContentArea from "../../components/user/HomePage/ContentArea"
+import ProductSlider from "../../components/user/HomePage/ProductSlider";
 // ======================= Helpers =======================
 
 
@@ -283,6 +284,12 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                         },
                     ]}
                 />
+            
+                {/* Slider danh mục / sản phẩm ngang */}
+                <section className="my-4">
+                <ProductSlider />
+                </section>
+
                 {/* Sản phẩm sale */}
                 <div className="d-flex justify-content-center">
                     <img src={sale} alt="" className="image-sale" />

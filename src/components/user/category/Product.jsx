@@ -143,7 +143,7 @@ export default function Product({ prod }) {
             <AnimateCard scrollRootRef={scrollRef} className="col position-relative">
                 <div
                     className="card nav-link p-2 position-relative shadow-sm border-0 rounded-4"
-                    style={{ width: "100%", overflow: "hidden" }}
+                    style={{ width: "100%", overflow: "hidden", height: 550 }}
                     onMouseLeave={() => setHovered(false)}
                 >
                     {/* Ribbon góc */}
@@ -170,6 +170,7 @@ export default function Product({ prod }) {
                     <Link to={`/productdetail/${id}`} className="nav-link p-0">
                         <div
                             className="product-image-wrapper"
+                            style={{ height: 230 }}
                             onMouseEnter={() => setHovered(true)}
                         >
                             <img
@@ -179,14 +180,18 @@ export default function Product({ prod }) {
                                 onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
                             />
 
+                            
+
                             {/* Badge nhỏ phía dưới ảnh (tuỳ bạn) */}
                             <img
                                 height={22}
                                 className="product-small-badge"
                                 src={process.env.REACT_APP_API_URL + banners.imageUrl}
                                 alt=""
+                                
                             />
                         </div>
+
                     </Link>
 
 
@@ -196,17 +201,18 @@ export default function Product({ prod }) {
                         className="d-flex gap-2 justify-content-center"
                         style={{
                             position: "absolute",
-                            
                             left: 8,
+                            top: 460,
                             right: 8,
-                            bottom: hovered ? 220 : -48,
+                            marginTop: 12,
+                            bottom: "auto",
                             background: "rgba(255,255,255,.92)",
                             backdropFilter: "blur(4px)",
                             borderRadius: 12,
                             padding: 8,
                             boxShadow: "0 6px 18px rgba(0,0,0,.12)",
-                            transition: "bottom .25s ease",
-                            zIndex: 2,
+                            transition: "top .25s ease",
+                            zIndex: 9999,
                         }}
                     >
                         <button className="btn btn-sm btn-outline-secondary">Xem nhanh</button>
