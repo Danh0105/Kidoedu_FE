@@ -67,10 +67,41 @@ export default function FeaturedProducts({ apiBase = process.env.REACT_APP_API_U
       </div>
 
       {/* Loading / Error */}
-      {loading && <p className="text-center text-secondary">⏳ Đang tải...</p>}
+      {/* {loading && <p className="text-center text-secondary">⏳ Đang tải...</p>} */}
       {err && <p className="text-center text-danger">{err}</p>}
 
       <div className="row g-4 justify-content-center">
+        {/* placeholder */}
+        {loading &&
+          Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="col-xl-3 col-lg-4 col-md-6 col-sm-12 d-flex justify-content-center"
+            >
+              <div
+                className="card border-0 shadow-sm rounded-4 overflow-hidden h-100 w-100"
+                style={{ maxWidth: "300px" }}
+                aria-hidden="true"
+              >
+                {/* Image placeholder */}
+                <div
+                  className="placeholder-glow"
+                  style={{ height: "220px", background: "#f8f9fa" }}
+                >
+                  <span className="placeholder col-12 h-100"></span>
+                </div>
+
+                {/* Body placeholder */}
+                <div className="card-body text-center placeholder-glow">
+                  <h6 className="placeholder col-8 mb-2"></h6>
+                  <p className="placeholder col-6 mb-3"></p>
+                  <span className="btn btn-outline-primary disabled placeholder col-6 rounded-pill"></span>
+                </div>
+              </div>
+            </div>
+          ))}        
+        
+        {/* end */}
         {!loading && products.length === 0 && (
           <div className="col-12 text-center text-muted">Chưa có sản phẩm nổi bật nào.</div>
         )}

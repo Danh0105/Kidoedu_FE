@@ -8,7 +8,7 @@ export default function Quotation({ apiBase = `${process.env.REACT_APP_API_URL}`
   const [products, setProducts] = useState([]);
   const [quantities, setQuantities] = useState({}); // ⭐ quantity theo từng sản phẩm
   const { setSelectedProducts } = useContext(CartContext);
-
+  const [loading, setLoading] = useState(true);
   // -------------------------------------------
   // 🔧 Helper: lấy giá từ một variant
   const pickPricesFromVariant = (v) => {
@@ -46,16 +46,19 @@ export default function Quotation({ apiBase = `${process.env.REACT_APP_API_URL}`
 
   // 🔍 Lấy danh sách sản phẩm
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await api.get("/products");
-        setProducts(res.data?.data || []);
-      } catch (err) {
-        console.error("Error fetching products:", err);
-      }
-    };
-    fetchProducts();
-  }, []);
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/products");
+      setProducts(res.data?.data || []);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchProducts();
+}, []);
 
   // 🛒 Khi nhấn "Mua ngay"
   const handleSubmit = (product) => {
@@ -93,90 +96,118 @@ export default function Quotation({ apiBase = `${process.env.REACT_APP_API_URL}`
           </thead>
 
           <tbody>
-            {products.length > 0 ? (
-              products.map((p) => {
-                // ⭐ Chọn ảnh đúng chuẩn
-                const img =
-                  p.images?.find((i) => i.isPrimary)?.imageUrl ||
-                  p.images?.[0]?.image_url ||
-                  "https://via.placeholder.com/100";
+  {/* 1️⃣ PLACEHOLDER KHI LOAD */}
+  {loading &&
+    Array.from({ length: 5 }).map((_, i) => (
+      <tr key={i} className="placeholder-glow">
+        <td>
+          <span
+            className="placeholder rounded"
+            style={{ width: 100, height: 80, display: "inline-block" }}
+          ></span>
+        </td>
+        <td>
+          <span className="placeholder col-8 d-block mb-2"></span>
+          <span className="placeholder col-4"></span>
+        </td>
+        <td>
+          <span className="placeholder col-6"></span>
+        </td>
+        <td>
+          <span className="placeholder col-5"></span>
+        </td>
+        <td>
+          <span
+            className="placeholder col-6"
+            style={{ height: 38 }}
+          ></span>
+        </td>
+        <td>
+          <span className="btn btn-primary disabled placeholder col-8"></span>
+        </td>
+      </tr>
+    ))}
 
-                // ⭐ Tính giá
-                const price =
-                  Number(p.price) > 0
-                    ? Number(p.price)
-                    : getVariantMinPrice(p.variants);
+  {/* 2️⃣ LOAD XONG NHƯNG KHÔNG CÓ DATA */}
+  {!loading && products.length === 0 && (
+    <tr>
+      <td colSpan="6" className="text-muted py-4 text-center">
+        Không có sản phẩm nào
+      </td>
+    </tr>
+  )}
 
-                return (
-                  <tr key={p.productId}>
-                    {/* Hình ảnh */}
-                    <td>
-                      <img
-                        src={process.env.REACT_APP_API_URL + img}
-                        alt={p.productName}
-                        className="img-fluid rounded"
-                        style={{ maxHeight: "100px" }}
-                      />
-                    </td>
+  {/* 3️⃣ DATA THẬT */}
+  {!loading &&
+    products.map((p) => {
+      const img =
+        p.images?.find((i) => i.isPrimary)?.imageUrl ||
+        p.images?.[0]?.image_url ||
+        "https://via.placeholder.com/100";
 
-                    {/* Tên sản phẩm */}
-                    <td className="text-start">
-                      <strong>{p.productName}</strong>
-                      <br />
-                      <button
-                        className="btn btn-sm btn-outline-primary mt-2"
-                        onClick={() =>
-                          window.open(`/productdetail/${p.productId}`, "_blank")
-                        }
-                      >
-                        Xem thêm
-                      </button>
-                    </td>
+      const price =
+        Number(p.price) > 0
+          ? Number(p.price)
+          : getVariantMinPrice(p.variants);
 
-                    {/* Giá bán */}
-                    <td className="text-danger fw-bold">
-                      {price.toLocaleString()} ₫
-                    </td>
+      return (
+        <tr key={p.productId}>
+          <td>
+            <img
+              src={process.env.REACT_APP_API_URL + img}
+              alt={p.productName}
+              className="img-fluid rounded"
+              style={{ maxHeight: "100px" }}
+            />
+          </td>
 
-                    {/* Bảo hành */}
-                    <td>{p.warranty_period || "1 Tuần"}</td>
+          <td className="text-start">
+            <strong>{p.productName}</strong>
+            <br />
+            <button
+              className="btn btn-sm btn-outline-primary mt-2"
+              onClick={() =>
+                window.open(`/productdetail/${p.productId}`, "_blank")
+              }
+            >
+              Xem thêm
+            </button>
+          </td>
 
-                    {/* Số lượng */}
-                    <td>
-                      <input
-                        type="number"
-                        min="1"
-                        className="form-control text-center mx-auto"
-                        style={{ width: "70px" }}
-                        value={quantities[p.productId] || 1}
-                        onChange={(e) =>
-                          handleQtyChange(p.productId, e.target.value)
-                        }
-                      />
-                    </td>
+          <td className="text-danger fw-bold">
+            {price.toLocaleString()} ₫
+          </td>
 
-                    {/* Mua ngay */}
-                    <td>
-                      <NavLink
-                        to="/checkout"
-                        className="btn btn-primary d-flex align-items-center justify-content-center mx-auto"
-                        onClick={() => handleSubmit(p)}
-                      >
-                        <i className="bi bi-cart-fill me-2"></i>
-                        Mua ngay
-                      </NavLink>
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan="6" className="text-muted py-4">
-                  Không có sản phẩm nào
-                </td>
-              </tr>
-            )}
-          </tbody>
+          <td>{p.warranty_period || "1 Tuần"}</td>
+
+          <td>
+            <input
+              type="number"
+              min="1"
+              className="form-control text-center mx-auto"
+              style={{ width: "70px" }}
+              value={quantities[p.productId] || 1}
+              onChange={(e) =>
+                handleQtyChange(p.productId, e.target.value)
+              }
+            />
+          </td>
+
+          <td>
+            <NavLink
+              to="/checkout"
+              className="btn btn-primary d-flex align-items-center justify-content-center mx-auto"
+              onClick={() => handleSubmit(p)}
+            >
+              <i className="bi bi-cart-fill me-2"></i>
+              Mua ngay
+            </NavLink>
+          </td>
+        </tr>
+      );
+    })}
+</tbody>
+
         </table>
       </div>
     </div>

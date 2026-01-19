@@ -60,7 +60,7 @@ export default function ProductSlider() {
             className="bg-white rounded-4 position-relative flex-shrink-0"
             style={{
               width: 110,
-              height: 140, // 👈 CỐ ĐỊNH CARD
+              height: 140,
               padding: 8,
               textAlign: "center",
             }}
