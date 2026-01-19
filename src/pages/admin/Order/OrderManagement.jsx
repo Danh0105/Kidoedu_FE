@@ -294,6 +294,7 @@ export default function OrderManager() {
                                 <th>Trạng thái</th>
                                 <th>Payment Method</th>
                                 <th>Payment Status</th>
+                                <th>Discount</th>
                                 <th className="text-end">Tổng tiền</th>
                                 <th className="text-center">Thao tác</th>
                             </tr>
@@ -335,9 +336,14 @@ export default function OrderManager() {
 
 
                                         <td>{getCustomerName(o)}</td>
-                                        {/*                                         <td>{o.user?.email || ""}</td>
+
+                                        {/* 
+                                        <td>{o.user?.email || ""}</td>
                                         <td>{o.shippingAddress?.phone_number || ""}</td>
- */}                                        <td>{formatDate(o.orderDate)}</td>
+                                        */}
+
+                                        <td>{formatDate(o.orderDate)}</td>
+
 
                                         <td>
                                             {hasPermission(["order.update"]) ? (
@@ -378,11 +384,20 @@ export default function OrderManager() {
                                                 {PAYMENT_STATUS_MAP[o.paymentStatus]?.label || "Không xác định"}
                                             </span>
                                         </td>
-
+                                        <td className="text-end fw-semibold">
+                                            {o.promotion?.discount_value != null ? (
+                                                <span className="badge bg-success">
+                                                    {o.promotion.name}
+                                                </span>
+                                            ) : (
+                                                <span className="badge bg-secondary">No Discount</span>
+                                            )}
+                                        </td>
 
                                         <td className="text-end fw-semibold">
-                                            {formatCurrency(o.totalAmount)}
+                                            {formatCurrency(o.subtotal)}
                                         </td>
+
 
                                         <td className="text-center">
                                             <button

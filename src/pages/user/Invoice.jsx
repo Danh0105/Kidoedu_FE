@@ -9,15 +9,16 @@ export default function Invoice() {
   const invoiceRef = useRef(null);
   console.log("order:", order);
 
-  // 🔢 Tính tổng từ items, không cần order
-  const subtotal = order.items.reduce((sum, item) => {
-    const price = Number(item.pricing) || 0;
-    const qty = Number(item.quantity) || 0;
-    return sum + price * qty;
-  }, 0);
+  const subtotal = Number(order?.order?.subtotal ?? order?.subtotal ?? 0);
+  const discountAmount = Number(
+    order?.order?.discountAmount ?? order?.discountAmount ?? 0
+  );
+  const totalAmount = Number(
+    order?.order?.totalAmount ?? order?.totalAmount ?? 0
+  );
+
 
   const shippingFee = 0; // nếu sau này có phí ship thì sửa ở đây
-  const grandTotal = subtotal + shippingFee;
 
   const handleDownloadPDF = () => {
     const input = invoiceRef.current;
@@ -152,9 +153,23 @@ export default function Invoice() {
                 {/*  <p>
                   <strong>Phí vận chuyển:</strong> {shippingFee.toLocaleString()} ₫
                 </p> */}
-                <h5 className="fw-bold text-danger">
-                  Tổng cộng: {(order?.order?.subtotal || order?.subtotal).toLocaleString()} ₫
-                </h5>
+                <div className="text-end mb-3">
+                  <p>
+                    <strong>Tạm tính:</strong>{" "}
+                    {subtotal.toLocaleString()} ₫
+                  </p>
+
+                  {discountAmount > 0 && (
+                    <p className="text-success">
+                      <strong>Giảm giá:</strong>{" "}
+                      -{discountAmount.toLocaleString()} ₫
+                    </p>
+                  )}
+
+                  <h5 className="fw-bold text-danger">
+                    Tổng thanh toán: {totalAmount.toLocaleString()} ₫
+                  </h5>
+                </div>
               </div>
             </>
           ) : (

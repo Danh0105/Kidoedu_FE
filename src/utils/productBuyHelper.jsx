@@ -54,5 +54,6 @@ export function makeCheckoutProduct({
         pricing: finalPrice,
         basePrice,
         promoPrice,
+        promotion: product.promotionApplicabilities
     };
 }

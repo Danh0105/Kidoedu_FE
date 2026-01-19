@@ -8,35 +8,9 @@ import ModalPayment from "../../components/user/ModalPayment";
 import logoMomo from "../../assets/user/logo2.svg";
 import '../../components/user/Checkout.css';
 import { QRCodeCanvas } from "qrcode.react";
-
-// đặt trong Checkout.jsx (trên cùng file)
-const toAttrObj = (raw) => {
-  if (!raw) return {};
-  if (typeof raw === 'object') return raw;            // đã là object
-  if (Array.isArray(raw)) {
-    // ex: [{name:'color', value:'Đen'}] -> {color:'Đen'}
-    return raw.reduce((acc, it) => {
-      if (it && it.name) acc[String(it.name).trim()] = String(it.value ?? '').trim();
-      return acc;
-    }, {});
-  }
-  if (typeof raw === 'string') {
-    const s = raw.trim();
-    if (!s) return {};
-    // thử JSON trước
-    try { const j = JSON.parse(s); if (j && typeof j === 'object') return j; } catch { }
-    // fallback: parse k:v; k2:v2 (ngăn cách bởi ; , |)
-    const out = {};
-    s.split(/[;,\|]/).forEach(pair => {
-      if (!pair) return;
-      const [k, ...rest] = pair.split(':');
-      if (!k) return;
-      out[k.trim()] = rest.join(':').trim();
-    });
-    return out;
-  }
-  return {};
-};
+import calcDiscount from "../../utils/calcDiscount";
+import VoucherForm from "../../components/user/CheckoutPage/VoucherForm";
+import { applyVoucher as applyVoucherApi } from "../../services/promotion";
 
 const PLACEHOLDER_IMG = "https://placehold.co/600x600?text=No+Image";
 export default function Checkout() {
@@ -44,11 +18,12 @@ export default function Checkout() {
   const { selectedProducts } = useContext(CartContext);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [pendingOrder, setPendingOrder] = useState(false);
-
+  const [promotion, setPromotion] = useState(null);
   const [products, setProducts] = useState([]);
   const [shippingInfo, setShippingInfo] = useState(null);
   const [showModalPayment, setShowModalPayment] = useState(false);
   const [method, setMethod] = useState("cod");
+  const [voucherCode, setVoucherCode] = useState("");
   const [opt, setOpt] = useState({
     id: "cod",
     label: "Thanh toán khi nhận hàng (COD)",
@@ -59,7 +34,12 @@ export default function Checkout() {
 
   // Lấy thông tin sản phẩm và shipping từ cookie
   useEffect(() => {
-    if (selectedProducts?.length) setProducts(selectedProducts);
+    if (selectedProducts?.length) {
+      setProducts(selectedProducts);
+      console.log(selectedProducts[0].promotion);
+
+/*       setPromotion(selectedProducts.promotion[0]);
+ */    };
     const saved = Cookies.get("shippingInfo");
     if (saved) {
       try {
@@ -71,7 +51,8 @@ export default function Checkout() {
         }
 
         const defaultAddress = data.find(item => item.address?.is_default === true);
-        setShippingInfo(defaultAddress || data[0]); // fallback: nếu chưa có mặc định
+        setShippingInfo(defaultAddress || data[0]);
+
       } catch (err) {
         console.error("Không thể parse shippingInfo từ cookie:", err);
       }
@@ -85,7 +66,11 @@ export default function Checkout() {
     0
   );
   const shippingFee = 0;
-  const finalTotal = totalPrice + shippingFee;
+  console.log(promotion);
+
+  const discountAmount = calcDiscount(totalPrice, promotion);
+  const finalTotal = totalPrice - discountAmount + shippingFee;
+
   const buildOrderPayload = (paymentMethod) => {
     if (!shippingInfo) {
       throw new Error("Thiếu thông tin giao hàng");
@@ -113,7 +98,8 @@ export default function Checkout() {
       email,
       address: shippingInfo.address,
       items,
-      paymentMethod
+      paymentMethod,
+      promotionId: promotion?.id ?? null,
     };
     const url = shippingInfo.API;
     delete shippingInfo.API;
@@ -279,7 +265,25 @@ export default function Checkout() {
     if (method === "bank") return handleBankPayment();
     return handleSubmit(); // COD
   };
+  const applyVoucher = async () => {
+    if (!voucherCode) {
+      alert("Vui lòng nhập mã voucher");
+      return;
+    }
 
+    try {
+      const res = await applyVoucherApi({
+        code: voucherCode,
+        orderTotal: totalPrice,
+      });
+
+      setPromotion(res.data); // 🔥 QUAN TRỌNG
+      alert(`🎉 Áp dụng voucher thành công: ${res.data.name}`);
+    } catch (err) {
+      setPromotion(null);
+      alert(err.response?.data?.message || "Voucher không hợp lệ");
+    }
+  };
   return (
     <div className="checkout-page">
       {/* ========== Thông tin giao hàng ========== */}
@@ -557,12 +561,38 @@ export default function Checkout() {
             />
           </div>
         </div>
+        <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+          <h6 className="fw-bold mb-0"> Mã Voucher</h6>
+          <div className="d-flex align-items-center flex-wrap gap-2">
+            <VoucherForm
+              value={voucherCode}
+              disabled={!!promotion}
+              onChange={(val) => setVoucherCode(val.toUpperCase())}
+              onApply={applyVoucher}
+            />
+            {promotion?.isVoucher && (
+              <span className="badge bg-success ms-2">Đã áp dụng</span>
+            )}
+
+          </div>
+        </div>
 
         <div className="border-top pt-3">
           <div className="d-flex justify-content-between text-muted">
             <span>Tổng tiền hàng</span>
             <span>{totalPrice.toLocaleString()} ₫</span>
           </div>
+          {promotion && (
+            <div className="d-flex justify-content-between text-success">
+              <span>
+                Khuyến mãi ({promotion.name})
+              </span>
+              <span>
+                -{discountAmount.toLocaleString()} ₫
+              </span>
+            </div>
+          )}
+
           <div className="d-flex justify-content-between text-muted">
             <span>Phí vận chuyển</span>
             <span>{shippingFee.toLocaleString()} ₫</span>
