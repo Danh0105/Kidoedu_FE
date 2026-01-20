@@ -114,9 +114,25 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
     const showNewSection = useInViewOnce(newSectionRef);
     const showFeaturedSection = useInViewOnce(featuredSectionRef);
+<<<<<<< HEAD
 
     const [promotions, setPromotions] = useState()
+=======
+    const isDesktop = useIsDesktop();
+>>>>>>> 3bfce9ada350d5c6f5c5a8f0157f02484872731a
     const scrollRef = useRef(null);
+
+
+    // cố định playout
+    useEffect(() => {
+        document.documentElement.style.overflowX = "hidden";
+        document.body.style.overflowX = "hidden";
+
+        return () => {
+            document.documentElement.style.overflowX = "";
+            document.body.style.overflowX = "";
+        };
+    }, []);
     // Stable axios instance
     const api = useMemo(
         () =>
@@ -126,6 +142,24 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
             }),
         [apiBase]
     );
+
+    //     // màn desktop 
+    function useIsDesktop() {
+        const get = () => window.matchMedia("(min-width: 992px)").matches; // Bootstrap lg breakpoint
+        const [isDesktop, setIsDesktop] = useState(get);
+        useEffect(() => {
+            const mq = window.matchMedia("(min-width: 992px)");
+            const handler = () => setIsDesktop(mq.matches);
+            mq.addEventListener?.("change", handler);
+            window.addEventListener("resize", handler);
+            return () => {
+                mq.removeEventListener?.("change", handler);
+                window.removeEventListener("resize", handler);
+            };
+        }, []);
+        return isDesktop;
+    }
+
 
     // ======================= Data fetching =======================
     const fetchCategories = useCallback(async () => {
@@ -251,8 +285,260 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     useEffect(() => {
         loadBanners();
     }, []);
+    if (isDesktop) {
+        return (
+            <div >
+                <div className="container py-4 bg-white bg-opacity-75 rounded-4 shadow-sm">
+                    {/* Desktop layout: Sidebar + Content */}
+                    <div
+                        className="d-none d-md-flex"
+                        onMouseLeave={handleLeaveAll}
+                    >
+                        <CategorySidebar
+                            rootCats={rootCats}
+                            hoverCatId={hoverCatId}
+                            setHoverCatId={setHoverCatId}
+                            setShowHoverPanel={setShowHoverPanel}
+                            setSelectedCatId={setSelectedCatId}
+                        />
+                        <div
+                            ref={scrollRef}
+                            style={{ overflowY: "auto", flex: 1 }}
+                        >
+                            {/*  */}
+                            <ContentArea
+                                selectedCatId={selectedCatId}
+                                loading={loading}
+                                items={items}
+                                showHoverPanel={showHoverPanel}
+                                hoverPanel={hoverPanel}
+                                hoverCatId={hoverCatId}
+                                setSelectedCatId={setSelectedCatId}
+                                setShowHoverPanel={setShowHoverPanel}
+                                setHoverCatId={setHoverCatId}
+                                rootCats={rootCats}
+                                childrenOfHover={childrenOfHover}
+                            />
+                        </div>
+                    </div>
+
+                    <PromoRow
+                        items={[
+                            {
+                                src: "https://cdn.tgdd.vn/Files/2021/12/27/1406967/tivi-samsung-giam-cuc-soc-den-28-mua-cuoi-nam.jpg",
+                                href: "https://cdn.tgdd.vn/Files/2021/12/27/1406967/tivi-samsung-giam-cuc-soc-den-28-mua-cuoi-nam.jpg",
+                                alt: "Duy nhất 11.11 - Nồi cơm PHILIPS",
+                            },
+                            {
+                                src: "https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/Picture//Tm/Tm_picture_3053/1111_244_800.png.webp",
+                                href: "https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/Picture//Tm/Tm_picture_3053/1111_244_800.png.webp",
+                                alt: "Thách đấu online - Giảm đến 50%",
+                            },
+                            {
+                                src: "https://mediamart.vn/images/uploads/2023/6e6eff39-2dc5-4a93-809b-fff5eab21d4f.png",
+                                href: "https://mediamart.vn/images/uploads/2023/6e6eff39-2dc5-4a93-809b-fff5eab21d4f.png",
+                                alt: "Lễ hội máy sấy - Giá từ 3.990 triệu",
+                            },
+                        ]}
+                    />
+
+                    {/* Slider danh mục / sản phẩm ngang */}
+                    <section className="my-4">
+                        <ProductSlider />
+                    </section>
+
+                    {/* Sản phẩm sale */}
+                    <div className="d-flex justify-content-center">
+                        <img src={sale} alt="" className="image-sale" />
+                    </div>
+                    <section className="bg-product-featured p-2" ref={featuredSectionRef}>
+
+
+                        <div className="row justify-content-center">
+                            {showFeaturedSection ? (
+                                (showAllFeatured ? featuredProducts : featuredProducts.slice(0, 4)).map(
+                                    (p) => (
+                                        <ProductCard
+                                            key={p.productId}
+                                            p={p}
+                                            banners={frameproductP}
+                                            className={`col-12 col-sm-6 col-md-4 col-lg-3 mb-4 appear ${showFeaturedSection ? "is-visible" : ""}`}
+                                        />
+                                    )
+                                )
+                            ) : (
+                                Array.from({ length: 4 }).map((_, i) => (
+                                    <div key={i} className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                                        <div className="card placeholder-glow h-100">
+                                            <div className="placeholder w-100" style={{ height: 220 }} />
+                                            <div className="card-body">
+                                                <span className="placeholder col-8" />
+                                                <span className="placeholder col-5 mt-2" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        {featuredProducts.length > 4 && (
+                            <div className="text-center mt-3">
+                                <button
+                                    onClick={() => setShowAllFeatured((v) => !v)}
+                                    className="btn btn-outline-danger rounded-pill px-4"
+                                >
+                                    {showAllFeatured ? "Thu gọn" : "Xem thêm"}
+                                </button>
+                            </div>
+                        )}
+                    </section>
+                    {/* Sản phẩm mới */}
+                    <section className="my-5 bg-product-new p-2 " ref={newSectionRef}>
+                        <div className="d-flex justify-content-between">
+                            <div>
+                                <img className="lig" src={light} alt="Đèn lồng ngày tết" />
+                            </div>
+                            <div>
+                                <div className="bg-img-np">
+                                    <h2 className="fw-bold " style={{ fontSize: "2rem" }}>
+                                        🆕 Sản phẩm mới
+                                    </h2>
+                                </div>
+
+                                <div
+                                    style={{
+                                        height: 3,
+                                        width: 80,
+                                        backgroundColor: "hsl(0,75%,60%)",
+                                        margin: "10px auto",
+                                        borderRadius: 3,
+                                    }}
+                                />
+                            </div>
+                            <div>
+                                <img className="lig" src={light} alt="Đèn lồng ngày tết" />
+                            </div>
+                        </div>
+                        <div className="row justify-content-center">
+                            {showNewSection ? (
+                                (showAllNew ? newProducts : newProducts.slice(0, 4)).map((p) => (
+
+                                    <ProductCard
+                                        key={p.productId}
+                                        p={p}
+                                        banners={frameproductN}
+                                        className={`col-12 col-sm-6 col-md-4 col-lg-3 mb-4 appear ${showNewSection ? "is-visible" : ""}`}
+                                    />
+                                ))
+                            ) : (
+                                Array.from({ length: 4 }).map((_, i) => (
+                                    <div key={i} className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                                        <div className="card placeholder-glow h-100">
+                                            <div className="placeholder w-100" style={{ height: 220 }} />
+                                            <div className="card-body">
+                                                <span className="placeholder col-8" />
+                                                <span className="placeholder col-5 mt-2" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        {newProducts.length > 4 && (
+                            <div className="text-center mt-3">
+                                <button
+                                    onClick={() => setShowAllNew((v) => !v)}
+                                    className="btn btn-outline-danger rounded-pill px-4"
+                                >
+                                    {showAllNew ? "Thu gọn" : "Xem thêm"}
+                                </button>
+                            </div>
+                        )}
+                    </section>
+
+                    {/* Sản phẩm nổi bật */}
+                    <section className="my-5 bg-product-featured p-2" ref={featuredSectionRef}>
+
+                        <div className="d-flex justify-content-between">
+                            <div>
+                                <img className="lig" src={light1} alt="Đèn lồng ngày tết" />
+                            </div>
+                            <div>
+                                <div className="bg-img-np">
+                                    <h2 className="fw-bold " style={{ fontSize: "2rem" }}>
+                                        ⭐ Sản phẩm nổi bật
+                                    </h2>
+                                </div>
+
+                                <div
+                                    style={{
+                                        height: 3,
+                                        width: 80,
+                                        backgroundColor: "hsl(0,75%,60%)",
+                                        margin: "10px auto",
+                                        borderRadius: 3,
+                                    }}
+                                />
+                            </div>
+                            <div>
+                                <img className="lig" src={light1} alt="Đèn lồng ngày tết" />
+                            </div>
+                        </div>
+                        <div className="row justify-content-center">
+                            {showFeaturedSection ? (
+                                (showAllFeatured ? featuredProducts : featuredProducts.slice(0, 4)).map(
+                                    (p) => (
+                                        <ProductCard
+                                            key={p.productId}
+                                            p={p}
+                                            banners={frameproductP}
+                                            className={`col-12 col-sm-6 col-md-4 col-lg-3 mb-4 appear ${showFeaturedSection ? "is-visible" : ""}`}
+                                        />
+                                    )
+                                )
+                            ) : (
+                                Array.from({ length: 4 }).map((_, i) => (
+                                    <div key={i} className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                                        <div className="card placeholder-glow h-100">
+                                            <div className="placeholder w-100" style={{ height: 220 }} />
+                                            <div className="card-body">
+                                                <span className="placeholder col-8" />
+                                                <span className="placeholder col-5 mt-2" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        {featuredProducts.length > 4 && (
+                            <div className="text-center mt-3">
+                                <button
+                                    onClick={() => setShowAllFeatured((v) => !v)}
+                                    className="btn btn-outline-danger rounded-pill px-4"
+                                >
+                                    {showAllFeatured ? "Thu gọn" : "Xem thêm"}
+                                </button>
+                            </div>
+                        )}
+                    </section>
+
+                </div>
+
+                {/* Modal Buy (global) */}
+                <ModalBuy
+                    show={showModalBuy}
+                    onClose={() => setShowModalBuy(false)}
+                    product={buyProduct || {}}
+                />
+            </div>
+        );
+    }
+
 
     return (
+<<<<<<< HEAD
         <div >
             <div className="container py-4 bg-white bg-opacity-75 rounded-4 shadow-sm">
                 {/* Desktop layout: Sidebar + Content */}
@@ -360,130 +646,126 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                                 <h2 className="fw-bold " style={{ fontSize: "2rem" }}>
                                     🆕 Sản phẩm mới
                                 </h2>
+=======
+        <div
+            style={{
+                width: "100%",
+                maxWidth: "100vw",
+                overflowX: "hidden",
+                backgroundColor: "#f5d6d6", // nền hồng nhạt giống giao diện cũ
+            }}
+        >
+            <div className="container-fluid p-0">
+
+
+                {/* ===== 2. BANNER / CAROUSEL ===== */}
+                {/* <section style={{ marginTop: 8 }}>
+                    <Carousel />
+                </section> */}
+
+                {/* ===== 3. PROMO ROW ===== */}
+                {/* ===== PROMO ROW (MOBILE – 3 BANNER ĐẦY ĐỦ) ===== */}
+                <section style={{ padding: "0 8px", marginTop: 12 }}>
+                    <div className="row g-2">
+                        {[
+                            {
+                                src: "https://cdn.tgdd.vn/Files/2021/12/27/1406967/tivi-samsung-giam-cuc-soc-den-28-mua-cuoi-nam.jpg",
+                                href: "https://cdn.tgdd.vn/Files/2021/12/27/1406967/tivi-samsung-giam-cuc-soc-den-28-mua-cuoi-nam.jpg",
+                                alt: "Duy nhất 11.11 - Nồi cơm PHILIPS",
+                            },
+                            {
+                                src: "https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/Picture//Tm/Tm_picture_3053/1111_244_800.png.webp",
+                                href: "https://cdn11.dienmaycholon.vn/filewebdmclnew/DMCL21/Picture//Tm/Tm_picture_3053/1111_244_800.png.webp",
+                                alt: "Thách đấu online - Giảm đến 50%",
+                            },
+                            {
+                                src: "https://mediamart.vn/images/uploads/2023/6e6eff39-2dc5-4a93-809b-fff5eab21d4f.png",
+                                href: "https://mediamart.vn/images/uploads/2023/6e6eff39-2dc5-4a93-809b-fff5eab21d4f.png",
+                                alt: "Lễ hội máy sấy - Giá từ 3.990 triệu",
+                            },
+                        ].map((item, idx) => (
+                            <div className="col-12" key={idx}>
+                                <a href={item.href} style={{ display: "block" }}>
+                                    <img
+                                        src={item.src}
+                                        alt={item.alt}
+                                        style={{
+                                            width: "100%",
+                                            maxWidth: "100%",
+                                            borderRadius: 8,
+                                            display: "block",
+                                        }}
+                                    />
+                                </a>
+>>>>>>> 3bfce9ada350d5c6f5c5a8f0157f02484872731a
                             </div>
-
-                            <div
-                                style={{
-                                    height: 3,
-                                    width: 80,
-                                    backgroundColor: "hsl(0,75%,60%)",
-                                    margin: "10px auto",
-                                    borderRadius: 3,
-                                }}
-                            />
-                        </div>
-                        <div>
-                            <img className="lig" src={light} alt="Đèn lồng ngày tết" />
-                        </div>
+                        ))}
                     </div>
-                    <div className="row justify-content-center">
-                        {showNewSection ? (
-                            (showAllNew ? newProducts : newProducts.slice(0, 4)).map((p) => (
+                </section>
 
+                {/* ===== 4. SLIDER DANH MỤC / SẢN PHẨM ===== */}
+                <section
+                    style={{
+                        marginTop: 16,
+                        padding: "0 8px",
+                        overflowX: "hidden",
+                    }}
+                >
+                    <ProductSlider />
+                </section>
+
+                {/* ===== 5. SẢN PHẨM MỚI ===== */}
+                <section style={{ marginTop: 24, padding: "0 8px" }}>
+                    <h4
+                        style={{
+                            textAlign: "center",
+                            fontWeight: 700,
+                            marginBottom: 12,
+                        }}
+                    >
+                        Sản phẩm mới
+                    </h4>
+
+                    <div className="row row-cols-1 row-cols-sm-2 g-3">
+                        {newProducts.map((p) => (
+                            <div className="col" key={p.productId}>
                                 <ProductCard
-                                    key={p.productId}
                                     p={p}
                                     banners={frameproductN}
-                                    className={`col-12 col-sm-6 col-md-4 col-lg-3 mb-4 appear ${showNewSection ? "is-visible" : ""}`}
                                 />
-                            ))
-                        ) : (
-                            Array.from({ length: 4 }).map((_, i) => (
-                                <div key={i} className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
-                                    <div className="card placeholder-glow h-100">
-                                        <div className="placeholder w-100" style={{ height: 220 }} />
-                                        <div className="card-body">
-                                            <span className="placeholder col-8" />
-                                            <span className="placeholder col-5 mt-2" />
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-
-                    {newProducts.length > 4 && (
-                        <div className="text-center mt-3">
-                            <button
-                                onClick={() => setShowAllNew((v) => !v)}
-                                className="btn btn-outline-danger rounded-pill px-4"
-                            >
-                                {showAllNew ? "Thu gọn" : "Xem thêm"}
-                            </button>
-                        </div>
-                    )}
-                </section>
-
-                {/* Sản phẩm nổi bật */}
-                <section className="my-5 bg-product-featured p-2" ref={featuredSectionRef}>
-
-                    <div className="d-flex justify-content-between">
-                        <div>
-                            <img className="lig" src={light1} alt="Đèn lồng ngày tết" />
-                        </div>
-                        <div>
-                            <div className="bg-img-np">
-                                <h2 className="fw-bold " style={{ fontSize: "2rem" }}>
-                                    ⭐ Sản phẩm nổi bật
-                                </h2>
                             </div>
-
-                            <div
-                                style={{
-                                    height: 3,
-                                    width: 80,
-                                    backgroundColor: "hsl(0,75%,60%)",
-                                    margin: "10px auto",
-                                    borderRadius: 3,
-                                }}
-                            />
-                        </div>
-                        <div>
-                            <img className="lig" src={light1} alt="Đèn lồng ngày tết" />
-                        </div>
+                        ))}
                     </div>
-                    <div className="row justify-content-center">
-                        {showFeaturedSection ? (
-                            (showAllFeatured ? featuredProducts : featuredProducts.slice(0, 4)).map(
-                                (p) => (
-                                    <ProductCard
-                                        key={p.productId}
-                                        p={p}
-                                        banners={frameproductP}
-                                        className={`col-12 col-sm-6 col-md-4 col-lg-3 mb-4 appear ${showFeaturedSection ? "is-visible" : ""}`}
-                                    />
-                                )
-                            )
-                        ) : (
-                            Array.from({ length: 4 }).map((_, i) => (
-                                <div key={i} className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
-                                    <div className="card placeholder-glow h-100">
-                                        <div className="placeholder w-100" style={{ height: 220 }} />
-                                        <div className="card-body">
-                                            <span className="placeholder col-8" />
-                                            <span className="placeholder col-5 mt-2" />
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-
-                    {featuredProducts.length > 4 && (
-                        <div className="text-center mt-3">
-                            <button
-                                onClick={() => setShowAllFeatured((v) => !v)}
-                                className="btn btn-outline-danger rounded-pill px-4"
-                            >
-                                {showAllFeatured ? "Thu gọn" : "Xem thêm"}
-                            </button>
-                        </div>
-                    )}
                 </section>
+
+                {/* ===== 6. SẢN PHẨM NỔI BẬT ===== */}
+                <section style={{ marginTop: 24, padding: "0 8px" }}>
+                    <h4
+                        style={{
+                            textAlign: "center",
+                            fontWeight: 700,
+                            marginBottom: 12,
+                        }}
+                    >
+                        Sản phẩm nổi bật
+                    </h4>
+
+                    <div className="row row-cols-1 row-cols-sm-2 g-3">
+                        {featuredProducts.map((p) => (
+                            <div className="col" key={p.productId}>
+                                <ProductCard
+                                    p={p}
+                                    banners={frameproductP}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
 
             </div>
 
-            {/* Modal Buy (global) */}
+            {/* ===== MODAL BUY ===== */}
             <ModalBuy
                 show={showModalBuy}
                 onClose={() => setShowModalBuy(false)}
@@ -491,6 +773,6 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
             />
         </div>
     );
+
+
 }
-
-

@@ -365,7 +365,12 @@ export default function Footer() {
 
                     <div className="hotline-text">
                         <div>Hotline - Zalo</div>
-                        <strong className="shine">0789 636 979</strong>
+                        <strong
+                            className="shine"
+
+                        >
+                            0789 636 979
+                        </strong>
                     </div>
 
                     <a className="zalo-badge" href="https://zalo.me/0789 636 979" target="_blank" aria-label="Chat Zalo"></a>
@@ -453,9 +458,33 @@ export default function Footer() {
                         <FontAwesomeIcon icon={faArrowUp} />
                     </div>
                 )}
-                <a href="tel:0789 636 979" className="hotline-bubble" aria-label="Gọi ngay">
+                {/* <a href="tel:0789 636 979" className="hotline-bubble" aria-label="Gọi ngay">
                     <i className="bi bi-telephone-fill"></i>
                     <span className="hotline-tip">Gọi 0789 636 979</span>
+                </a> */}
+                <a
+                    href="tel:0789636979"
+                    className="hotline-bubble"
+                    aria-label="Gọi ngay"
+                    style={{
+                        width: 50,
+                        height: 50,
+                        fontSize: "18px",
+                    }}
+                >
+                    <i
+                        className="bi bi-telephone-fill"
+                        style={{ fontSize: 18 }}
+                    ></i>
+                    <span
+                        className="hotline-tip"
+                        style={{
+                            fontSize: "0.8rem",
+                            padding: "4px 8px",
+                        }}
+                    >
+                        Gọi 0789 636 979
+                    </span>
                 </a>
                 {/* Hotline banner (hidden on md+) */}
                 <a className="hotline-banner " href="https://zalo.me/0789636979">
@@ -463,12 +492,37 @@ export default function Footer() {
                         <i className="bi bi-phone"></i>
                     </div>
 
-                    <div className="hotline-info d-flex flex-column">
+                    {/* <div className="hotline-info d-flex flex-column">
                         <span className="label">Hotline - Zalo</span>
                         <strong className="phone-number">0789 636 979</strong>
-                    </div>
+                    </div> */}
+                    <div
+                        className="hotline-info d-flex flex-column"
+                        style={{
+                            lineHeight: 1.2,
+                        }}
+                    >
+                        <span
+                            className="label"
+                            style={{
+                                fontSize: "0.75rem",
+                                opacity: 0.8,
+                            }}
+                        >
+                            Hotline - Zalo
+                        </span>
 
-                    <div className="zalo-btn" target="_blank" aria-label="Chat Zalo">
+                        <strong
+                            className="phone-number"
+                            style={{
+                                fontSize: "0.85rem",
+                                fontWeight: 600,
+                            }}
+                        >
+                            0789 636 979
+                        </strong>
+                    </div>
+                    <div className="zalo-btn"  target="_blank" aria-label="Chat Zalo">
 
                     </div>
                 </a>

@@ -32,11 +32,12 @@ export default function Product({ prod }) {
     const scrollRef = useRef(null);
     console.log("prod", prod)
     const firstImage =
-        prod?.images?.find(img => img.isPrimary)?.imageUrl;
+        prod?.images?.find(img => img.isPrimary)?.imageUrl ||
+        prod?.imageUrl;
 
 
-    // 🧮 Fetch giá theo biến thể
-    // 🧮 Fetch dải giá theo biến thể (min - max)
+    // Fetch giá theo biến thể
+    // Fetch dải giá theo biến thể (min - max)
     const priceRange = useMemo(() => {
         const variants = prod?.variants ?? [];
         const allPrices = [];
@@ -262,7 +263,7 @@ export default function Product({ prod }) {
 
                         <div className="d-flex justify-content-between gap-2">
                             <button onClick={handleAddToCart} className="btn btn-danger">
-                                Thêm vào giỏ
+                                Thêm vào giỏ hàng
                             </button>
                             <button onClick={handleBuy} className="btn btn-primary">
                                 Mua ngay
@@ -288,8 +289,6 @@ export default function Product({ prod }) {
                                 }}
                             />
                         </div>
-
-
                     </div>
                 </div>
             </AnimateCard>
@@ -304,7 +303,7 @@ export default function Product({ prod }) {
                 onClose={() => setShowModalBuy(false)}
                 product={prod}
 
-            />
+            />0//
         </>
 
     );
