@@ -23,6 +23,7 @@ import ProductCard from '../../components/user/HomePage/ProductCard'
 import CategorySidebar from "../../components/user/HomePage/CategorySidebar";
 import ContentArea from "../../components/user/HomePage/ContentArea"
 import ProductSlider from "../../components/user/HomePage/ProductSlider";
+import { getPromotions } from "../../services/promotion";
 // ======================= Helpers =======================
 
 
@@ -114,6 +115,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     const showNewSection = useInViewOnce(newSectionRef);
     const showFeaturedSection = useInViewOnce(featuredSectionRef);
 
+    const [promotions, setPromotions] = useState()
     const scrollRef = useRef(null);
     // Stable axios instance
     const api = useMemo(
@@ -160,7 +162,6 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
             console.error("fetchProducts error:", e);
         }
     }, []);
-
 
     // ==== Actions chung khi rời toàn bộ khu vực menu + panel
     const handleLeaveAll = useCallback(() => {
@@ -225,6 +226,27 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
         }
     };
 
+    const promotionProducts = useMemo(() => {
+        return allProducts
+            .map(product => {
+                const activePromotion = product.promotionApplicabilities
+                    ?.map(pa => pa.promotion)
+                    .find(promo =>
+                        promo?.isActive === true &&
+                        new Date(promo.startDate) <= new Date() &&
+                        new Date(promo.endDate) >= new Date()
+                    );
+
+                if (!activePromotion) return null;
+
+                return {
+                    ...product,
+                    promotion: activePromotion,
+                };
+            })
+            .filter(Boolean);
+    }, [allProducts]);
+
 
     useEffect(() => {
         loadBanners();
@@ -284,57 +306,49 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                         },
                     ]}
                 />
-            
+
                 {/* Slider danh mục / sản phẩm ngang */}
                 <section className="my-4">
-                <ProductSlider />
+                    <ProductSlider />
                 </section>
 
                 {/* Sản phẩm sale */}
-                <div className="d-flex justify-content-center">
-                    <img src={sale} alt="" className="image-sale" />
-                </div>
-                <section className="bg-product-featured p-2" ref={featuredSectionRef}>
+                {promotionProducts.length > 0 ? (
+                    <>
+                        <div className="d-flex justify-content-center">
+                            <img src={sale} alt="sale" className="image-sale" />
+                        </div>
 
-
-                    <div className="row justify-content-center">
-                        {showFeaturedSection ? (
-                            (showAllFeatured ? featuredProducts : featuredProducts.slice(0, 4)).map(
-                                (p) => (
+                        <section className="bg-product-featured p-2" ref={featuredSectionRef}>
+                            <div className="row justify-content-center">
+                                {promotionProducts.map(p => (
                                     <ProductCard
                                         key={p.productId}
                                         p={p}
+                                        promotion={p.promotion}
                                         banners={frameproductP}
-                                        className={`col-12 col-sm-6 col-md-4 col-lg-3 mb-4 appear ${showFeaturedSection ? "is-visible" : ""}`}
+                                        className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 appear is-visible"
                                     />
-                                )
-                            )
-                        ) : (
-                            Array.from({ length: 4 }).map((_, i) => (
-                                <div key={i} className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
-                                    <div className="card placeholder-glow h-100">
-                                        <div className="placeholder w-100" style={{ height: 220 }} />
-                                        <div className="card-body">
-                                            <span className="placeholder col-8" />
-                                            <span className="placeholder col-5 mt-2" />
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
+                                ))}
+                            </div>
 
-                    {featuredProducts.length > 4 && (
-                        <div className="text-center mt-3">
-                            <button
-                                onClick={() => setShowAllFeatured((v) => !v)}
-                                className="btn btn-outline-danger rounded-pill px-4"
-                            >
-                                {showAllFeatured ? "Thu gọn" : "Xem thêm"}
-                            </button>
-                        </div>
-                    )}
-                </section>
+                            {promotionProducts.length > 4 && (
+                                <div className="text-center mt-3">
+                                    <button
+                                        onClick={() => setShowAllFeatured(v => !v)}
+                                        className="btn btn-outline-danger rounded-pill px-4"
+                                    >
+                                        {showAllFeatured ? "Thu gọn" : "Xem thêm"}
+                                    </button>
+                                </div>
+                            )}
+                        </section>
+                    </>
+                ) : (
+                    <></>
+                )}
+
+
                 {/* Sản phẩm mới */}
                 <section className="my-5 bg-product-new p-2 " ref={newSectionRef}>
                     <div className="d-flex justify-content-between">

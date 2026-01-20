@@ -4,8 +4,12 @@ const api = axios.create({
     baseURL: process.env.REACT_APP_API_URL,
 });
 
-export const getPromotions = () =>
-    api.get('/promotions').then(res => res.data);
+// services/promotion.js
+export const getPromotions = (params) => {
+    return api.get('/promotions', params ? { params } : undefined)
+        .then(res => res.data);
+};
+
 
 export const getPromotion = (id) =>
     api.get(`/promotions/${id}`).then(res => res.data);
