@@ -56,7 +56,7 @@ export default function PromotionScopeModal({ open, promotion, onClose }) {
                                     onClick={() =>
                                         removeApplicability(
                                             promotion.id,
-                                            a.applicability_id
+                                            a.id
                                         ).then(() =>
                                             getApplicability(promotion.id).then(setList)
                                         )

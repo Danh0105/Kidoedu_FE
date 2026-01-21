@@ -44,6 +44,7 @@ import CheckoutRental from "../pages/user/CheckoutRental";
 import VerifySuccess from "../pages/user/VerifySuccess";
 import PaymentResult from "../pages/user/PaymentResult";
 import LuckyWheel from "../components/user/LuckyWheel";
+import ScanQrCode from "../pages/user/ScanQrPage"
 
 export default function AppRoutes() {
 
@@ -204,6 +205,9 @@ export default function AppRoutes() {
             </Route>
             <Route path="/lucky-wheel" >
                 <Route index element={<LuckyWheel />} />
+            </Route>
+            <Route path="/ScanQrPage" >
+                <Route index element={<ScanQrCode />} />
             </Route>
         </Routes>
     );

@@ -34,7 +34,7 @@ export default function Product({ prod }) {
     const firstImage =
         prod?.images?.find(img => img.isPrimary)?.imageUrl ||
         prod?.imageUrl;
-    
+
 
     // Fetch giá theo biến thể
     // Fetch dải giá theo biến thể (min - max)
@@ -180,7 +180,7 @@ export default function Product({ prod }) {
                                 onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
                             />
 
-                            
+
 
                             {/* Badge nhỏ phía dưới ảnh (tuỳ bạn) */}
                             <img
@@ -188,7 +188,7 @@ export default function Product({ prod }) {
                                 className="product-small-badge"
                                 src={process.env.REACT_APP_API_URL + banners.imageUrl}
                                 alt=""
-                                
+
                             />
                         </div>
 
