@@ -2,8 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 
 /* ===== CONFIG ===== */
 const ITEM_WIDTH = 230;
-const ITEM_MARGIN = 32; // mx-2 (16px * 2)
+const ITEM_MARGIN = 32;
 const ITEM_FULL_WIDTH = ITEM_WIDTH + ITEM_MARGIN;
+const SPIN_DURATION = 5000;
+const ROLL_SIZE = 150;
 
 export default function LuckyWheel() {
     const trackRef = useRef(null);
@@ -13,7 +15,7 @@ export default function LuckyWheel() {
     const [rolling, setRolling] = useState(false);
     const [winner, setWinner] = useState(null);
 
-    /* ===== LOAD DATA TỪ DB ===== */
+    /* ===== LOAD DATA ===== */
     useEffect(() => {
         fetch("http://localhost:3000/participants")
             .then(res => res.json())
@@ -22,27 +24,18 @@ export default function LuckyWheel() {
                     p => p.isCheckedIn && !p.isWinner
                 );
 
+                // ✅ CHỈ DÙNG valid
                 setParticipants(valid);
-
-                // init vòng xoay (tránh trắng lần đầu)
-                if (valid.length > 0) {
-                    setRollItems(generateRollList(valid, valid[0]));
-                }
+                setRollItems(generateRollList(valid));
             });
     }, []);
 
-    /* ===== RANDOM NGƯỜI TRÚNG ===== */
-    const randomWinner = () => {
-        return participants[Math.floor(Math.random() * participants.length)];
-    };
-
     /* ===== SINH DANH SÁCH QUAY ===== */
-    const generateRollList = (list, winItem, size = 150) => {
+    const generateRollList = (list, size = ROLL_SIZE) => {
         const result = [];
         for (let i = 0; i < size; i++) {
             result.push(list[Math.floor(Math.random() * list.length)]);
         }
-        result[Math.floor(size / 2)] = winItem;
         return result;
     };
 
@@ -53,36 +46,43 @@ export default function LuckyWheel() {
         setRolling(true);
         setWinner(null);
 
-        const win = randomWinner();
-        const list = generateRollList(participants, win);
+        const list = generateRollList(participants);
         setRollItems(list);
 
-        setTimeout(() => {
+        requestAnimationFrame(() => {
             const track = trackRef.current;
+            if (!track) return;
 
-            // reset animation
-            track.style.transition = "none";
-            track.style.transform = "translateX(0)";
-            void track.offsetHeight; // force reflow
+            const items = track.children;
+            const container = track.parentElement;
+
+            const containerCenter =
+                container.offsetWidth / 2;
 
             const targetIndex = Math.floor(list.length / 2);
-            const containerWidth = track.parentElement.offsetWidth;
+            const targetItem = items[targetIndex];
 
-            const offset =
-                targetIndex * ITEM_FULL_WIDTH -
-                containerWidth / 2 +
-                ITEM_FULL_WIDTH / 2;
+            const itemCenter =
+                targetItem.offsetLeft +
+                targetItem.offsetWidth / 2;
+
+            const offset = itemCenter - containerCenter;
+
+            track.style.transition = "none";
+            track.style.transform = "translateX(0)";
+            void track.offsetHeight;
 
             track.style.transition =
                 "transform 5s cubic-bezier(.08,.6,0,1)";
             track.style.transform = `translateX(-${offset}px)`;
 
             setTimeout(() => {
-                setWinner(win);
+                setWinner(list[targetIndex]);
                 setRolling(false);
-            }, 5000);
-        }, 100);
+            }, SPIN_DURATION);
+        });
     };
+
 
     return (
         <div className="container py-5">
@@ -92,10 +92,14 @@ export default function LuckyWheel() {
                 className="position-relative border rounded bg-light mx-auto mb-4"
                 style={{ width: 700, height: 160, overflow: "hidden" }}
             >
-                {/* Vạch giữa */}
+                {/* Vạch đỏ */}
                 <div
                     className="position-absolute top-0 bottom-0 start-50 bg-danger"
-                    style={{ width: 4, transform: "translateX(-50%)" }}
+                    style={{
+                        width: 4,
+                        transform: "translateX(-50%)",
+                        zIndex: 10,
+                    }}
                 />
 
                 {/* Track */}
@@ -113,12 +117,9 @@ export default function LuckyWheel() {
                                 flexShrink: 0,
                             }}
                         >
-                            <div
-                                className="card-body d-flex align-items-center justify-content-center text-center fw-bold p-0"
-                            >
+                            <div className="card-body d-flex align-items-center justify-content-center text-center fw-bold">
                                 {p.fullName}
                             </div>
-
                         </div>
                     ))}
                 </div>
