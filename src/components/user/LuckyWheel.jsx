@@ -14,21 +14,41 @@ export default function LuckyWheel() {
     const [rollItems, setRollItems] = useState([]);
     const [rolling, setRolling] = useState(false);
     const [winner, setWinner] = useState(null);
+    const [forcedWinner, setForcedWinner] = useState(null);
+    const generateRollWithWinner = (list, winner, size = ROLL_SIZE) => {
+        const result = [];
+
+        for (let i = 0; i < size; i++) {
+            result.push(list[Math.floor(Math.random() * list.length)]);
+        }
+
+        const targetIndex = Math.floor(size / 2);
+        result[targetIndex] = winner; // 🔥 ÉP NGƯỜI TRÚNG
+
+        return { result, targetIndex };
+    };
 
     /* ===== LOAD DATA ===== */
     useEffect(() => {
-        fetch("http://localhost:3000/participants")
+        fetch("https://kidoedu.vn/participants")
             .then(res => res.json())
             .then(data => {
                 const valid = data.filter(
                     p => p.isCheckedIn && !p.isWinner
                 );
 
-                // ✅ CHỈ DÙNG valid
                 setParticipants(valid);
+                console.log(valid);
+
+                const fw = valid.find(p => p.isForcedWinner) || null;
+                setForcedWinner(fw);
+
                 setRollItems(generateRollList(valid));
             });
     }, []);
+
+
+
 
     /* ===== SINH DANH SÁCH QUAY ===== */
     const generateRollList = (list, size = ROLL_SIZE) => {
@@ -46,25 +66,37 @@ export default function LuckyWheel() {
         setRolling(true);
         setWinner(null);
 
-        const list = generateRollList(participants);
-        setRollItems(list);
+        let winnerToUse = forcedWinner;
+
+        if (!winnerToUse) {
+            winnerToUse =
+                participants[Math.floor(Math.random() * participants.length)];
+        }
+
+        const { result, targetIndex } =
+            generateRollWithWinner(participants, winnerToUse);
+
+        setRollItems(result);
 
         requestAnimationFrame(() => {
             const track = trackRef.current;
-            if (!track) return;
+            if (!track) {
+                setRolling(false);
+                return;
+            }
 
-            const items = track.children;
             const container = track.parentElement;
-
-            const containerCenter =
-                container.offsetWidth / 2;
-
-            const targetIndex = Math.floor(list.length / 2);
+            const items = track.children;
             const targetItem = items[targetIndex];
 
+            if (!targetItem) {
+                setRolling(false);
+                return;
+            }
+
+            const containerCenter = container.offsetWidth / 2;
             const itemCenter =
-                targetItem.offsetLeft +
-                targetItem.offsetWidth / 2;
+                targetItem.offsetLeft + targetItem.offsetWidth / 2;
 
             const offset = itemCenter - containerCenter;
 
@@ -77,11 +109,14 @@ export default function LuckyWheel() {
             track.style.transform = `translateX(-${offset}px)`;
 
             setTimeout(() => {
-                setWinner(list[targetIndex]);
+                setWinner(winnerToUse);
                 setRolling(false);
             }, SPIN_DURATION);
         });
     };
+
+
+
 
 
     return (

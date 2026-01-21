@@ -50,6 +50,7 @@ import ParticipantQrCard from "../components/user/ParticipantQrCard";
 import ParticipantsQrPage from "../pages/user/ParticipantsQrPage";
 import CheckinPage from "../pages/user/CheckinPage";
 import RealtimeCheckinPage from "../pages/user/RealtimeCheckinPage";
+import ForceWinnerPage from "../components/user/ForceWinnerPage";
 
 export default function AppRoutes() {
 
@@ -225,6 +226,9 @@ export default function AppRoutes() {
             </Route>
             <Route path="/RealtimeCheckinPage" >
                 <Route index element={<RealtimeCheckinPage />} />
+            </Route>
+            <Route path="/ForceWinnerPage" >
+                <Route index element={<ForceWinnerPage />} />
             </Route>
         </Routes>
     );
