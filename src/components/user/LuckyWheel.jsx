@@ -1,78 +1,142 @@
-import { useEffect, useRef, useState } from "react";
-import { getParticipants, spinParticipant } from "../../services/participants.api";
-import '../user/css/LuckyWheel.css'
+import React, { useEffect, useRef, useState } from "react";
+
+/* ===== CONFIG ===== */
+const ITEM_WIDTH = 230;
+const ITEM_MARGIN = 32; // mx-2 (16px * 2)
+const ITEM_FULL_WIDTH = ITEM_WIDTH + ITEM_MARGIN;
+
 export default function LuckyWheel() {
-    const wheelRef = useRef(null);
+    const trackRef = useRef(null);
 
     const [participants, setParticipants] = useState([]);
-    const [spinning, setSpinning] = useState(false);
+    const [rollItems, setRollItems] = useState([]);
+    const [rolling, setRolling] = useState(false);
     const [winner, setWinner] = useState(null);
 
+    /* ===== LOAD DATA TỪ DB ===== */
     useEffect(() => {
-        loadParticipants();
+        fetch("http://localhost:3000/participants")
+            .then(res => res.json())
+            .then(data => {
+                const valid = data.filter(
+                    p => p.isCheckedIn && !p.isWinner
+                );
+
+                setParticipants(valid);
+
+                // init vòng xoay (tránh trắng lần đầu)
+                if (valid.length > 0) {
+                    setRollItems(generateRollList(valid, valid[0]));
+                }
+            });
     }, []);
 
-    const loadParticipants = async () => {
-        const res = await getParticipants();
-        setParticipants(res.data);
+    /* ===== RANDOM NGƯỜI TRÚNG ===== */
+    const randomWinner = () => {
+        return participants[Math.floor(Math.random() * participants.length)];
     };
 
-    const handleSpin = async () => {
-        if (spinning || participants.length === 0) return;
-        setSpinning(true);
+    /* ===== SINH DANH SÁCH QUAY ===== */
+    const generateRollList = (list, winItem, size = 150) => {
+        const result = [];
+        for (let i = 0; i < size; i++) {
+            result.push(list[Math.floor(Math.random() * list.length)]);
+        }
+        result[Math.floor(size / 2)] = winItem;
+        return result;
+    };
 
-        const res = await spinParticipant();
-        const { winner, remaining } = res.data;
+    /* ===== QUAY ===== */
+    const spin = () => {
+        if (rolling || participants.length === 0) return;
 
-        const index = participants.findIndex(p => p.id === winner.id);
-        const slice = 360 / participants.length;
+        setRolling(true);
+        setWinner(null);
 
-        const angle =
-            360 * 6 + // quay 6 vòng
-            index * slice +
-            slice / 2;
-
-        wheelRef.current.style.transition =
-            "transform 5s cubic-bezier(0.33, 1, 0.68, 1)";
-        wheelRef.current.style.transform = `rotate(${angle}deg)`;
+        const win = randomWinner();
+        const list = generateRollList(participants, win);
+        setRollItems(list);
 
         setTimeout(() => {
-            setWinner(winner);
-            setParticipants(remaining);
-            setSpinning(false);
-        }, 5000);
+            const track = trackRef.current;
+
+            // reset animation
+            track.style.transition = "none";
+            track.style.transform = "translateX(0)";
+            void track.offsetHeight; // force reflow
+
+            const targetIndex = Math.floor(list.length / 2);
+            const containerWidth = track.parentElement.offsetWidth;
+
+            const offset =
+                targetIndex * ITEM_FULL_WIDTH -
+                containerWidth / 2 +
+                ITEM_FULL_WIDTH / 2;
+
+            track.style.transition =
+                "transform 5s cubic-bezier(.08,.6,0,1)";
+            track.style.transform = `translateX(-${offset}px)`;
+
+            setTimeout(() => {
+                setWinner(win);
+                setRolling(false);
+            }, 5000);
+        }, 100);
     };
 
     return (
-        <div className="wheel-container">
-            <h1>🎉 VÒNG QUAY MAY MẮN 🎉</h1>
+        <div className="container py-5">
+            <h3 className="text-center mb-4">🎯 Vòng xoay trúng thưởng</h3>
 
-            <div className="wheel-wrapper">
-                <div className="pointer">▼</div>
+            <div
+                className="position-relative border rounded bg-light mx-auto mb-4"
+                style={{ width: 700, height: 160, overflow: "hidden" }}
+            >
+                {/* Vạch giữa */}
+                <div
+                    className="position-absolute top-0 bottom-0 start-50 bg-danger"
+                    style={{ width: 4, transform: "translateX(-50%)" }}
+                />
 
-                <div className="wheel" ref={wheelRef}>
-                    {participants.map((p, i) => (
+                {/* Track */}
+                <div
+                    ref={trackRef}
+                    className="d-flex align-items-center h-100"
+                >
+                    {rollItems.map((p, idx) => (
                         <div
-                            key={p.id}
-                            className="slice"
+                            key={idx}
+                            className="card bg-primary text-white mx-2"
                             style={{
-                                transform: `rotate(${(360 / participants.length) * i}deg)`
+                                width: ITEM_WIDTH,
+                                height: 120,
+                                flexShrink: 0,
                             }}
                         >
-                            <span>{p.fullName}</span>
+                            <div
+                                className="card-body d-flex align-items-center justify-content-center text-center fw-bold p-0"
+                            >
+                                {p.fullName}
+                            </div>
+
                         </div>
                     ))}
                 </div>
             </div>
 
-            <button onClick={handleSpin} disabled={spinning}>
-                {spinning ? "ĐANG QUAY..." : "XOAY 🎡"}
-            </button>
+            <div className="text-center">
+                <button
+                    className="btn btn-success px-4"
+                    onClick={spin}
+                    disabled={rolling || participants.length === 0}
+                >
+                    {rolling ? "Đang quay..." : "Quay"}
+                </button>
+            </div>
 
             {winner && (
-                <div className="result">
-                    🎉 Người trúng giải:
-                    <h2>{winner.fullName}</h2>
+                <div className="alert alert-success text-center mt-4">
+                    🎉 Người trúng thưởng: <strong>{winner.fullName}</strong>
                 </div>
             )}
         </div>

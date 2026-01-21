@@ -1,0 +1,18 @@
+.bg-checkin {
+    background-image: url('../../../assets/user/thumb-03.jpg');
+    min-height: 100vh;
+    background-repeat: repeat-x;
+    background-size: 120% auto;
+    background-position: 0% 50%;
+    animation: bg-checkin 30s linear infinite;
+}
+
+@keyframes bg-checkin {
+    from {
+        background-position: 0% 50%;
+    }
+
+    to {
+        background-position: 100% 50%;
+    }
+}
