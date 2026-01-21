@@ -56,82 +56,187 @@ export default function FormCreate({ onProductAdded }) {
        SUBMIT
        ========================================================================= */
 
+    // const onSubmit = async (e) => {
+    //     e.preventDefault();
+    //     setIsSaving(true);
+
+    //     try {
+    //         const formData = new FormData();
+
+    //         // ===== BASIC INFO =====
+    //         formData.append("productName", form.productName.trim());
+    //         formData.append("shortDescription", form.shortDescription || "");
+    //         formData.append("longDescription", form.longDescription || "");
+    //         formData.append("origin", form.origin || "");
+    //         formData.append("status", String(statusCreate));
+    //         formData.append("categoryId", String(categoryId));
+
+    //         // ===== PRODUCT IMAGES =====
+    //         appendFiles(
+    //             formData,
+    //             "newImages",
+    //             form.images
+    //                 .filter(img => img.file instanceof File)
+    //                 .map(img => img.file)
+    //         );
+
+    //         // ===== VARIANT IMAGES =====
+    //         variantsFromForm.forEach(v => {
+    //             if (v.imageFile && v.sku) {
+    //                 formData.append(`variantImage_${v.sku}`, v.imageFile);
+    //             }
+    //         });
+
+    //         // ===== VARIANTS + INVENTORY =====
+
+    //         const variantsPayload = buildVariantsPayload(
+    //             variantsFromForm.map(v => ({
+    //                 ...v,
+    //                 inventory: inventoryDraft ?? [],
+    //             }))
+    //         );
+
+    //         formData.append("variants", JSON.stringify(variantsPayload));
+
+    //         // ===== USER MANUAL =====
+    //         formData.append(
+    //             "userManual",
+    //             JSON.stringify({
+    //                 pdf: null,
+    //                 video: null,
+    //                 steps: splitLines(form.userManual),
+    //             })
+    //         );
+
+    //         // ===== CAUTION NOTES =====
+    //         formData.append(
+    //             "cautionNotes",
+    //             JSON.stringify(splitLines(form.cautionNotes))
+    //         );
+
+    //         // ===== API =====
+    //         const res = await axios.post(
+    //             `${process.env.REACT_APP_API_URL}/products`,
+    //             formData
+    //         );
+
+    //         alert("Thêm sản phẩm thành công!");
+    //         console.log(res.data.data);
+
+    //         onProductAdded(res.data.data);
+
+    //     } catch (err) {
+    //         console.error(err);
+    //         alert("Thêm sản phẩm thất bại");
+    //     } finally {
+    //         setIsSaving(false);
+    //     }
+    // };
+    const validateForm = () => {
+    if (!form.productName?.trim()) return "Tên sản phẩm không được để trống";
+    if (!categoryId) return "Vui lòng chọn danh mục";
+    if (!form.shortDescription?.trim()) return "Mô tả ngắn không được để trống";
+    if (!variantsFromForm.length) return "Phải có ít nhất 1 biến thể";
+
+    for (let i = 0; i < variantsFromForm.length; i++) {
+        const v = variantsFromForm[i];
+        if (!v.sku) return `Biến thể ${i + 1}: SKU không được để trống`;  
+              
+        if (!v.imageFile) return `Biến thể ${i + 1}: Chưa chọn hình ảnh`;
+    }
+
+    return null;
+};
+
     const onSubmit = async (e) => {
-        e.preventDefault();
-        setIsSaving(true);
+        
+    e.preventDefault();
 
-        try {
-            const formData = new FormData();
+    const errorMessage = validateForm();
+    if (errorMessage) {
+        alert(errorMessage);
+        return;
+    }
 
-            // ===== BASIC INFO =====
-            formData.append("productName", form.productName.trim());
-            formData.append("shortDescription", form.shortDescription || "");
-            formData.append("longDescription", form.longDescription || "");
-            formData.append("origin", form.origin || "");
-            formData.append("status", String(statusCreate));
-            formData.append("categoryId", String(categoryId));
+    setIsSaving(true);
 
-            // ===== PRODUCT IMAGES =====
-            appendFiles(
-                formData,
-                "newImages",
-                form.images
-                    .filter(img => img.file instanceof File)
-                    .map(img => img.file)
-            );
+    try {
+        const formData = new FormData();
 
-            // ===== VARIANT IMAGES =====
-            variantsFromForm.forEach(v => {
-                if (v.imageFile && v.sku) {
-                    formData.append(`variantImage_${v.sku}`, v.imageFile);
-                }
-            });
+        // ===== BASIC INFO =====
+        formData.append("productName", form.productName.trim());
+        formData.append("shortDescription", form.shortDescription || "");
+        formData.append("longDescription", form.longDescription || "");
+        formData.append("origin", form.origin || "");
+        formData.append("status", String(statusCreate));
+        formData.append("categoryId", String(categoryId));
 
-            // ===== VARIANTS + INVENTORY =====
+        // ===== PRODUCT IMAGES =====
+        appendFiles(
+            formData,
+            "newImages",
+            form.images
+                .filter(img => img.file instanceof File)
+                .map(img => img.file)
+        );
 
-            const variantsPayload = buildVariantsPayload(
-                variantsFromForm.map(v => ({
-                    ...v,
-                    inventory: inventoryDraft ?? [],
-                }))
-            );
+        // ===== VARIANT IMAGES =====
+        variantsFromForm.forEach(v => {
+            if (v.imageFile && v.sku) {
+                formData.append(`variantImage_${v.sku}`, v.imageFile);
+            }
+        });
 
-            formData.append("variants", JSON.stringify(variantsPayload));
+        // ===== VARIANTS + INVENTORY =====
+        const variantsPayload = buildVariantsPayload(
+            variantsFromForm.map(v => ({
+                ...v,
+                inventory: inventoryDraft ?? [],
+            }))
+        );
 
-            // ===== USER MANUAL =====
-            formData.append(
-                "userManual",
-                JSON.stringify({
-                    pdf: null,
-                    video: null,
-                    steps: splitLines(form.userManual),
-                })
-            );
+        formData.append("variants", JSON.stringify(variantsPayload));
 
-            // ===== CAUTION NOTES =====
-            formData.append(
-                "cautionNotes",
-                JSON.stringify(splitLines(form.cautionNotes))
-            );
+        // ===== USER MANUAL =====
+        formData.append(
+            "userManual",
+            JSON.stringify({
+                pdf: null,
+                video: null,
+                steps: splitLines(form.userManual),
+            })
+        );
 
-            // ===== API =====
-            const res = await axios.post(
-                `${process.env.REACT_APP_API_URL}/products`,
-                formData
-            );
+        // ===== CAUTION NOTES =====
+        formData.append(
+            "cautionNotes",
+            JSON.stringify(splitLines(form.cautionNotes))
+        );
 
-            alert("Thêm sản phẩm thành công!");
-            console.log(res.data.data);
+        const res = await axios.post(
+            `${process.env.REACT_APP_API_URL}/products`,
+            formData
+        );
 
-            onProductAdded(res.data.data);
+        alert("Thêm sản phẩm thành công!");
+        onProductAdded(res.data.data);
 
-        } catch (err) {
-            console.error(err);
-            alert("Thêm sản phẩm thất bại");
-        } finally {
-            setIsSaving(false);
-        }
-    };
+    } catch (err) {
+        handleApiError(err);
+    } finally {
+        setIsSaving(false);
+    }
+};
+
+const handleApiError = (err) => {
+    if (err.response) {
+        alert(err.response.data?.message || "Dữ liệu không hợp lệ");
+    } else {
+        alert(err.message || "Lỗi không xác định");
+    }
+};
+
+//end of onSubmit
 
     /* =========================================================================
        STATUS OPTIONS
