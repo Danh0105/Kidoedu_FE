@@ -208,13 +208,25 @@ export default function CheckinPage() {
 
             {/* PREVIEW */}
             {preview && (
-                <div style={{ marginTop: 15 }}>
+                <div style={{
+                    position: "fixed",
+                    inset: 0,
+                    background: "rgba(0,0,0,0.9)",
+                    zIndex: 9999,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+                >
                     <img
                         src={preview}
                         width={200}
                         style={{
-                            borderRadius: 10,
-                            border: "2px solid #4caf50",
+                            width: "90vw",
+                            maxHeight: "75vh",
+                            objectFit: "contain",
+                            borderRadius: 16,
                         }}
                     />
 
