@@ -14,8 +14,7 @@ export default function LuckyWheel({ trackRef, rollItems }) {
     return (
         <div className="container py-5" >
             <div
-                className="position-relative border rounded bg-light mx-auto mb-4"
-                style={{ width: 1000, height: 160, overflow: "hidden" }}
+                className="position-relative bg-light mx-auto mb-4 border-none roll-container"
             >
                 {/* Vạch đỏ */}
 

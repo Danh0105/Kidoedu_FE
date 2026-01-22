@@ -1,24 +1,29 @@
 import React from "react";
 import "./WinnerModal.css";
-
+import boss from '../../../assets/user/avatar.png';
+import frameWinner from '../../../assets/user/winnerbg.png';
 export default function WinnerModal({ winner, onClose }) {
     if (!winner) return null;
 
     return (
         <div className="winner-backdrop">
             <div className="winner-modal">
-                <div className="winner-icon">🎉</div>
 
-                <div className="winner-title">
-                    Người trúng thưởng
+                <div className="frame-wrapper">
+                    <img src={boss} className="winner-avatar-img" />
+                    <img src={frameWinner} className="frame-img" />
+
+                    <div className="winner-content">
+                        <div className="winner-icon">🎉</div>
+                        <div className="winner-title">Người trúng thưởng</div>
+                        <div className="winner-name">{winner.fullName}</div>
+                        <div className="winner-type">Chức vụ: {winner.guestType}</div>
+                    </div>
                 </div>
-
-                <div className="winner-name">
-                    {winner.fullName}
-                </div>
-
 
             </div>
         </div>
+
+
     );
 }

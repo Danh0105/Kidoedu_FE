@@ -197,3 +197,12 @@
         opacity: 0;
     }
 }
+
+.roll-container {
+    width: 100%;
+    max-width: 865px;
+    height: 200px;
+    margin-top: 78px;
+    overflow: hidden;
+    background: transparent;
+}
