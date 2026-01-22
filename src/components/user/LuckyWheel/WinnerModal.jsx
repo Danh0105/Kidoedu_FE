@@ -1,6 +1,4 @@
-import React from "react";
 import "./WinnerModal.css";
-import boss from '../../../assets/user/avatar.png';
 import frameWinner from '../../../assets/user/winnerbg.png';
 export default function WinnerModal({ winner, onClose }) {
     if (!winner) return null;
