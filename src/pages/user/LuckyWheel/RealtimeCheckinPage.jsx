@@ -149,6 +149,7 @@ export default function RealtimeCheckinPage() {
                                     <th style={{ width: 60 }}>#</th>
                                     <th>Khách hàng</th>
                                     <th>Email</th>
+                                    <th>Ảnh</th>
                                     <th className="text-end">
                                         <i className="bi bi-clock me-1"></i>
                                         Thời gian
@@ -209,7 +210,9 @@ export default function RealtimeCheckinPage() {
                                             <i className="bi bi-envelope me-1"></i>
                                             {p.email}
                                         </td>
-
+                                        <td className="text-muted">
+                                            <img src={`${process.env.REACT_APP_API_URL}${p.avatar}`} alt="" width="100" height="100" className="rounded-circle" />
+                                        </td>
                                         <td className="text-end fw-semibold">
                                             {new Date(p.checkedInAt).toLocaleTimeString()}
                                         </td>

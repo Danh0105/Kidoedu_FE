@@ -153,14 +153,21 @@ export default function CheckinPage() {
         );
     }
     const startCamera = async () => {
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "user" },
-            audio: false,
-        });
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: "environment", // camera trước
+                },
+                audio: false,
+            });
 
-        streamRef.current = stream;
-        videoRef.current.srcObject = stream;
+            streamRef.current = stream;
+            videoRef.current.srcObject = stream;
+        } catch (err) {
+            alert("Không thể mở camera");
+        }
     };
+
 
     return (
         <div style={{ textAlign: "center", marginTop: 30 }}>
