@@ -26,7 +26,7 @@ export default function CheckinPage() {
             return;
         }
 
-        fetch("http://localhost:3000/participants/checkin", {
+        fetch(`${process.env.REACT_APP_API_URL}/participants/checkin`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ qrCode: code }),
@@ -112,7 +112,7 @@ export default function CheckinPage() {
             form.append("file", imageBlob, "checkin.jpg");
 
             const res = await fetch(
-                `http://localhost:3000/participants/checkin/avatar/${participant.id}`,
+                `${process.env.REACT_APP_API_URL}/participants/checkin/avatar/${participant.id}`,
                 {
                     method: "POST",
                     body: form,
