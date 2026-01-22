@@ -6,7 +6,7 @@ export default function ParticipantsQrPage() {
     const [sendingAll, setSendingAll] = useState(false);
 
     useEffect(() => {
-        fetch("http://localhost:3000/participants")
+        fetch(`${process.env.REACT_APP_API_URL}/participants`)
             .then((res) => res.json())
             .then(setParticipants);
     }, []);
@@ -17,7 +17,7 @@ export default function ParticipantsQrPage() {
         setSendingAll(true);
         try {
             await fetch(
-                "http://localhost:3000/participants/send-invite-all",
+                `${process.env.REACT_APP_API_URL}/participants/send-invite-all`,
                 { method: "POST" }
             );
             alert("Đã đưa toàn bộ email vào hàng đợi gửi");
