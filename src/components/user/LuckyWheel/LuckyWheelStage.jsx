@@ -10,18 +10,23 @@ const ROLL_SIZE = 150;
 /* ===== CARD NGƯỜI THAM GIA ===== */
 const ParticipantCard = ({ p }) => (
     <div className={`p-card ${p.isForcedWinner ? "forced" : ""}`}>
-
-        <div className="d-flex ">
-            <div>
-                <img src={avatar} alt="" width={50} height={50} />
+        <div className="p-card-inner">
+            <div className="avatar">
+                <img src={avatar} alt={p.fullName} />
             </div>
-            <div>
-                <div className="fullname">{p.fullName}</div>
-                <div className="fullname">Chủ tích hội đồng quản trị</div>
+
+            <div className="info">
+                <div className="name" title={p.fullName}>
+                    {p.fullName}
+                </div>
+                <div className="title">
+                    Chủ tịch HĐQT
+                </div>
             </div>
         </div>
     </div>
 );
+
 
 /* ===== CHIA DANH SÁCH THÀNH 4 CẠNH ===== */
 const splitSides = (list) => {
@@ -183,19 +188,19 @@ export default function LuckyWheelStage() {
                     <img src={Asset} alt="" style={{ maxWidth: '60px' }} className="img-arrow" />
                 </div>
                 {/* ===== TOP ===== */}
-                <div className="side top">
+                {/* <div className="side top">
                     {sides.top.map(p => (
                         <ParticipantCard key={p.id} p={p} />
                     ))}
                 </div>
-
+ */}
                 {/* ===== LEFT ===== */}
-                <div className="side left">
+                {/*    <div className="side left">
                     {sides.left.map(p => (
                         <ParticipantCard key={p.id} p={p} />
                     ))}
                 </div>
-
+ */}
                 {/* ===== CENTER (VÒNG QUAY) ===== */}
                 <div className="center">
                     <LuckyWheel
@@ -209,25 +214,21 @@ export default function LuckyWheelStage() {
                     onClose={() => setShowWinnerModal(false)}
                 />
                 {/* ===== RIGHT ===== */}
-                <div className="side right">
+                {/*    <div className="side right">
                     {sides.right.map(p => (
                         <ParticipantCard key={p.id} p={p} />
                     ))}
                 </div>
-
+ */}
                 {/* ===== BOTTOM ===== */}
-                <div className="side bottom">
+                {/*  <div className="side bottom">
                     {sides.bottom.map(p => (
                         <ParticipantCard key={p.id} p={p} />
                     ))}
                 </div>
-
+ */}
                 {/* ===== PAGE INDICATOR ===== */}
-                {pageCount > 1 && (
-                    <div className="page-indicator">
-                        Trang {page + 1} / {pageCount}
-                    </div>
-                )}
+
             </div>
         </div>
 

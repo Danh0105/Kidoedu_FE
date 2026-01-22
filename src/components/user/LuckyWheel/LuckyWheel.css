@@ -4,16 +4,12 @@
     height: 100vh;
     background: #f8f9fa;
     overflow: hidden;
-
     background-image: url('../../../assets/user/bg-lucky.png');
-    min-height: 100vh;
-    background-size: cover;
+    background-size: 100% 100%;
     background-position: center;
     background-repeat: no-repeat;
 
     cursor: none;
-
-
 }
 
 
@@ -55,37 +51,101 @@
     justify-content: center;
 }
 
-.left {
-    left: 24px;
+.left,
+.right {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 cột */
+    gap: 12px;
+
     top: 50%;
     transform: translateY(-50%);
-    flex-direction: column;
+    max-height: 70vh;
+    /* tránh tràn màn */
+    overflow-y: auto;
+    /* scroll nếu nhiều người */
+}
+
+.left {
+    left: 24px;
 }
 
 .right {
     right: 24px;
-    top: 50%;
-    transform: translateY(-50%);
-    flex-direction: column;
 }
+
 
 
 /* ===== CARD ===== */
+/* ===== CARD ===== */
 .p-card {
-    width: 150px;
-    padding: 5px;
-    background: white;
-    border-radius: 8px;
-    text-align: center;
-    font-weight: 600;
-    font-size: 13px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(180deg, #ffffff, #f8f9fa);
+    border-radius: 12px;
+    padding: 10px 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    transition: all .25s ease;
+    cursor: default;
 }
 
-.p-card.forced {
-    background: #fff3cd;
-    border: 2px solid #dc3545;
+.p-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
 }
+
+/* ===== INNER ===== */
+.p-card-inner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ===== AVATAR ===== */
+.avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid #e9ecef;
+    background: #fff;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ===== INFO ===== */
+.info {
+    min-width: 0;
+}
+
+.name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #212529;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.title {
+    font-size: 11px;
+    color: #6c757d;
+}
+
+/* ===== FORCED WINNER ===== */
+.p-card.forced {
+    background: linear-gradient(180deg, #fff3cd, #ffe8a1);
+    border: 2px solid #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+}
+
+.p-card.forced .name {
+    color: #b02a37;
+}
+
 
 /* ===== PAGE ===== */
 .page-indicator {
@@ -101,7 +161,7 @@
 
 .lucky-arrow {
     position: absolute;
-    top: 35%;
+    top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 999;
@@ -136,8 +196,4 @@
         transform: translateY(110vh) rotate(720deg);
         opacity: 0;
     }
-}
-
-.fullname {
-    font-size: 10px;
 }
