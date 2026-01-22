@@ -1,43 +1,54 @@
 let cachedVoices = [];
+let voicesLoaded = false;
 
 function loadVoices() {
     return new Promise((resolve) => {
-        const voices = window.speechSynthesis.getVoices();
+        if (voicesLoaded && cachedVoices.length) {
+            resolve(cachedVoices);
+            return;
+        }
+
+        const voices = speechSynthesis.getVoices();
         if (voices.length) {
             cachedVoices = voices;
+            voicesLoaded = true;
             resolve(voices);
-        } else {
-            window.speechSynthesis.onvoiceschanged = () => {
-                cachedVoices = window.speechSynthesis.getVoices();
-                resolve(cachedVoices);
-            };
+            return;
         }
+
+        speechSynthesis.onvoiceschanged = () => {
+            cachedVoices = speechSynthesis.getVoices();
+            voicesLoaded = true;
+            speechSynthesis.onvoiceschanged = null;
+            resolve(cachedVoices);
+        };
     });
+}
+
+function pickVietnameseVoice(voices) {
+    return (
+        voices.find(v =>
+            v.lang === "vi-VN" &&
+            /hoaimy|female|google/i.test(v.name)
+        ) ||
+        voices.find(v => v.lang === "vi-VN") ||
+        voices.find(v => v.lang.startsWith("vi"))
+    );
 }
 
 export async function speak(text) {
     if (!("speechSynthesis" in window)) return;
 
-    const voices = cachedVoices.length
-        ? cachedVoices
-        : await loadVoices();
+    const voices = await loadVoices();
+    const voice = pickVietnameseVoice(voices);
 
     const msg = new SpeechSynthesisUtterance(text);
     msg.lang = "vi-VN";
+    msg.voice = voice || null;
     msg.rate = 1;
     msg.pitch = 1;
     msg.volume = 1;
 
-    // 🎯 ƯU TIÊN GIỌNG VIỆT
-    const viVoice =
-        voices.find(v => v.lang === "vi-VN" && v.name.toLowerCase().includes("female")) ||
-        voices.find(v => v.lang === "vi-VN") ||
-        voices.find(v => v.lang.startsWith("vi"));
-
-    if (viVoice) {
-        msg.voice = viVoice;
-    }
-
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(msg);
+    speechSynthesis.cancel();
+    speechSynthesis.speak(msg);
 }

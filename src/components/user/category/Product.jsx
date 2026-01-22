@@ -303,7 +303,7 @@ export default function Product({ prod }) {
                 onClose={() => setShowModalBuy(false)}
                 product={prod}
 
-            />0//
+            />
         </>
 
     );

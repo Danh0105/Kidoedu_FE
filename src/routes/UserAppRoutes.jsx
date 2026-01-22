@@ -44,13 +44,13 @@ import CheckoutRental from "../pages/user/CheckoutRental";
 import VerifySuccess from "../pages/user/VerifySuccess";
 import PaymentResult from "../pages/user/PaymentResult";
 import LuckyWheel from "../components/user/LuckyWheel";
-import ScanQrCode from "../pages/user/ScanQrPage"
+import ScanQrCode from "../pages/user/LuckyWheel/ScanQrPage"
 import ImportParticipants from "../pages/user/ImportParticipants";
-import ParticipantQrCard from "../components/user/ParticipantQrCard";
-import ParticipantsQrPage from "../pages/user/ParticipantsQrPage";
+import ParticipantQrCard from "../components/user/LuckyWheel/ParticipantQrCard";
+import ParticipantsQrPage from "../pages/user/LuckyWheel/ParticipantsQrPage";
 import CheckinPage from "../pages/user/CheckinPage";
-import RealtimeCheckinPage from "../pages/user/RealtimeCheckinPage";
-import ForceWinnerPage from "../components/user/ForceWinnerPage";
+import RealtimeCheckinPage from "../pages/user/LuckyWheel/RealtimeCheckinPage";
+import ForceWinnerPage from "../components/user/LuckyWheel/ForceWinnerPage";
 
 export default function AppRoutes() {
 

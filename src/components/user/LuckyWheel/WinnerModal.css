@@ -1,0 +1,49 @@
+.winner-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.winner-modal {
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px 60px;
+    text-align: center;
+    min-width: 400px;
+
+    animation: flyIn 0.6s cubic-bezier(.25, .8, .25, 1);
+}
+
+.winner-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.winner-title {
+    font-size: 20px;
+    color: #666;
+    margin-bottom: 12px;
+}
+
+.winner-name {
+    font-size: 32px;
+    font-weight: 800;
+    color: #198754;
+}
+
+@keyframes flyIn {
+    from {
+        transform: translateY(-80px) scale(0.9);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
