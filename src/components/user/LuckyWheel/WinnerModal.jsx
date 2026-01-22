@@ -10,7 +10,7 @@ export default function WinnerModal({ winner, onClose }) {
             <div className="winner-modal">
 
                 <div className="frame-wrapper">
-                    <img src={boss} className="winner-avatar-img" />
+                    <img src={process.env.REACT_APP_API_URL + winner.avatar} className="winner-avatar-img" />
                     <img src={frameWinner} className="frame-img" />
 
                     <div className="winner-content">
