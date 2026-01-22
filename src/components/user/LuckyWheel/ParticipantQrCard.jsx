@@ -11,7 +11,7 @@ export default function ParticipantQrCard({ participant }) {
 
         try {
             const res = await fetch(
-                `http://localhost:3000/participants/${participant.id}/send-invite`,
+                `${process.env.REACT_APP_API_URL}/participants/${participant.id}/send-invite`,
                 { method: "POST" }
             );
 

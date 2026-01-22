@@ -21,7 +21,7 @@ export default function ImportParticipants() {
             formData.append("file", file);
 
             const res = await fetch(
-                "http://localhost:3000/participants/import-file",
+                `${process.env.REACT_APP_API_URL}/participants/import-file`,
                 {
                     method: "POST",
                     body: formData,

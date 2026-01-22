@@ -6,7 +6,7 @@ export default function ForceWinnerPage() {
 
     /* ===== LOAD PARTICIPANTS ===== */
     const loadParticipants = async () => {
-        const res = await fetch("http://localhost:3000/participants");
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/participants`);
         const data = await res.json();
 
         setParticipants(
@@ -23,7 +23,7 @@ export default function ForceWinnerPage() {
         setLoading(true);
 
         await fetch(
-            "http://localhost:3000/participants/force-winner",
+            `${process.env.REACT_APP_API_URL}/participants/force-winner`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -39,7 +39,7 @@ export default function ForceWinnerPage() {
         setLoading(true);
 
         await fetch(
-            "http://localhost:3000/participants/clear-force-winner",
+            `${process.env.REACT_APP_API_URL}/participants/clear-force-winner`,
             { method: "POST" }
         );
 

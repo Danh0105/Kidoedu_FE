@@ -14,7 +14,7 @@ export default function RealtimeCheckinPage() {
         const fetchData = async () => {
             try {
                 const res = await fetch(
-                    "http://localhost:3000/participants/checked-in"
+                    `${process.env.REACT_APP_API_URL}/participants/checked-in`
                 );
                 const data = await res.json();
 

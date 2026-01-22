@@ -88,7 +88,7 @@ export default function LuckyWheelStage() {
     /* ===== QUAY ===== */
     /* ===== LOAD PARTICIPANTS TỪ DB ===== */
     const loadParticipants = async () => {
-        const res = await fetch("http://localhost:3000/participants");
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/participants`);
         const data = await res.json();
 
         const valid = data.filter(

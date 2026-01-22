@@ -33,7 +33,7 @@ export default function CameraCapture({ participantId, onUploaded }) {
             form.append("file", blob, "checkin.jpg");
 
             const res = await fetch(
-                `http://localhost:3000/participants/checkin/avatar/${participantId}`,
+                `${process.env.REACT_APP_API_URL}/participants/checkin/avatar/${participantId}`,
                 {
                     method: "POST",
                     body: form,

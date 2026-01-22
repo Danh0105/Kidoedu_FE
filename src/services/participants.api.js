@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "http://localhost:3000", // sửa nếu BE khác port
+    baseURL: `${process.env.REACT_APP_API_URL}`, // sửa nếu BE khác port
 });
 
 export const importParticipants = (data) =>
