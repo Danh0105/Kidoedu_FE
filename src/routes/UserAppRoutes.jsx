@@ -51,6 +51,7 @@ import ParticipantsQrPage from "../pages/user/LuckyWheel/ParticipantsQrPage";
 import CheckinPage from "../pages/user/CheckinPage";
 import RealtimeCheckinPage from "../pages/user/LuckyWheel/RealtimeCheckinPage";
 import ForceWinnerPage from "../components/user/LuckyWheel/ForceWinnerPage";
+import CreateParticipantQR from "../pages/user/CreateParticipantQR";
 
 export default function AppRoutes() {
 
@@ -217,6 +218,9 @@ export default function AppRoutes() {
             </Route>
             <Route path="/ImportParticipants" >
                 <Route index element={<ImportParticipants />} />
+            </Route>
+            <Route path="/CreateParticipantQr" >
+                <Route index element={<CreateParticipantQR />} />
             </Route>
             <Route path="/ParticipantQrCard" >
                 <Route index element={<ParticipantsQrPage />} />
