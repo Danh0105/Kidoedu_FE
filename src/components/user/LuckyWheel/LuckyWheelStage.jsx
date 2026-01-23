@@ -5,7 +5,7 @@ import WinnerModal from "./WinnerModal";
 import Asset from "../../../assets/user/Asset.png"
 import avatar from "../../../assets/user/avatar.png"
 const PAGE_SIZE = 160;
-const SPIN_DURATION = 5000;
+const SPIN_DURATION = 10000;
 const ROLL_SIZE = 150;
 /* ===== CARD NGƯỜI THAM GIA ===== */
 const ParticipantCard = ({ p }) => (
@@ -105,14 +105,8 @@ export default function LuckyWheelStage() {
         startCoinRainContinuous(80);
     }, []);
 
-    /* ===== PAGINATION ===== */
-    const pageCount = Math.ceil(participants.length / PAGE_SIZE);
-    const pageParticipants = participants.slice(
-        page * PAGE_SIZE,
-        page * PAGE_SIZE + PAGE_SIZE
-    );
 
-    const sides = splitSides(pageParticipants);
+
     const spin = async () => {
         if (rolling) return;
 
@@ -168,7 +162,7 @@ export default function LuckyWheelStage() {
             void track.offsetHeight;
 
             track.style.transition =
-                "transform 5s cubic-bezier(.08,.6,0,1)";
+                `transform ${SPIN_DURATION}ms cubic-bezier(.08,.6,0,1)`;
             track.style.transform = `translateX(-${offset}px)`;
 
             setTimeout(() => {
