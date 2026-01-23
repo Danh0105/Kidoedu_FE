@@ -35,7 +35,7 @@ export default function LuckyWheel({ trackRef, rollItems }) {
                             }}
                         >
                             <div className="card-body d-flex align-items-center justify-content-center text-center fw-bold">
-                                {p.fullName}
+                                {p?.fullName || "No Name"}
                             </div>
                         </div>
                     ))}

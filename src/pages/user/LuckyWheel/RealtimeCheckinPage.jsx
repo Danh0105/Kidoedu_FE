@@ -62,7 +62,7 @@ export default function RealtimeCheckinPage() {
         };
 
         fetchData();
-        const timer = setInterval(fetchData, 3000);
+        const timer = setInterval(fetchData, 5000);
         return () => clearInterval(timer);
     }, [lastId, voiceEnabled]);
 
@@ -84,8 +84,8 @@ export default function RealtimeCheckinPage() {
                         src={`${process.env.REACT_APP_API_URL}${currentGuest.avatar}`}
                         alt={currentGuest.fullName}
                         className="rounded-circle mb-3"
-                        width={180}
-                        height={180}
+                        width={800}
+                        height={800}
                     />
                     <h1 className="fw-bold text-white">
                         {currentGuest.fullName}

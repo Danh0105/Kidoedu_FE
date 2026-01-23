@@ -3,42 +3,12 @@ import LuckyWheel from "./LuckyWheel";
 import "./LuckyWheel.css";
 import WinnerModal from "./WinnerModal";
 import Asset from "../../../assets/user/Asset.png"
-import avatar from "../../../assets/user/avatar.png"
+import mp3luckywheel from '../../../assets/user/luckywheel.mp3'
+import mp3winner from '../../../assets/user/winner.mp3'
 const PAGE_SIZE = 160;
 const SPIN_DURATION = 10000;
 const ROLL_SIZE = 150;
-/* ===== CARD NGƯỜI THAM GIA ===== */
-const ParticipantCard = ({ p }) => (
-    <div className={`p-card ${p.isForcedWinner ? "forced" : ""}`}>
-        <div className="p-card-inner">
-            <div className="avatar">
-                <img src={avatar} alt={p.fullName} />
-            </div>
 
-            <div className="info">
-                <div className="name" title={p.fullName}>
-                    {p.fullName}
-                </div>
-                <div className="title">
-                    Chủ tịch HĐQT
-                </div>
-            </div>
-        </div>
-    </div>
-);
-
-
-/* ===== CHIA DANH SÁCH THÀNH 4 CẠNH ===== */
-const splitSides = (list) => {
-    const perSide = Math.ceil(list.length / 4);
-
-    return {
-        top: list.slice(0, perSide),
-        right: list.slice(perSide, perSide * 2),
-        bottom: list.slice(perSide * 2, perSide * 3),
-        left: list.slice(perSide * 3),
-    };
-};
 
 export default function LuckyWheelStage() {
     const [participants, setParticipants] = useState([]);
@@ -48,8 +18,27 @@ export default function LuckyWheelStage() {
     const [rolling, setRolling] = useState(false);
     const [forcedWinner, setForcedWinner] = useState(null);
     const trackRef = useRef(null);
-
+    const audioRef = useRef(null);
     const [rollItems, setRollItems] = useState([]);
+    const winnerAudioRef = useRef(null);
+    useEffect(() => {
+        const spinAudio = new Audio(mp3luckywheel);
+        spinAudio.loop = true;
+        spinAudio.volume = 0.15;
+        audioRef.current = spinAudio;
+
+        const winAudio = new Audio(mp3winner);
+        winAudio.loop = false;
+        winAudio.volume = 0.8;
+        winnerAudioRef.current = winAudio;
+
+        return () => {
+            spinAudio.pause();
+            spinAudio.currentTime = 0;
+            winAudio.pause();
+            winAudio.currentTime = 0;
+        };
+    }, []);
 
 
     const generateRollWithWinner = (list, winner, size = ROLL_SIZE) => {
@@ -109,7 +98,15 @@ export default function LuckyWheelStage() {
 
     const spin = async () => {
         if (rolling) return;
+        if (winnerAudioRef.current) {
+            winnerAudioRef.current.pause();
+            winnerAudioRef.current.currentTime = 0;
+        }
 
+        // 🔊 BẬT NHẠC QUAY
+        if (audioRef.current && audioRef.current.paused) {
+            audioRef.current.play().catch(() => { });
+        }
         setRolling(true);
         setWinner(null);
 
@@ -166,7 +163,15 @@ export default function LuckyWheelStage() {
             track.style.transform = `translateX(-${offset}px)`;
 
             setTimeout(() => {
+                if (audioRef.current) {
+                    audioRef.current.pause();
+                    audioRef.current.currentTime = 0;
+                }
 
+                // 🎉 BẬT NHẠC WINNER
+                if (winnerAudioRef.current) {
+                    winnerAudioRef.current.play().catch(() => { });
+                }
                 setWinner(winnerToUse);
                 setShowWinnerModal(true);   // 👈 HIỆN MODAL
                 setRolling(false);

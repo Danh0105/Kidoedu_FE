@@ -7,7 +7,7 @@ export default function CreateParticipantQR() {
     const [participant, setParticipant] = useState(null);
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState("");
-
+    const [position, setPosition] = useState("");
     const qrRef = useRef(null);
 
     const handleCreate = async () => {
@@ -21,13 +21,13 @@ export default function CreateParticipantQR() {
 
         try {
             const res = await fetch(
-                /*         `${process.env.REACT_APP_API_URL}/participants`,
-                 */
-                `http://localhost:3000/participants`,
+                `${process.env.REACT_APP_API_URL}/participants`,
+
+                /* `http://localhost:3000/participants`, */
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ fullName, email: email || undefined }),
+                    body: JSON.stringify({ fullName, email: email || undefined, position: position || undefined }),
                 }
             );
 
@@ -116,7 +116,12 @@ export default function CreateParticipantQR() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                 />
-
+                <input
+                    className="form-control mt-2"
+                    placeholder="Chức vụ (không bắt buộc)"
+                    value={position}
+                    onChange={(e) => setPosition(e.target.value)}
+                />
 
                 <button
                     className="btn btn-sm btn-success mt-3 w-100"
