@@ -18,7 +18,7 @@ export default function CreateParticipantQR() {
 
         setLoading(true);
         setStatus("");
-
+        console.log({ fullName, email, position });
         try {
             const res = await fetch(
                 `${process.env.REACT_APP_API_URL}/participants`,
