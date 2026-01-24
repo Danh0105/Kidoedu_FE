@@ -44,7 +44,7 @@ export default function RealtimeCheckinPage() {
                     setCurrentGuest(newest);
                     console.log("New check-in:", newest);
                     speak(
-                        `Xin chào ${newest.fullName} ${newest.position} đã đến tham dự tiệc tất niên`,
+                        `Chào mừng ${newest.fullName} - ${newest.position} đã đến tham dự tiệc tất niên`,
                         () => {
                             // ✅ Ẩn thông báo NGAY khi đọc xong
                             setCurrentGuest(null);
