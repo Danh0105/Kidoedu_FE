@@ -21,7 +21,7 @@ export default function CreateParticipantQR() {
         console.log({ fullName, email, position });
         try {
             const res = await fetch(
-                `https://www.kidoedu.edu.vn/participants`,
+                `${process.env.REACT_APP_API_URL}/participants`,
 
                 /* `http://localhost:3000/participants`, */
                 {
@@ -43,7 +43,7 @@ export default function CreateParticipantQR() {
     };
 
     const qrValue = participant
-        ? `${window.location.origin}/checkin?code=${participant.qrCode}`
+        ? `https://www.kidoedu.edu.vn/checkin?code=${participant.qrCode}`
         : "";
 
     const downloadQR = async () => {
