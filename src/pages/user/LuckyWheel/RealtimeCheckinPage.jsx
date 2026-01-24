@@ -20,41 +20,43 @@ export default function RealtimeCheckinPage() {
                 const data = await res.json();
 
                 if (!data.length) return;
+                console.log("Fetched data:", data);
 
                 const newest = data[0];
-
+                console.log("Newest participant:", newest);
                 // ❌ Không đọc lần load đầu
-                if (isFirstLoad.current) {
-                    isFirstLoad.current = false;
-                    setLastId(newest.id);
-                    return;
-                }
+                /*   if (isFirstLoad.current) {
+                      isFirstLoad.current = false;
+                      setLastId(newest.id);
+                      return;
+                  } */
                 if (!newest.avatar) {
                     return;
                 }
-
+                console.log("Newest avatar:", newest.avatar);
                 // hoặc nếu backend trả avatar rỗng
                 if (typeof newest.avatar === "string" && newest.avatar.trim() === "") {
                     return;
                 }
+                console.log("Last ID:", lastId, "Newest ID:", newest.id);
                 if (newest.id !== lastId) {
                     setLastId(newest.id);
                     setCurrentGuest(newest);
-
+                    console.log("New check-in:", newest);
                     if (voiceEnabled) {
-                        speak(`Xin chào ${newest.fullName} đã đến tham dự tiệc tất niên`);
+                        speak(`Xin chào ${newest.fullName} ${newest.position} đã đến tham dự tiệc tất niên`);
                     }
 
                     startFireworks();
 
                     // ⏱️ Ẩn sau 6 giây
-                    if (hideTimer.current) {
-                        clearTimeout(hideTimer.current);
-                    }
-
-                    hideTimer.current = setTimeout(() => {
-                        setCurrentGuest(null);
-                    }, 60000);
+                    /*                  if (hideTimer.current) {
+                                         clearTimeout(hideTimer.current);
+                                     }
+                 
+                                     hideTimer.current = setTimeout(() => {
+                                         setCurrentGuest(null);
+                                     }, 6000); */
                 }
             } catch (err) {
                 console.error(err);
@@ -62,7 +64,7 @@ export default function RealtimeCheckinPage() {
         };
 
         fetchData();
-        const timer = setInterval(fetchData, 5000);
+        const timer = setInterval(fetchData, 3000);
         return () => clearInterval(timer);
     }, [lastId, voiceEnabled]);
 
@@ -72,10 +74,18 @@ export default function RealtimeCheckinPage() {
             <button
                 className={`btn position-fixed top-0 end-0 m-3 ${voiceEnabled ? "btn-success" : "btn-outline-secondary"
                     }`}
-                onClick={() => setVoiceEnabled(v => !v)}
+                onClick={() => {
+                    setVoiceEnabled(true);
+
+                    // 🔓 unlock speech
+                    const utter = new SpeechSynthesisUtterance(" ");
+                    utter.volume = 0;
+                    speechSynthesis.speak(utter);
+                }}
             >
-                🔊 {voiceEnabled ? "Đã bật giọng đọc" : "Tắt giọng đọc"}
+                🔊 Bật giọng đọc
             </button>
+
 
             {/* ===== HIỂN THỊ KHÁCH MỚI ===== */}
             {currentGuest && (
@@ -83,17 +93,24 @@ export default function RealtimeCheckinPage() {
                     <img
                         src={`${process.env.REACT_APP_API_URL}${currentGuest.avatar}`}
                         alt={currentGuest.fullName}
-                        className="rounded-circle mb-3"
-                        width={800}
-                        height={800}
+                        className="rounded-circle mb-4 guest-avatar"
+                        width={600}
+                        height={600}
                     />
-                    <h1 className="fw-bold text-white">
+
+                    <h1 className="guest-name">
                         {currentGuest.fullName}
                     </h1>
-                    <p className="text-light fs-4">
+
+                    <h2 className="guest-position">
+                        {currentGuest.position}
+                    </h2>
+
+                    <p className="text-light fs-4 mt-3">
                         Welcome to Year End Party 🎉
                     </p>
                 </div>
+
             )}
         </div>
     );

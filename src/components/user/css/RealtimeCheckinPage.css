@@ -34,8 +34,76 @@
 }
 
 .guest-card {
-    backdrop-filter: blur(8px);
-    padding: 40px 60px;
-    border-radius: 24px;
-    background: rgba(0, 0, 0, 0.35);
+    position: relative;
+    padding: 60px 80px;
+    border-radius: 32px;
+
+    /* nền kính tối cao cấp */
+    background: linear-gradient(145deg,
+            rgba(0, 0, 0, 0.65),
+            rgba(30, 30, 30, 0.45));
+
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+
+    /* viền ánh kim */
+    border: 3px solid rgba(255, 215, 0, 0.6);
+
+    /* đổ bóng sâu */
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.8),
+        0 0 60px rgba(255, 215, 0, 0.25);
+
+    animation: cardZoomIn 0.6s ease-out;
+}
+
+
+.guest-name {
+    font-size: 4.5rem;
+    font-weight: 900;
+    margin: 20px 0 10px;
+    color: #fff;
+
+    /* Glow effect */
+    text-shadow:
+        0 0 10px rgba(255, 215, 0, 0.8),
+        0 0 25px rgba(255, 215, 0, 0.6),
+        0 0 45px rgba(255, 215, 0, 0.4);
+
+    animation: namePop 0.6s ease-out;
+}
+
+@keyframes namePop {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.guest-position {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+
+    background: linear-gradient(90deg,
+            #ffdd00,
+            #ff9f00,
+            #ffdd00);
+    background-size: 200% auto;
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    animation: shine 2.5s linear infinite;
+}
+
+@keyframes shine {
+    to {
+        background-position: 200% center;
+    }
 }
