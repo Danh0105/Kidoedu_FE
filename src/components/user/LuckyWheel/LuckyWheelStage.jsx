@@ -184,8 +184,15 @@ export default function LuckyWheelStage() {
         <div className="stage" onClick={spin}>
             <div id="coin-container">
                 <div className="lucky-arrow">
-                    <img src={Asset} alt="" style={{ maxWidth: '60px' }} className="img-arrow" />
+                    <img
+                        src={Asset}
+                        alt=""
+                        className="img-arrow"
+                    />
                 </div>
+
+
+
                 {/* ===== TOP ===== */}
                 {/* <div className="side top">
                     {sides.top.map(p => (

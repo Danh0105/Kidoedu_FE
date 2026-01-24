@@ -12,6 +12,12 @@
     cursor: none;
 }
 
+.bg-participant {
+    background-image: url('../../../assets/user/participant.png');
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
 
 
 .center {
@@ -165,11 +171,30 @@
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 999;
+
 }
 
 .img-arrow {
     transform: rotate(180deg);
+    max-width: 60px;
+}
 
+@keyframes arrowRotateLeft {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    30% {
+        transform: rotate(-45deg);
+    }
+
+    60% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
 }
 
 #coin-container {

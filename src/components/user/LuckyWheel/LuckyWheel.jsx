@@ -27,14 +27,14 @@ export default function LuckyWheel({ trackRef, rollItems }) {
                     {rollItems.map((p, idx) => (
                         <div
                             key={idx}
-                            className="card bg-primary text-white mx-2"
+                            className="card bg-participant text-white mx-2"
                             style={{
                                 width: ITEM_WIDTH,
                                 height: 120,
                                 flexShrink: 0,
                             }}
                         >
-                            <div className="card-body d-flex align-items-center justify-content-center text-center fw-bold">
+                            <div className="card-body d-flex align-items-center justify-content-center text-center fw-bold text-dark">
                                 {p?.fullName || "No Name"}
                             </div>
                         </div>
