@@ -54,7 +54,7 @@ export default function RealtimeCheckinPage() {
 
                     hideTimer.current = setTimeout(() => {
                         setCurrentGuest(null);
-                    }, 6000);
+                    }, 60000);
                 }
             } catch (err) {
                 console.error(err);
