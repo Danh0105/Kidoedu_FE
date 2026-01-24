@@ -21,7 +21,7 @@ export default function CreateParticipantQR() {
         console.log({ fullName, email, position });
         try {
             const res = await fetch(
-                `${process.env.REACT_APP_API_URL}/participants`,
+                `https://www.kidoedu.edu.vn/participants`,
 
                 /* `http://localhost:3000/participants`, */
                 {
