@@ -11,7 +11,7 @@ export default function ParticipantQrCard({ participant }) {
 
         try {
             const res = await fetch(
-                `${process.env.REACT_APP_API_URL}/participants/${participant.id}/send-invite`,
+                `https://www.kidoedu.edu.vn/participants/${participant.id}/send-invite`,
                 { method: "POST" }
             );
 
