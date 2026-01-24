@@ -43,9 +43,13 @@ export default function RealtimeCheckinPage() {
                     setLastId(newest.id);
                     setCurrentGuest(newest);
                     console.log("New check-in:", newest);
-                    if (voiceEnabled) {
-                        speak(`Xin chào ${newest.fullName} ${newest.position} đã đến tham dự tiệc tất niên`);
-                    }
+                    speak(
+                        `Xin chào ${newest.fullName} ${newest.position} đã đến tham dự tiệc tất niên`,
+                        () => {
+                            // ✅ Ẩn thông báo NGAY khi đọc xong
+                            setCurrentGuest(null);
+                        }
+                    );
 
                     startFireworks();
 

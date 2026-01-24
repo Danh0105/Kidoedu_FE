@@ -1,8 +1,8 @@
 let currentAudio = null;
 
-export async function speak(text) {
+export async function speak(text, onEnd) {
     try {
-        // Dừng audio cũ (tránh chồng tiếng)
+        // ⛔ Dừng audio cũ
         if (currentAudio) {
             currentAudio.pause();
             currentAudio = null;
@@ -29,8 +29,18 @@ export async function speak(text) {
 
         currentAudio = new Audio(url);
         currentAudio.volume = 1;
-        await currentAudio.play();
 
+        // 🎯 Khi giọng đọc kết thúc
+        currentAudio.onended = () => {
+            URL.revokeObjectURL(url);
+            currentAudio = null;
+
+            if (typeof onEnd === "function") {
+                onEnd();
+            }
+        };
+
+        await currentAudio.play();
     } catch (err) {
         console.error("TTS failed:", err);
     }
