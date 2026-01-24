@@ -11,7 +11,7 @@ export default function ParticipantQrCard({ participant }) {
 
         try {
             const res = await fetch(
-                `https://www.kidoedu.edu.vn/participants/${participant.id}/send-invite`,
+                `${process.env.REACT_APP_API_URL}/participants/${participant.id}/send-invite`,
                 { method: "POST" }
             );
 
@@ -26,7 +26,7 @@ export default function ParticipantQrCard({ participant }) {
         }
     };
 
-    const qrValue = `${window.location.origin}/checkin?code=${participant.qrCode}`;
+    const qrValue = `https://www.kidoedu.edu.vn/checkin?code=${participant.qrCode}`;
 
     return (
         <div
