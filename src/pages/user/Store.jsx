@@ -289,7 +289,7 @@ export default function Store({
                                 </div>
                             ))
                         ) : (
-                            <div className="col">
+                            <div className="col vh-100">
                                 <p className="text-muted mb-0">Không có sản phẩm nào</p>
                             </div>
                         )}
@@ -440,7 +440,7 @@ export default function Store({
 
                         {!loading && !filteredItems.length && (
                             <div className="col-12">
-                                <div className="text-center text-muted py-4">Không có sản phẩm nào</div>
+                                <div className="text-center text-muted py-4 vh-100">Không có sản phẩm nào</div>
                             </div>
                         )}
                     </div>
