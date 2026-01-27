@@ -53,7 +53,7 @@ export default function ProductHome({ prod }) {
             {trimText(name, 35)}
           </Link>
         </h5>
-        <div className="d-flex flex-column align-items-center">
+        {/*       <div className="d-flex flex-column align-items-center">
           {promoPrice ? (
             <>
               <span className="text-muted text-decoration-line-through small">
@@ -68,7 +68,7 @@ export default function ProductHome({ prod }) {
               {formatCurrency(basePrice)}
             </span>
           )}
-        </div>
+        </div> */}
 
       </div>
     </div>

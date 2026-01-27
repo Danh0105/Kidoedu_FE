@@ -11,12 +11,9 @@ const ROLL_SIZE = 150;
 
 
 export default function LuckyWheelStage() {
-    const [participants, setParticipants] = useState([]);
-    const [page, setPage] = useState(0);
     const [showWinnerModal, setShowWinnerModal] = useState(false);
     const [winner, setWinner] = useState();
     const [rolling, setRolling] = useState(false);
-    const [forcedWinner, setForcedWinner] = useState(null);
     const trackRef = useRef(null);
     const audioRef = useRef(null);
     const [rollItems, setRollItems] = useState([]);
@@ -49,7 +46,7 @@ export default function LuckyWheelStage() {
         }
 
         const targetIndex = Math.floor(size / 2);
-        result[targetIndex] = winner; // 🔥 ÉP NGƯỜI TRÚNG
+        result[targetIndex] = winner;
 
         return { result, targetIndex };
     };
@@ -61,11 +58,6 @@ export default function LuckyWheelStage() {
         });
     }, []);
 
-
-
-
-
-    /* ===== SINH DANH SÁCH QUAY ===== */
     const generateRollList = (list, size = ROLL_SIZE) => {
         const result = [];
         for (let i = 0; i < size; i++) {
@@ -74,8 +66,6 @@ export default function LuckyWheelStage() {
         return result;
     };
 
-    /* ===== QUAY ===== */
-    /* ===== LOAD PARTICIPANTS TỪ DB ===== */
     const loadParticipants = async () => {
         const res = await fetch(`${process.env.REACT_APP_API_URL}/participants`);
         const data = await res.json();
@@ -84,11 +74,9 @@ export default function LuckyWheelStage() {
             p => p.isCheckedIn && !p.isWinner
         );
 
-        setParticipants(valid);
         return valid;
     };
 
-    /* ===== LOAD LẦN ĐẦU ===== */
     useEffect(() => {
         loadParticipants();
         startCoinRainContinuous(80);
@@ -98,19 +86,19 @@ export default function LuckyWheelStage() {
 
     const spin = async () => {
         if (rolling) return;
+
         if (winnerAudioRef.current) {
             winnerAudioRef.current.pause();
             winnerAudioRef.current.currentTime = 0;
         }
 
-        // 🔊 BẬT NHẠC QUAY
         if (audioRef.current && audioRef.current.paused) {
             audioRef.current.play().catch(() => { });
         }
+
         setRolling(true);
         setWinner(null);
 
-        // 🔄 1. LOAD LẠI TỪ DB
         const latestParticipants = await loadParticipants();
 
         if (!latestParticipants.length) {
@@ -118,20 +106,17 @@ export default function LuckyWheelStage() {
             return;
         }
 
-        // 🎯 2. XÁC ĐỊNH WINNER
-        let winnerToUse =
-            latestParticipants.find(p => p.isForcedWinner) ??
+        // 🎯 RANDOM HOÀN TOÀN – KHÔNG ÉP
+        const winnerToUse =
             latestParticipants[
             Math.floor(Math.random() * latestParticipants.length)
             ];
 
-        // 🎰 3. TẠO LIST QUAY
         const { result, targetIndex } =
             generateRollWithWinner(latestParticipants, winnerToUse);
 
         setRollItems(result);
 
-        // 🎥 4. QUAY
         requestAnimationFrame(() => {
             const track = trackRef.current;
             if (!track) {
@@ -163,22 +148,18 @@ export default function LuckyWheelStage() {
             track.style.transform = `translateX(-${offset}px)`;
 
             setTimeout(() => {
-                if (audioRef.current) {
-                    audioRef.current.pause();
-                    audioRef.current.currentTime = 0;
-                }
+                audioRef.current?.pause();
+                audioRef.current.currentTime = 0;
 
-                // 🎉 BẬT NHẠC WINNER
-                if (winnerAudioRef.current) {
-                    winnerAudioRef.current.play().catch(() => { });
-                }
+                winnerAudioRef.current?.play().catch(() => { });
+
                 setWinner(winnerToUse);
-                setShowWinnerModal(true);   // 👈 HIỆN MODAL
+                setShowWinnerModal(true);
                 setRolling(false);
             }, SPIN_DURATION);
-
         });
     };
+
 
     return (
         <div className="stage" onClick={spin}>
@@ -190,24 +171,6 @@ export default function LuckyWheelStage() {
                         className="img-arrow"
                     />
                 </div>
-
-
-
-                {/* ===== TOP ===== */}
-                {/* <div className="side top">
-                    {sides.top.map(p => (
-                        <ParticipantCard key={p.id} p={p} />
-                    ))}
-                </div>
- */}
-                {/* ===== LEFT ===== */}
-                {/*    <div className="side left">
-                    {sides.left.map(p => (
-                        <ParticipantCard key={p.id} p={p} />
-                    ))}
-                </div>
- */}
-                {/* ===== CENTER (VÒNG QUAY) ===== */}
                 <div className="center">
                     <LuckyWheel
                         onAfterSpin={loadParticipants}
@@ -219,21 +182,6 @@ export default function LuckyWheelStage() {
                     winner={showWinnerModal ? winner : null}
                     onClose={() => setShowWinnerModal(false)}
                 />
-                {/* ===== RIGHT ===== */}
-                {/*    <div className="side right">
-                    {sides.right.map(p => (
-                        <ParticipantCard key={p.id} p={p} />
-                    ))}
-                </div>
- */}
-                {/* ===== BOTTOM ===== */}
-                {/*  <div className="side bottom">
-                    {sides.bottom.map(p => (
-                        <ParticipantCard key={p.id} p={p} />
-                    ))}
-                </div>
- */}
-                {/* ===== PAGE INDICATOR ===== */}
 
             </div>
         </div>
@@ -258,7 +206,7 @@ let lastTime = 0;
 function coinLoop(time) {
     if (!running) return;
 
-    if (time - lastTime > 100) { // 100ms / coin
+    if (time - lastTime > 100) {
         spawnCoin();
         lastTime = time;
     }
@@ -272,7 +220,5 @@ function startCoinRainContinuous() {
     requestAnimationFrame(coinLoop);
 }
 
-function stopCoinRain() {
-    running = false;
-}
+
 

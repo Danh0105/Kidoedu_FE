@@ -17,7 +17,7 @@ export default function ParticipantsQrPage() {
         setSendingAll(true);
         try {
             await fetch(
-                `${process.env.REACT_APP_API_URL}/participants/send-invite-all-ichi`,
+                `${process.env.REACT_APP_API_URL}/participants/send-invite-all-gate`,
                 { method: "POST" }
             );
             alert("Đã đưa toàn bộ email vào hàng đợi gửi");
