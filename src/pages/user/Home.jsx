@@ -343,7 +343,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                     />
 
                     {/* Slider danh mục / sản phẩm ngang */}
-                    {/* <section className="my-4">
+                    {/*      <section className="my-4">
                         <ProductSlider />
                     </section> */}
 

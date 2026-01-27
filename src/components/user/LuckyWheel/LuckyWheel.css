@@ -1,0 +1,233 @@
+.stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: #f8f9fa;
+    overflow: hidden;
+    background-image: url('../../../assets/user/bg-lucky.png');
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    cursor: none;
+}
+
+.bg-participant {
+    background-image: url('../../../assets/user/participant.png');
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+
+.center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 10;
+}
+
+
+.side {
+    position: absolute;
+    display: flex;
+    gap: 12px;
+}
+
+.top {
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.bottom {
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.left,
+.right {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 cột */
+    gap: 12px;
+
+    top: 50%;
+    transform: translateY(-50%);
+    max-height: 70vh;
+    /* tránh tràn màn */
+    overflow-y: auto;
+    /* scroll nếu nhiều người */
+}
+
+.left {
+    left: 24px;
+}
+
+.right {
+    right: 24px;
+}
+
+
+
+/* ===== CARD ===== */
+/* ===== CARD ===== */
+.p-card {
+    background: linear-gradient(180deg, #ffffff, #f8f9fa);
+    border-radius: 12px;
+    padding: 10px 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    transition: all .25s ease;
+    cursor: default;
+}
+
+.p-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== INNER ===== */
+.p-card-inner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ===== AVATAR ===== */
+.avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid #e9ecef;
+    background: #fff;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ===== INFO ===== */
+.info {
+    min-width: 0;
+}
+
+.name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #212529;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.title {
+    font-size: 11px;
+    color: #6c757d;
+}
+
+/* ===== FORCED WINNER ===== */
+.p-card.forced {
+    background: linear-gradient(180deg, #fff3cd, #ffe8a1);
+    border: 2px solid #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+}
+
+.p-card.forced .name {
+    color: #b02a37;
+}
+
+
+/* ===== PAGE ===== */
+.page-indicator {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+.lucky-arrow {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 999;
+
+}
+
+.img-arrow {
+    transform: rotate(180deg);
+    max-width: 60px;
+}
+
+@keyframes arrowRotateLeft {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    30% {
+        transform: rotate(-45deg);
+    }
+
+    60% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+#coin-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 9999;
+}
+
+.coin {
+    position: absolute;
+    top: -50px;
+    width: 32px;
+    height: 32px;
+    background-image: url('../../../assets/user/coin.png');
+    /* ảnh coin */
+    background-size: cover;
+    animation: fall linear forwards;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+.roll-container {
+    width: 100%;
+    max-width: 865px;
+    height: 200px;
+    margin-top: 78px;
+    overflow: hidden;
+    background: transparent;
+}

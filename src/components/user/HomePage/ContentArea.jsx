@@ -30,16 +30,16 @@ const ContentArea = ({
                     ))
                     : items.length > 0
                         ? items.map((prod) => {
-                            const ribbons = pickRibbonsFromStatus(prod?.status);
+                            const ribbons = pickRibbonsFromStatus(prod?.status) ?? [];
 
                             return (
                                 <AnimateCard
-                                    key={prod.productId}
+                                    key={prod?.productId}
                                     className="col position-relative"
                                 >
-                                    {ribbons.map((rb, i) => (
+                                    {/*     {ribbons.map((rb, i) => (
                                         <Ribbon key={i} {...rb} />
-                                    ))}
+                                    ))} */}
 
                                     <ProductHome
                                         prod={prod}

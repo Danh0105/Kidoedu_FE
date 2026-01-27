@@ -44,7 +44,14 @@ import CheckoutRental from "../pages/user/CheckoutRental";
 import VerifySuccess from "../pages/user/VerifySuccess";
 import PaymentResult from "../pages/user/PaymentResult";
 import LuckyWheel from "../components/user/LuckyWheel";
-import ScanQrCode from "../pages/user/ScanQrPage"
+import ScanQrCode from "../pages/user/LuckyWheel/ScanQrPage"
+import ImportParticipants from "../pages/user/ImportParticipants";
+import ParticipantQrCard from "../components/user/LuckyWheel/ParticipantQrCard";
+import ParticipantsQrPage from "../pages/user/LuckyWheel/ParticipantsQrPage";
+import CheckinPage from "../pages/user/CheckinPage";
+import RealtimeCheckinPage from "../pages/user/LuckyWheel/RealtimeCheckinPage";
+import ForceWinnerPage from "../components/user/LuckyWheel/ForceWinnerPage";
+import CreateParticipantQR from "../pages/user/CreateParticipantQR";
 
 export default function AppRoutes() {
 
@@ -208,6 +215,24 @@ export default function AppRoutes() {
             </Route>
             <Route path="/ScanQrPage" >
                 <Route index element={<ScanQrCode />} />
+            </Route>
+            <Route path="/ImportParticipants" >
+                <Route index element={<ImportParticipants />} />
+            </Route>
+            <Route path="/CreateParticipantQr" >
+                <Route index element={<CreateParticipantQR />} />
+            </Route>
+            <Route path="/ParticipantQrCard" >
+                <Route index element={<ParticipantsQrPage />} />
+            </Route>
+            <Route path="/checkin" >
+                <Route index element={<CheckinPage />} />
+            </Route>
+            <Route path="/RealtimeCheckinPage" >
+                <Route index element={<RealtimeCheckinPage />} />
+            </Route>
+            <Route path="/ForceWinnerPage" >
+                <Route index element={<ForceWinnerPage />} />
             </Route>
         </Routes>
     );
