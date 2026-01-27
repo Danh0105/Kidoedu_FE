@@ -75,7 +75,7 @@ export default function RealtimeCheckinPage() {
     return (
         <div className="bg-checkin d-flex justify-content-center align-items-center min-vh-100">
             {/* Toggle voice */}
-            <button
+            {/*             <button
                 className={`btn position-fixed top-0 end-0 m-3 ${voiceEnabled ? "btn-success" : "btn-outline-secondary"
                     }`}
                 onClick={() => {
@@ -88,7 +88,7 @@ export default function RealtimeCheckinPage() {
                 }}
             >
                 🔊 Bật giọng đọc
-            </button>
+            </button> */}
 
 
             {/* ===== HIỂN THỊ KHÁCH MỚI ===== */}
