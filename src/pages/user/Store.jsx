@@ -9,7 +9,9 @@ import {
     fetchAllProductsApi,
     searchProductsApi
 } from "../../services/Product";
-import { fetchCategoriesApi } from "../../services/Category"
+import { fetchCategoriesApi } from "../../services/Category";
+import ViewProducts from "../../components/user/HomePage/ViewProducts";
+
 /* --------- Hook breakpoint để phân nhánh Desktop/Mobile ---------- */
 function useIsDesktop() {
     const get = () => window.matchMedia("(min-width: 992px)").matches; // Bootstrap lg breakpoint
@@ -77,6 +79,13 @@ export default function Store({
     const debouncedQ = useDebounce(q, 500);
     const firstLoad = useRef(true);
     const isDesktop = useIsDesktop();
+
+    // banner sản phẩm đã xem 
+    const [banners, setBanners] = useState([]);
+        const getBanner = (id) => banners?.find((b) => b.id === id);
+        //const frameproductN = getBanner(10);
+        const frameproductP = getBanner(11);
+
 
     const roots = useMemo(
         () => categories.filter((c) => c.parent === null),
@@ -295,6 +304,35 @@ export default function Store({
                         )}
                     </div>
 
+                    {/* ===== SẢN PHẨM ĐÃ XEM ===== */}
+                    {/* ===== SẢN PHẨM ĐÃ XEM ===== */}
+                          <section
+                            style={{
+                              marginTop: 32,
+                              padding: "0 8px",
+                              overflowX: "hidden",
+                            }}
+                          >
+                            <div className="text-center mb-3">
+                              <h5 className="fw-bold display-6 text-uppercase">
+                                Sản phẩm đã xem
+                              </h5>
+                              <p className="text-muted">
+                                Những sản phẩm bạn đã quan tâm gần đây
+                              </p>
+                              <div
+                                style={{
+                                  height: 3,
+                                  width: 60,
+                                  backgroundColor: "hsl(0,75%,60%)",
+                                  margin: "0 auto",
+                                  borderRadius: 3,
+                                }}
+                              />
+                            </div>
+                    
+                            <ViewProducts />
+                          </section>
 
                     {/* Pagination */}
                     {meta?.last_page > 1 && (
@@ -444,6 +482,33 @@ export default function Store({
                             </div>
                         )}
                     </div>
+
+                    <section
+                        style={{
+                            marginTop: 16,
+                            padding: "0 8px",
+                            overflowX: "hidden",
+                        }}
+                    >
+                       
+                        <div className="text-center mb-3">
+                            <h5 className="fw-bold text-uppercase mb-2">
+                                Sản phẩm đã xem
+                            </h5>
+                            <div
+                                style={{
+                                    height: 3,
+                                    width: 60,
+                                    backgroundColor: "hsl(0,75%,60%)",
+                                    margin: "0 auto",
+                                    borderRadius: 3,
+                                }}
+                            />
+                        </div>
+
+                        {/* Danh sách sản phẩm đã xem */}
+                        <ViewProducts banners={frameproductP} />
+                    </section>
 
 
                     {/* Pagination */}

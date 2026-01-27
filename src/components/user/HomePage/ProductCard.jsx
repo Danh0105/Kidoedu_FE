@@ -103,6 +103,31 @@ export default function ProductCard({ p, banners }) {
     const showDiscountBadge =
         hasSale && discountPercent && discountPercent > 0;
 
+    // lưu giá trị khi xem một sản phẩm 
+    const saveViewedProduct = (product) => {
+    const key = "viewed_products";
+    const maxItems = 8;
+
+    let viewed = JSON.parse(localStorage.getItem(key)) || [];
+    viewed = viewed.filter(item => item.productId !== product.productId);
+    viewed.unshift({
+        productId: product.productId,
+        productName: product.productName,
+        images: product.images,
+        price: product.price,
+        priceRange: product.priceRange,
+        variants: product.variants,
+        status: product.status,
+    });
+
+    
+    if (viewed.length > maxItems) viewed = viewed.slice(0, maxItems);
+
+    localStorage.setItem(key, JSON.stringify(viewed));
+};
+
+//end
+
 
     return (
         <div className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 d-flex">
@@ -138,6 +163,7 @@ export default function ProductCard({ p, banners }) {
                         href={`/productdetail/${p.productId}`}
                         aria-label={p?.productName}
                         className="product-image-wrapper"
+                        onClick={() => saveViewedProduct(p)}
                     >
                         <img
                             src={process.env.REACT_APP_API_URL + imgSrc}

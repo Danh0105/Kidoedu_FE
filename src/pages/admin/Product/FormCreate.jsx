@@ -133,110 +133,110 @@ export default function FormCreate({ onProductAdded }) {
     //     }
     // };
     const validateForm = () => {
-    if (!form.productName?.trim()) return "Tên sản phẩm không được để trống";
-    if (!categoryId) return "Vui lòng chọn danh mục";
-    if (!form.shortDescription?.trim()) return "Mô tả ngắn không được để trống";
-    if (!variantsFromForm.length) return "Phải có ít nhất 1 biến thể";
+        if (!form.productName?.trim()) return "Tên sản phẩm không được để trống";
+        if (!categoryId) return "Vui lòng chọn danh mục";
+        if (!form.shortDescription?.trim()) return "Mô tả ngắn không được để trống";
+        if (!variantsFromForm.length) return "Phải có ít nhất 1 biến thể";
 
-    for (let i = 0; i < variantsFromForm.length; i++) {
-        const v = variantsFromForm[i];
-        if (!v.sku) return `Biến thể ${i + 1}: SKU không được để trống`;  
-              
-        if (!v.imageFile) return `Biến thể ${i + 1}: Chưa chọn hình ảnh`;
-    }
+        for (let i = 0; i < variantsFromForm.length; i++) {
+            const v = variantsFromForm[i];
+            if (!v.sku) return `Biến thể ${i + 1}: SKU không được để trống`;
 
-    return null;
-};
+            if (!v.imageFile) return `Biến thể ${i + 1}: Chưa chọn hình ảnh`;
+        }
+
+        return null;                                                    
+    };
 
     const onSubmit = async (e) => {
         
-    e.preventDefault();
+        e.preventDefault();
 
-    const errorMessage = validateForm();
-    if (errorMessage) {
-        alert(errorMessage);
-        return;
-    }
+        const errorMessage = validateForm();
+        if (errorMessage) {
+            alert(errorMessage);
+            return;
+        }
 
-    setIsSaving(true);
+        setIsSaving(true);
 
-    try {
-        const formData = new FormData();
+        try {
+            const formData = new FormData();
 
-        // ===== BASIC INFO =====
-        formData.append("productName", form.productName.trim());
-        formData.append("shortDescription", form.shortDescription || "");
-        formData.append("longDescription", form.longDescription || "");
-        formData.append("origin", form.origin || "");
-        formData.append("status", String(statusCreate));
-        formData.append("categoryId", String(categoryId));
+            // ===== BASIC INFO =====
+            formData.append("productName", form.productName.trim());
+            formData.append("shortDescription", form.shortDescription || "");
+            formData.append("longDescription", form.longDescription || "");
+            formData.append("origin", form.origin || "");
+            formData.append("status", String(statusCreate));
+            formData.append("categoryId", String(categoryId));
 
-        // ===== PRODUCT IMAGES =====
-        appendFiles(
-            formData,
-            "newImages",
-            form.images
-                .filter(img => img.file instanceof File)
-                .map(img => img.file)
-        );
+            // ===== PRODUCT IMAGES =====
+            appendFiles(
+                formData,
+                "newImages",
+                form.images
+                    .filter(img => img.file instanceof File)
+                    .map(img => img.file)
+            );
 
-        // ===== VARIANT IMAGES =====
-        variantsFromForm.forEach(v => {
-            if (v.imageFile && v.sku) {
-                formData.append(`variantImage_${v.sku}`, v.imageFile);
-            }
-        });
+            // ===== VARIANT IMAGES =====
+            variantsFromForm.forEach(v => {
+                if (v.imageFile && v.sku) {
+                    formData.append(`variantImage_${v.sku}`, v.imageFile);
+                }
+            });
 
-        // ===== VARIANTS + INVENTORY =====
-        const variantsPayload = buildVariantsPayload(
-            variantsFromForm.map(v => ({
-                ...v,
-                inventory: inventoryDraft ?? [],
-            }))
-        );
+            // ===== VARIANTS + INVENTORY =====
+            const variantsPayload = buildVariantsPayload(
+                variantsFromForm.map(v => ({
+                    ...v,
+                    inventory: inventoryDraft ?? [],
+                }))
+            );
 
-        formData.append("variants", JSON.stringify(variantsPayload));
+            formData.append("variants", JSON.stringify(variantsPayload));
 
-        // ===== USER MANUAL =====
-        formData.append(
-            "userManual",
-            JSON.stringify({
-                pdf: null,
-                video: null,
-                steps: splitLines(form.userManual),
-            })
-        );
+            // ===== USER MANUAL =====
+            formData.append(
+                "userManual",
+                JSON.stringify({
+                    pdf: null,
+                    video: null,
+                    steps: splitLines(form.userManual),
+                })
+            );
 
-        // ===== CAUTION NOTES =====
-        formData.append(
-            "cautionNotes",
-            JSON.stringify(splitLines(form.cautionNotes))
-        );
+            // ===== CAUTION NOTES =====
+            formData.append(
+                "cautionNotes",
+                JSON.stringify(splitLines(form.cautionNotes))
+            );
 
-        const res = await axios.post(
-            `${process.env.REACT_APP_API_URL}/products`,
-            formData
-        );
+            const res = await axios.post(
+                `${process.env.REACT_APP_API_URL}/products`,
+                formData
+            );
 
-        alert("Thêm sản phẩm thành công!");
-        onProductAdded(res.data.data);
+            alert("Thêm sản phẩm thành công!");
+            onProductAdded(res.data.data);
 
-    } catch (err) {
-        handleApiError(err);
-    } finally {
-        setIsSaving(false);
-    }
-};
+        } catch (err) {
+            handleApiError(err);
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
-const handleApiError = (err) => {
-    if (err.response) {
-        alert(err.response.data?.message || "Dữ liệu không hợp lệ");
-    } else {
-        alert(err.message || "Lỗi không xác định");
-    }
-};
+    const handleApiError = (err) => {
+        if (err.response) {
+            alert(err.response.data?.message || "Dữ liệu không hợp lệ");
+        } else {
+            alert(err.message || "Lỗi không xác định");
+        }
+    };
 
-//end of onSubmit
+    //end of onSubmit
 
     /* =========================================================================
        STATUS OPTIONS

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ROBOT from "../../assets/user/ROBOT.png";
+import ViewProducts from "../../components/user/HomePage/ViewProducts";
 // import "bootstrap/dist/css/bootstrap.min.css";
 export default function NewProducts({ apiBase = process.env.REACT_APP_API_URL }) {
   const [products, setProducts] = useState([]);
@@ -190,6 +191,37 @@ export default function NewProducts({ apiBase = process.env.REACT_APP_API_URL })
           );
         })}
       </div>
+
+      {/* ===== SẢN PHẨM ĐÃ XEM ===== */}
+      <section
+        style={{
+          marginTop: 32,
+          padding: "0 8px",
+          overflowX: "hidden",
+        }}
+      >
+        <div className="text-center mb-3">
+          <h5 className="fw-bold display-6 text-uppercase">
+            Sản phẩm đã xem
+          </h5>
+          <p className="text-muted">
+            Những sản phẩm bạn đã quan tâm gần đây
+          </p>
+          <div
+            style={{
+              height: 3,
+              width: 60,
+              backgroundColor: "hsl(0,75%,60%)",
+              margin: "0 auto",
+              borderRadius: 3,
+            }}
+          />
+        </div>
+
+        <ViewProducts />
+      </section>
+
+
     </div>
   );
 }

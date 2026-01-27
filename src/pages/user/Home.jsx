@@ -24,6 +24,8 @@ import CategorySidebar from "../../components/user/HomePage/CategorySidebar";
 import ContentArea from "../../components/user/HomePage/ContentArea"
 import ProductSlider from "../../components/user/HomePage/ProductSlider";
 import { getPromotions } from "../../services/promotion";
+import ViewProducts from "../../components/user/HomePage/ViewProducts";
+
 // ======================= Helpers =======================
 
 
@@ -116,6 +118,9 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     const showFeaturedSection = useInViewOnce(featuredSectionRef);
     const isDesktop = useIsDesktop();
     const scrollRef = useRef(null);
+
+
+
 
 
     // cố định playout
@@ -338,9 +343,9 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                     />
 
                     {/* Slider danh mục / sản phẩm ngang */}
-                    <section className="my-4">
+                    {/* <section className="my-4">
                         <ProductSlider />
-                    </section>
+                    </section> */}
 
                     {/* Sản phẩm sale */}
                     {promotionProducts.length > 0 ? (
@@ -511,6 +516,42 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                         )}
                     </section>
 
+                    {/* ===== SẢN PHẨM ĐÃ XEM  ===== */}
+                    <section className="my-5 bg-product-featured p-2">
+
+                        <div className="d-flex justify-content-between">
+                            <div>
+                                <img className="lig" src={light1} alt="Đèn lồng ngày tết" />
+                            </div>
+
+                            <div>
+                                <div className="bg-img-np">
+                                    <h2 className="fw-bold" style={{ fontSize: "2rem" }}>
+                                        Sản phẩm đã xem
+                                    </h2>
+                                </div>
+
+                                <div
+                                    style={{
+                                        height: 3,
+                                        width: 80,
+                                        backgroundColor: "hsl(0,75%,60%)",
+                                        margin: "10px auto",
+                                        borderRadius: 3,
+                                    }}
+                                />
+                            </div>
+
+                            <div>
+                                <img className="lig" src={light1} alt="Đèn lồng ngày tết" />
+                            </div>
+                        </div>
+
+                        {/* CHỈ GỌI COMPONENT */}
+                        <ViewProducts banners={frameproductP} />
+
+                    </section>
+
                 </div>
 
                 {/* Modal Buy (global) */}
@@ -580,9 +621,9 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                 />
 
                 {/* Slider danh mục / sản phẩm ngang */}
-                <section className="my-4">
+                {/* <section className="my-4">
                     <ProductSlider />
-                </section>
+                </section> */}
 
                 {/* Sản phẩm sale */}
                 {promotionProducts.length > 0 ? (
@@ -624,15 +665,15 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
 
                 {/* ===== 4. SLIDER DANH MỤC / SẢN PHẨM ===== */}
-                <section
+                {/* <section
                     style={{
                         marginTop: 16,
                         padding: "0 8px",
                         overflowX: "hidden",
                     }}
-                >
+                >l
                     <ProductSlider />
-                </section>
+                </section> */}
 
                 {/* ===== 5. SẢN PHẨM MỚI ===== */}
                 <section style={{ marginTop: 24, padding: "0 8px" }}>
@@ -680,6 +721,34 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                             </div>
                         ))}
                     </div>
+                </section>
+
+                {/* ===== SẢN PHẨM ĐÃ XEM (SLIDER) ===== */}
+                <section
+                    style={{
+                        marginTop: 16,
+                        padding: "0 8px",
+                        overflowX: "hidden",
+                    }}
+                >
+                    {/* Tiêu đề */}
+                    <div className="text-center mb-3">
+                        <h5 className="fw-bold text-uppercase mb-2">
+                            Sản phẩm đã xem
+                        </h5>
+                        <div
+                            style={{
+                                height: 3,
+                                width: 60,
+                                backgroundColor: "hsl(0,75%,60%)",
+                                margin: "0 auto",
+                                borderRadius: 3,
+                            }}
+                        />
+                    </div>
+
+                    {/* Danh sách sản phẩm đã xem */}
+                    <ViewProducts banners={frameproductP} />
                 </section>
 
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ROBOT from "../../assets/user/ROBOT.png";
+import ViewProducts from "../../components/user/HomePage/ViewProducts";
 
 // 🔧 Helper: Lấy giá từ một variant
 
@@ -99,8 +100,8 @@ export default function FeaturedProducts({ apiBase = process.env.REACT_APP_API_U
                 </div>
               </div>
             </div>
-          ))}        
-        
+          ))}
+
         {/* end */}
         {!loading && products.length === 0 && (
           <div className="col-12 text-center text-muted">Chưa có sản phẩm nổi bật nào.</div>
@@ -186,6 +187,38 @@ export default function FeaturedProducts({ apiBase = process.env.REACT_APP_API_U
           );
         })}
       </div>
+
+      {/* ===== SẢN PHẨM ĐÃ XEM ===== */}
+      <section
+        style={{
+          marginTop: 48,
+          padding: "0 8px",
+          overflowX: "hidden",
+        }}
+      >
+      
+        <div className="text-center mb-5">
+          <h2 className="fw-bold display-6 text-uppercase">
+            Sản phẩm đã xem
+          </h2>
+          <p className="text-muted">
+            Những sản phẩm bạn đã quan tâm gần đây
+          </p>
+          <div
+            style={{
+              width: "80px",
+              height: "3px",
+              backgroundColor: "hsl(45, 100%, 50%)",
+              margin: "10px auto",
+              borderRadius: "2px",
+            }}
+          />
+        </div>
+ 
+        <ViewProducts />
+      </section>
+
+
     </div>
   );
 }
