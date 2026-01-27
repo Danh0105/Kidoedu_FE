@@ -106,7 +106,6 @@ export default function LuckyWheelStage() {
             return;
         }
 
-        // 🎯 RANDOM HOÀN TOÀN – KHÔNG ÉP
         const winnerToUse =
             latestParticipants[
             Math.floor(Math.random() * latestParticipants.length)
@@ -147,12 +146,12 @@ export default function LuckyWheelStage() {
                 `transform ${SPIN_DURATION}ms cubic-bezier(.08,.6,0,1)`;
             track.style.transform = `translateX(-${offset}px)`;
 
-            setTimeout(() => {
+            setTimeout(async () => {
                 audioRef.current?.pause();
                 audioRef.current.currentTime = 0;
 
                 winnerAudioRef.current?.play().catch(() => { });
-
+                await markWinner(winnerToUse.id);
                 setWinner(winnerToUse);
                 setShowWinnerModal(true);
                 setRolling(false);
@@ -160,6 +159,14 @@ export default function LuckyWheelStage() {
         });
     };
 
+    const markWinner = async (winnerId) => {
+        await fetch(
+            `${process.env.REACT_APP_API_URL}/participants/${winnerId}/winner`,
+            {
+                method: "PATCH",
+            }
+        );
+    };
 
     return (
         <div className="stage" onClick={spin}>
