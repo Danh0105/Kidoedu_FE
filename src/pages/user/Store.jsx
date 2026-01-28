@@ -304,7 +304,7 @@ export default function Store({
                         )}
                     </div>
 
-                    {/* ===== SẢN PHẨM ĐÃ XEM ===== */}
+                  
                     {/* ===== SẢN PHẨM ĐÃ XEM ===== */}
                           <section
                             style={{

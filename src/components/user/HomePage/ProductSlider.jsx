@@ -90,11 +90,10 @@ export default function ProductSlider() {
             >
               {item.price.toLocaleString()}đ
             </span>
-
-            {/* ================= ẢNH (KHUNG RIÊNG) ================= */}
+ 
             <div
               style={{
-                height: 72, // 👈 KHUNG ẢNH CỐ ĐỊNH
+                height: 72,  
                 marginTop: 18,
                 display: "flex",
                 alignItems: "center",
@@ -111,11 +110,10 @@ export default function ProductSlider() {
                 }}
               />
             </div>
-
-            {/* ================= TÊN (KHUNG RIÊNG) ================= */}
+ 
             <div
               style={{
-                height: 32, // 👈 KHUNG TÊN
+                height: 32,  
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

@@ -517,40 +517,33 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
                     </section>
 
                     {/* ===== SẢN PHẨM ĐÃ XEM  ===== */}
-                    <section className="my-5 bg-product-featured p-2">
-
-                        <div className="d-flex justify-content-between">
-                            <div>
-                                <img className="lig" src={light1} alt="Đèn lồng ngày tết" />
+                    <section
+                            style={{
+                              marginTop: 32,
+                              padding: "0 8px",
+                              overflowX: "hidden",
+                            }}
+                          >
+                            <div className="text-center mb-3">
+                              <h5 className="fw-bold display-6 text-uppercase">
+                                Sản phẩm đã xem
+                              </h5>
+                              <p className="text-muted">
+                                Những sản phẩm bạn đã quan tâm gần đây
+                              </p>
+                              <div
+                                style={{
+                                  height: 3,
+                                  width: 60,
+                                  backgroundColor: "hsl(0,75%,60%)",
+                                  margin: "0 auto",
+                                  borderRadius: 3,
+                                }}
+                              />
                             </div>
-
-                            <div>
-                                <div className="bg-img-np">
-                                    <h2 className="fw-bold" style={{ fontSize: "2rem" }}>
-                                        Sản phẩm đã xem
-                                    </h2>
-                                </div>
-
-                                <div
-                                    style={{
-                                        height: 3,
-                                        width: 80,
-                                        backgroundColor: "hsl(0,75%,60%)",
-                                        margin: "10px auto",
-                                        borderRadius: 3,
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <img className="lig" src={light1} alt="Đèn lồng ngày tết" />
-                            </div>
-                        </div>
-
-                        {/* CHỈ GỌI COMPONENT */}
-                        <ViewProducts banners={frameproductP} />
-
-                    </section>
+                    
+                            <ViewProducts banners={frameproductP}/>
+                          </section>
 
                 </div>
 
