@@ -12,6 +12,9 @@ export default function ViewProducts() {
         setProducts(viewed);
     }, []);
 
+    // lưu giá trị khi xem 1 sản phẩm 
+
+
     if (!products.length) return null;
 
     const scrollAmount = () => listRef.current.offsetWidth / 4;
@@ -41,13 +44,13 @@ export default function ViewProducts() {
                 <div
                     ref={listRef}
                     className="d-flex gap-3"
-                    style={{ 
-                        width: 990, 
-                        overflow: "hidden", 
-                        margin: "0 auto", 
-                    }} 
-                > 
-                    {products.map((p, index) => { 
+                    style={{
+                        width: 990,
+                        overflow: "hidden",
+                        margin: "0 auto",
+                    }}
+                >
+                    {products.map((p, index) => {
                         const imageUrl =
                             p.images?.[0]?.imageUrl
                                 ? `${process.env.REACT_APP_API_URL}${p.images[0].imageUrl}`
@@ -63,43 +66,41 @@ export default function ViewProducts() {
 
                                 }}
                             >
-                                {/* ===== BADGE TRẢ GÓP ===== */}
-                                <div
-                                    style={{
-                                        position: "absolute",
-                                        top: 8,
-                                        left: 8,
-                                        backgroundColor: "#198754", 
-                                        color: "#fff",
-                                        fontSize: 11,
-                                        fontWeight: 600,
-                                        padding: "2px 6px",
-                                        borderRadius: 4,
-                                        zIndex: 2,
-                                        lineHeight: "14px",
-                                    }}
-                                >
-                                    Trả góp 0%
-                                </div>
+
                                 {/* ===== ẢNH ===== */}
-                                <div
+                                <a
+                                    href={`/productdetail/${p.productId}`}
+                                    aria-label={p?.productName}
+                                    className="product-image-wrapper"
                                     style={{
-                                        height: 90,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
+                                        display: "block",
+                                        width: "100%",
+                                        textDecoration: "none",
                                     }}
                                 >
-                                    <img
-                                        src={imageUrl}
-                                        alt={p.productName}
+                                    <div
                                         style={{
-                                            maxHeight: 80,
-                                            maxWidth: "100%",
-                                            objectFit: "contain",
+                                            height: 150,
+                                            backgroundColor: "#f2f2f2",   
+                                            borderRadius: 10,
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            overflow: "hidden",
                                         }}
-                                    />
-                                </div>
+                                    >
+                                        <img
+                                            src={imageUrl}
+                                            alt={p.productName}
+                                            style={{
+                                                width: "95%",           
+                                                height: "95%",
+                                                objectFit: "contain",
+                                            }}
+                                        />
+                                    </div>
+                                </a>
+
 
                                 {/* ===== TÊN ===== */}
                                 <div
