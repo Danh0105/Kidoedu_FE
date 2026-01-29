@@ -17,6 +17,7 @@ export default function LuckyWheelStage() {
     const trackRef = useRef(null);
     const audioRef = useRef(null);
     const [rollItems, setRollItems] = useState([]);
+
     const winnerAudioRef = useRef(null);
     useEffect(() => {
         const spinAudio = new Audio(mp3luckywheel);

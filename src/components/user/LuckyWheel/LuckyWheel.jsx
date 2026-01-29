@@ -34,7 +34,7 @@ export default function LuckyWheel({ trackRef, rollItems }) {
                                 flexShrink: 0,
                             }}
                         >
-                            <div className="card-body d-flex align-items-center justify-content-center text-center fw-bold text-dark">
+                            <div className="card-body d-flex align-items-center justify-content-center text-center fw-bold text-dark" style={{ fontSize: "14px" }}>
                                 {p?.fullName || "No Name"}
                             </div>
                         </div>

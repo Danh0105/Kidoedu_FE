@@ -8,7 +8,7 @@ export const api = axios.create({
 });
 
 export async function fetchCategoriesApi() {
-    const res = await api.get("/categories");
+    const res = await axios.get('https://kidoedu.vn/categories');
     return res.data || [];
 }
 

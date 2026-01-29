@@ -15,7 +15,7 @@ export default function WinnerModal({ winner, onClose }) {
                         <div className="winner-icon">🎉</div>
                         <div className="winner-title">Người trúng thưởng</div>
                         <div className="winner-name">{winner.fullName}</div>
-                        <div className="winner-type">Chức vụ: {winner.position}</div>
+                        <div className="winner-type">{winner.position}</div>
                     </div>
                 </div>
 
