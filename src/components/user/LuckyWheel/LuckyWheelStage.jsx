@@ -22,7 +22,7 @@ export default function LuckyWheelStage() {
     useEffect(() => {
         const spinAudio = new Audio(mp3luckywheel);
         spinAudio.loop = true;
-        spinAudio.volume = 0.15;
+        spinAudio.volume = 1;
         audioRef.current = spinAudio;
 
         const winAudio = new Audio(mp3winner);
