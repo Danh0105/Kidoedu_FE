@@ -145,20 +145,20 @@ export default function FormCreate({ onProductAdded }) {
             if (!v.imageFile) return `Biến thể ${i + 1}: Chưa chọn hình ảnh`;
         }
 
-        return null;                                                    
+        return null;
     };
 
     const onSubmit = async (e) => {
-        
+
         e.preventDefault();
 
-        const errorMessage = validateForm();
-        if (errorMessage) {
-            alert(errorMessage);
-            return;
-        }
-
-        setIsSaving(true);
+        /*   const errorMessage = validateForm();
+          if (errorMessage) {
+              alert(errorMessage);
+              return;
+          }
+  
+          setIsSaving(true); */
 
         try {
             const formData = new FormData();
@@ -172,12 +172,24 @@ export default function FormCreate({ onProductAdded }) {
             formData.append("categoryId", String(categoryId));
 
             // ===== PRODUCT IMAGES =====
-            appendFiles(
-                formData,
-                "newImages",
-                form.images
-                    .filter(img => img.file instanceof File)
-                    .map(img => img.file)
+            console.log("Form images:", form.images);
+
+            const productImages = form.images.filter(img => img.file instanceof File);
+
+            // 1️⃣ append file
+            productImages.forEach(img => {
+                formData.append("newImages", img.file);
+            });
+
+            // 2️⃣ append metadata (JSON)
+            formData.append(
+                "newImagesMeta",
+                JSON.stringify(
+                    productImages.map(img => ({
+                        altText: img.altText ?? null,
+                        isPrimary: img.isPrimary ?? false,
+                    }))
+                )
             );
 
             // ===== VARIANT IMAGES =====
@@ -212,14 +224,25 @@ export default function FormCreate({ onProductAdded }) {
                 "cautionNotes",
                 JSON.stringify(splitLines(form.cautionNotes))
             );
+            for (let [key, value] of formData.entries()) {
+                if (value instanceof File) {
+                    console.log(key, {
+                        name: value.name,
+                        type: value.type,
+                        size: value.size,
+                    });
+                } else {
+                    console.log(key, value);
+                }
+            }
 
             const res = await axios.post(
                 `${process.env.REACT_APP_API_URL}/products`,
                 formData
             );
 
-            alert("Thêm sản phẩm thành công!");
-            onProductAdded(res.data.data);
+            /*      alert("Thêm sản phẩm thành công!");
+                 onProductAdded(res.data.data); */
 
         } catch (err) {
             handleApiError(err);

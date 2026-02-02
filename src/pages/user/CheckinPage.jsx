@@ -69,20 +69,35 @@ export default function CheckinPage() {
             return;
         }
 
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        const vw = video.videoWidth;
+        const vh = video.videoHeight;
 
-        if (canvas.width === 0 || canvas.height === 0) {
-            alert("Không chụp được ảnh, thử lại");
+        if (!vw || !vh) {
+            alert("Không chụp được ảnh");
             return;
         }
 
+        // 🔥 TÍNH VÙNG VUÔNG Ở GIỮA
+        const size = Math.min(vw, vh);
+        const sx = (vw - size) / 2;
+        const sy = (vh - size) / 2;
+
+        // canvas vuông
+        canvas.width = size;
+        canvas.height = size;
+
         const ctx = canvas.getContext("2d");
-        ctx.drawImage(video, 0, 0);
+
+        // crop từ video → canvas
+        ctx.drawImage(
+            video,
+            sx, sy, size, size, // vùng crop từ video
+            0, 0, size, size    // vẽ lên canvas
+        );
 
         canvas.toBlob((blob) => {
             if (!blob) {
-                alert("Không tạo được ảnh, vui lòng chụp lại");
+                alert("Không tạo được ảnh");
                 return;
             }
 
@@ -91,6 +106,7 @@ export default function CheckinPage() {
             setImageBlob(blob);
         }, "image/jpeg", 0.9);
     };
+
 
     const retake = async () => {
         setPreview(null);

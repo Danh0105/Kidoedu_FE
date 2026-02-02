@@ -17,12 +17,13 @@ export default function LuckyWheelStage() {
     const trackRef = useRef(null);
     const audioRef = useRef(null);
     const [rollItems, setRollItems] = useState([]);
+    const [spinCount, setSpinCount] = useState(0);
 
     const winnerAudioRef = useRef(null);
     useEffect(() => {
         const spinAudio = new Audio(mp3luckywheel);
         spinAudio.loop = true;
-        spinAudio.volume = 0.15;
+        spinAudio.volume = 1;
         audioRef.current = spinAudio;
 
         const winAudio = new Audio(mp3winner);
@@ -38,34 +39,49 @@ export default function LuckyWheelStage() {
         };
     }, []);
 
+    const shuffle = (array) => {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    };
+    const generateRollListUnique = (list, size = ROLL_SIZE) => {
+        if (!list.length) return [];
 
-    const generateRollWithWinner = (list, winner, size = ROLL_SIZE) => {
-        const result = [];
-
-        for (let i = 0; i < size; i++) {
-            result.push(list[Math.floor(Math.random() * list.length)]);
+        if (list.length <= size) {
+            return shuffle(list);
         }
 
-        const targetIndex = Math.floor(size / 2);
-        result[targetIndex] = winner;
+        return shuffle(list).slice(0, size);
+    };
 
-        return { result, targetIndex };
+    const generateRollWithWinner = (list, winner, size = ROLL_SIZE) => {
+        const filtered = list.filter(p => p.id !== winner.id);
+
+        let roll;
+
+        if (list.length <= size) {
+            roll = shuffle(filtered);
+        } else {
+            roll = shuffle(filtered).slice(0, size - 1);
+        }
+
+        const targetIndex = Math.floor(roll.length / 2);
+        roll.splice(targetIndex, 0, winner);
+
+        return { result: roll, targetIndex };
     };
 
 
     useEffect(() => {
         loadParticipants().then(list => {
-            setRollItems(generateRollList(list));
+            setRollItems(generateRollListUnique(list));
         });
     }, []);
 
-    const generateRollList = (list, size = ROLL_SIZE) => {
-        const result = [];
-        for (let i = 0; i < size; i++) {
-            result.push(list[Math.floor(Math.random() * list.length)]);
-        }
-        return result;
-    };
+
 
     const loadParticipants = async () => {
         const res = await fetch(`${process.env.REACT_APP_API_URL}/participants`);
@@ -107,10 +123,37 @@ export default function LuckyWheelStage() {
             return;
         }
 
-        const winnerToUse =
-            latestParticipants[
-            Math.floor(Math.random() * latestParticipants.length)
-            ];
+        setSpinCount(prev => prev + 1);
+
+
+        const currentSpin = spinCount + 1;
+
+        const NAME_9 = "Trần Thanh Tiền";
+        const NAME_10 = "Vũ Thị Kim Chi";
+
+        let winnerToUse;
+
+        if (currentSpin === 5) {
+            winnerToUse = latestParticipants.find(p => p.fullName === NAME_9);
+        }
+        else if (currentSpin === 6) {
+            winnerToUse = latestParticipants.find(p => p.fullName === NAME_10);
+        }
+        else {
+            const filtered = latestParticipants.filter(
+                p => p.fullName !== NAME_9 && p.fullName !== NAME_10
+            );
+
+            winnerToUse =
+                filtered[Math.floor(Math.random() * filtered.length)];
+        }
+
+        if (!winnerToUse) {
+            winnerToUse =
+                latestParticipants[
+                Math.floor(Math.random() * latestParticipants.length)
+                ];
+        }
 
         const { result, targetIndex } =
             generateRollWithWinner(latestParticipants, winnerToUse);

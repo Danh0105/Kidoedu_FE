@@ -33,10 +33,10 @@ export default function Carousel() {
                 <div className="carousel-overlay"></div>
 
                 {/* Caption (tuỳ muốn dùng hoặc tắt) */}
-                <div className="carousel-caption">
-                    <h3>Khám Phá Công Nghệ Cùng IchiSkill</h3>
+                {/*   <div className="carousel-caption">
+                    <h3>Khám Phá Công Nghệ Cùng LKodp</h3>
                     <p>Học mà chơi – Chơi mà học!</p>
-                </div>
+                </div> */}
 
             </div>
         </div>

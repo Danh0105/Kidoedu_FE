@@ -3,9 +3,7 @@ import './LuckyWheel.css'
 /* ===== CONFIG ===== */
 const ITEM_WIDTH = 230;
 const ITEM_MARGIN = 32;
-const ITEM_FULL_WIDTH = ITEM_WIDTH + ITEM_MARGIN;
-const SPIN_DURATION = 5000;
-const ROLL_SIZE = 150;
+
 
 export default function LuckyWheel({ trackRef, rollItems }) {
 
@@ -16,10 +14,6 @@ export default function LuckyWheel({ trackRef, rollItems }) {
             <div
                 className="position-relative bg-light mx-auto mb-4 border-none roll-container"
             >
-                {/* Vạch đỏ */}
-
-
-                {/* Track */}
                 <div
                     ref={trackRef}
                     className="d-flex align-items-center h-100"
