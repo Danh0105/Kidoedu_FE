@@ -1,5 +1,4 @@
 import "../../components/user/csss/Home.css";
-import Carousel from "../../components/user/Carousel";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Menu, Cpu, ChevronRight, Layers } from "lucide-react";
@@ -26,70 +25,12 @@ import ProductSlider from "../../components/user/HomePage/ProductSlider";
 import { getPromotions } from "../../services/promotion";
 import ViewProducts from "../../components/user/HomePage/ViewProducts";
 
-// ======================= Helpers =======================
 
 
-const Ribbon = ({ text, position, className }) => (
-    <span
-        className={`position-absolute top-0 ${position === "left" ? "start-0 ms-2" : "end-0 me-2"
-            } mt-2 badge ${className} px-3 d-flex align-items-center fst-italic shadow-sm`}
-        style={{
-            borderTopLeftRadius: position === "left" ? 0 : "999rem",
-            borderTopRightRadius: position === "right" ? 0 : "999rem",
-            borderBottomLeftRadius: "999rem",
-            borderBottomRightRadius: "999rem",
-            height: 32,
-            zIndex: 3,
-            pointerEvents: "none",
-        }}
-    >
-        {text}
-    </span>
-);
-
-
-
-/** Helper: lấy basePrice/promoPrice/finalPrice từ 1 variant (dùng cho ProductCard) */
-function pickPricesFromVariant(variant) {
-    if (!variant) {
-        return {
-            basePrice: null,
-            promoPrice: null,
-            finalPrice: 0,
-            hasPromo: false,
-        };
-    }
-
-    const prices = Array.isArray(variant.prices) ? variant.prices : [];
-    let baseRecord = null;
-    let promoRecord = null;
-
-    prices.forEach((p) => {
-        if (!p) return;
-        if (p.priceType === "base") {
-            if (!baseRecord || new Date(p.startAt) > new Date(baseRecord.startAt)) {
-                baseRecord = p;
-            }
-        }
-        if (p.priceType === "promo") {
-            if (!promoRecord || new Date(p.startAt) > new Date(promoRecord.startAt)) {
-                promoRecord = p;
-            }
-        }
-    });
-
-    const basePrice = baseRecord ? Number(baseRecord.price) : null;
-    const promoPrice = promoRecord ? Number(promoRecord.price) : null;
-    const finalPrice = promoPrice ?? basePrice ?? 0;
-    const hasPromo =
-        promoPrice != null && (basePrice ?? promoPrice) > promoPrice;
-
-    return { basePrice, promoPrice, finalPrice, hasPromo };
-}
 
 // ======================= Component =======================
 
-export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
+export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}`, onLoaded }) {
     // ---- State
     const [allCats, setAllCats] = useState([]); // tất cả danh mục (chuẩn hoá id/parent)
     const [rootCats, setRootCats] = useState([]); // danh mục gốc
@@ -118,9 +59,6 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     const showFeaturedSection = useInViewOnce(featuredSectionRef);
     const isDesktop = useIsDesktop();
     const scrollRef = useRef(null);
-
-
-
 
 
     // cố định playout
@@ -220,11 +158,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
     }, [selectedCatId]);
 
 
-    // Initial load
-    useEffect(() => {
-        fetchCategories();
-        fetchProducts();
-    }, [fetchCategories, fetchProducts]);
+
 
     // Khi click chọn danh mục (con) → tải sản phẩm
     useEffect(() => {
@@ -280,11 +214,34 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
             })
             .filter(Boolean);
     }, [allProducts]);
-
-
     useEffect(() => {
-        loadBanners();
-    }, []);
+        let mounted = true;
+
+        const loadHome = async () => {
+            try {
+                await Promise.all([
+                    fetchCategories(),
+                    fetchProducts(),
+                    loadBanners(),
+                ]);
+            } catch (err) {
+                console.error("Load home error:", err);
+            } finally {
+                if (mounted) {
+                    onLoaded?.(); // ✅ CỰC KỲ QUAN TRỌNG
+                }
+            }
+        };
+
+        loadHome();
+
+        return () => {
+            mounted = false;
+        };
+    }, [fetchCategories, fetchProducts]);
+
+
+
     if (isDesktop) {
         return (
             <div >
@@ -518,32 +475,32 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
                     {/* ===== SẢN PHẨM ĐÃ XEM  ===== */}
                     <section
-                            style={{
-                              marginTop: 32,
-                              padding: "0 8px",
-                              overflowX: "hidden",
-                            }}
-                          >
-                            <div className="text-center mb-3">
-                              <h5 className="fw-bold display-6 text-uppercase">
+                        style={{
+                            marginTop: 32,
+                            padding: "0 8px",
+                            overflowX: "hidden",
+                        }}
+                    >
+                        <div className="text-center mb-3">
+                            <h5 className="fw-bold display-6 text-uppercase">
                                 Sản phẩm đã xem
-                              </h5>
-                              <p className="text-muted">
+                            </h5>
+                            <p className="text-muted">
                                 Những sản phẩm bạn đã quan tâm gần đây
-                              </p>
-                              <div
+                            </p>
+                            <div
                                 style={{
-                                  height: 3,
-                                  width: 60,
-                                  backgroundColor: "hsl(0,75%,60%)",
-                                  margin: "0 auto",
-                                  borderRadius: 3,
+                                    height: 3,
+                                    width: 60,
+                                    backgroundColor: "hsl(0,75%,60%)",
+                                    margin: "0 auto",
+                                    borderRadius: 3,
                                 }}
-                              />
-                            </div>
-                    
-                            <ViewProducts banners={frameproductP}/>
-                          </section>
+                            />
+                        </div>
+
+                        <ViewProducts banners={frameproductP} />
+                    </section>
 
                 </div>
 
@@ -560,6 +517,7 @@ export default function Home({ apiBase = `${process.env.REACT_APP_API_URL}` }) {
 
     return (
         <div >
+
             <div className="container py-4 bg-white bg-opacity-75 rounded-4 shadow-sm">
                 {/* Desktop layout: Sidebar + Content */}
                 <div

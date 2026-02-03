@@ -145,11 +145,11 @@ export default function FormCreate({ onProductAdded }) {
             if (!v.imageFile) return `Biến thể ${i + 1}: Chưa chọn hình ảnh`;
         }
 
-        return null;                                                    
+        return null;
     };
 
     const onSubmit = async (e) => {
-        
+
         e.preventDefault();
 
         const errorMessage = validateForm();
@@ -212,20 +212,57 @@ export default function FormCreate({ onProductAdded }) {
                 "cautionNotes",
                 JSON.stringify(splitLines(form.cautionNotes))
             );
+            const formDataToObject = (formData) => {
+                const obj = {};
+                for (const [key, value] of formData.entries()) {
+                    obj[key] = value instanceof File
+                        ? `[File: ${value.name}]`
+                        : value;
+                }
+                return obj;
+            };
+
+            logFormData(formData);
 
             const res = await axios.post(
                 `${process.env.REACT_APP_API_URL}/products`,
                 formData
             );
 
-            alert("Thêm sản phẩm thành công!");
-            onProductAdded(res.data.data);
+            /*   alert("Thêm sản phẩm thành công!");
+              onProductAdded(res.data.data); */
 
         } catch (err) {
             handleApiError(err);
         } finally {
             setIsSaving(false);
         }
+    };
+    const logFormData = (formData) => {
+        console.group("📦 FormData payload");
+
+        for (const [key, value] of formData.entries()) {
+            if (value instanceof File) {
+                console.log(
+                    `${key}: [File]`,
+                    {
+                        name: value.name,
+                        type: value.type,
+                        size: `${(value.size / 1024).toFixed(2)} KB`,
+                    }
+                );
+            } else {
+                // thử parse JSON cho dễ đọc
+                try {
+                    const parsed = JSON.parse(value);
+                    console.log(`${key}:`, parsed);
+                } catch {
+                    console.log(`${key}:`, value);
+                }
+            }
+        }
+
+        console.groupEnd();
     };
 
     const handleApiError = (err) => {
@@ -408,10 +445,16 @@ export default function FormCreate({ onProductAdded }) {
                             <button
                                 type="submit"
                                 className="btn btn-primary"
+                            >
+                                Lưu sản phẩm
+                            </button>
+                            {/*  <button
+                                type="submit"
+                                className="btn btn-primary"
                                 disabled={isSaving}
                             >
                                 {isSaving ? "Đang lưu…" : "Lưu sản phẩm"}
-                            </button>
+                            </button> */}
                         </div>
                     </form>
                 </div>
