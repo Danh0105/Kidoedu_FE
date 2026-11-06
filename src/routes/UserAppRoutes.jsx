@@ -51,6 +51,7 @@ import CheckinPage from "../pages/user/CheckinPage";
 import RealtimeCheckinPage from "../pages/user/LuckyWheel/RealtimeCheckinPage";
 import ForceWinnerPage from "../components/user/LuckyWheel/ForceWinnerPage";
 import CreateParticipantQR from "../pages/user/CreateParticipantQR";
+import HomeWithLoadOnce from "../hooks/HomeWithLoadOnce";
 
 export default function AppRoutes() {
 
@@ -59,8 +60,9 @@ export default function AppRoutes() {
         <Routes>
             {/* Public routes */}
             <Route path="/" element={<UserLayout />}>
-                <Route index element={<Home />} />
+                <Route index element={<HomeWithLoadOnce />} />
             </Route>
+
             <Route path="/login" element={<UserLayout />}>
                 <Route index element={<Login />} />
             </Route>
