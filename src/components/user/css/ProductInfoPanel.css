@@ -1,0 +1,126 @@
+.product-title {
+    font-size: 30px !important;
+    font-weight: 800 !important;
+    color: #222;
+    line-height: 1.3;
+}
+
+/* Badge số lượng */
+.stock-badge {
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    background: #e8f5e9;
+    /* xanh nhạt */
+    color: #2e7d32;
+    /* xanh đậm */
+    border: 1px solid #a5d6a7;
+}
+
+/* Khi hết hàng */
+.stock-badge.out {
+    background: #ffebee;
+    color: #c62828;
+    border-color: #ffcdd2;
+}
+
+.offer-card {
+    border: 2px solid transparent;
+    border-radius: 10px;
+    background: linear-gradient(#fff, #fff) padding-box,
+        linear-gradient(135deg, #ff4d4f, #ff9800) border-box;
+    margin: 16px 0;
+    overflow: hidden;
+    font-size: 14px;
+}
+
+/* Header */
+.offer-header {
+    background: linear-gradient(90deg, #1f4ea3, #2c6ed5);
+    color: #fff;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+}
+
+/* Badge */
+.offer-badge {
+    background: #ffd700;
+    color: #000;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+}
+
+/* Body */
+.offer-content {
+    padding: 16px 18px;
+    background: #ffffff;
+}
+
+/* Item */
+.offer-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+/* Index circle */
+.offer-index {
+    min-width: 28px;
+    height: 28px;
+    background: #1f4ea3;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.promo-icon {
+    font-size: 20px;
+}
+
+.variant-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.variant-box {
+    min-width: 110px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #dcdcdc;
+    background: #f3f3f3;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.variant-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.variant-price {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a56db;
+}
+
+.variant-box:hover {
+    border-color: #1a56db;
+}
+
+.variant-box.active {
+    background: #e7f0ff;
+    border: 1px solid #1a56db;
+}

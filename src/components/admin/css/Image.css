@@ -1,0 +1,10 @@
+.thumbnail-slider .slick-track {
+    width: 100% !important;
+    display: flex;
+    align-items: center;
+}
+
+.thumbnail-slider .slick-slide {
+    display: flex;
+    justify-content: center;
+}

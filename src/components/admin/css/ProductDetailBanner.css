@@ -1,0 +1,183 @@
+.product-detail {
+    width: 600px;
+    background: #fff;
+    padding: 20px;
+}
+
+.pd-title {
+    font-size: 32px;
+    font-weight: 800;
+}
+
+.pd-tags {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.tag {
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: #ececec;
+    font-size: 13px;
+}
+
+.sku {
+    background: #e6f1ff;
+}
+
+.sku-red {
+    background: #ffe1e1;
+}
+
+.brand {
+    background: #dff4ff;
+}
+
+.pd-section-title {
+    margin-top: 20px;
+    font-weight: 700;
+}
+
+.pd-variants {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.variant {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+}
+
+.variant.active {
+    background: #1d8fff;
+    color: #fff;
+    border-color: #1d8fff;
+}
+
+.pd-banner-wrapper {
+    margin-top: 20px;
+}
+
+.pd-banner-img {
+    width: 100%;
+    border-radius: 12px;
+}
+
+.pd-attributes-box {
+    background: #fff;
+    border: 1px solid #eee;
+    padding: 16px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.pd-attributes {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.attr {
+    padding: 6px 12px;
+    background: #f3f3f3;
+    border-radius: 8px;
+}
+
+.pd-description {
+    font-size: 14px;
+    margin-top: 20px;
+    line-height: 1.5;
+}
+
+.pd-price-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.pd-price-main {
+    color: #d40000;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.pd-price-old {
+    text-decoration: line-through;
+    color: #777;
+    font-size: 16px;
+}
+
+.pd-badge {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.pd-badge.red {
+    background: #ffe1e1;
+    color: #c40000;
+}
+
+.pd-badge.green {
+    background: #d9ffd9;
+    color: #008000;
+}
+
+.pd-buy-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.qty-box {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.qty-box button {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.qty-box div {
+    width: 32px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.btn-addcart {
+    background: #ff6262;
+    padding: 10px 16px;
+    color: #fff;
+    border-radius: 8px;
+    border: none;
+}
+
+.btn-buy {
+    background: #1d8fff;
+    padding: 10px 16px;
+    color: #fff;
+    border-radius: 8px;
+    border: none;
+}
+
+.pd-services {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.service {
+    font-size: 14px;
+    color: #555;
+}

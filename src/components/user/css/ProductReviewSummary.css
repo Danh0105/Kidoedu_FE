@@ -1,0 +1,26 @@
+.review-box {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+}
+
+.review-score {
+    font-size: 40px;
+    font-weight: 700;
+}
+
+.review-score span {
+    font-size: 18px;
+    font-weight: 500;
+    color: #666;
+}
+
+.review-stars i {
+    font-size: 20px;
+}
+
+.review-progress {
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 20px;
+}

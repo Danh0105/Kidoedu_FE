@@ -1,0 +1,16 @@
+/* kiểu dáng item chuẩn mobile */
+.menu-fixed-escape .dropdown-item {
+    padding: 12px 14px;
+    /* vùng bấm ~44px */
+    font-size: 15px;
+}
+
+.menu-fixed-escape {
+    border-radius: 12px;
+    min-width: 180px;
+}
+
+/* nếu header có blur/z-index, đảm bảo menu nổi cao hơn */
+.menu-fixed-escape {
+    z-index: 1080;
+}

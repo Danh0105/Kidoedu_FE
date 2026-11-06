@@ -1,0 +1,6 @@
+.sticky-lg-top {
+    transition: background-color 0.5s ease;
+}
+.sticky-lg-top.bg-secondary {
+    color: white;
+}

@@ -1,0 +1,57 @@
+.product-card {
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .15);
+}
+
+.variant-box {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 10px;
+    background: #fafafa;
+}
+
+.variant-row {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.variant-row:last-child {
+    border-bottom: none;
+}
+
+.variant-row:hover {
+    background: #f3f6ff;
+}
+
+.pagination .page-link {
+    border-radius: 6px;
+    margin: 0 3px;
+}
+
+.skeleton {
+    height: 180px;
+    background: linear-gradient(90deg,
+            #eee 25%,
+            #f5f5f5 50%,
+            #eee 75%);
+    animation: skeleton 1.2s infinite;
+}
+
+@keyframes skeleton {
+    0% {
+        background-position: -200px 0
+    }
+
+    100% {
+        background-position: 200px 0
+    }
+}
+
+.table tbody tr:nth-child(even) {
+    background: #fafafa;
+}
